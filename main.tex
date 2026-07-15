@@ -751,7 +751,7 @@ reported in the appendix.}
 \paragraph{Capability preservation on common benchmarks.}
 Safety gains are useful only if the governed library continues to improve task
 performance. We therefore evaluate each evolution method raw, with
-Library-Drift, and with \safeevolve on the same four capability benchmarks.
+Library-Drift, and with \safeevolve on the same three capability benchmarks.
 Table~\ref{tab:capability} reports absolute task success for every condition,
 not change from raw evolution.
 
@@ -760,31 +760,31 @@ not change from raw evolution.
 \small
 \setlength{\tabcolsep}{6pt}
 \renewcommand{\arraystretch}{1.08}
-\begin{tabular}{llccccc}
+\begin{tabular}{llcccc}
 \toprule
 \textbf{Evolution method} & \textbf{Governance}
 & \textbf{SkillsBench} & \textbf{SkillLearnBench}
-& \textbf{SWE-Skills-Bench} & \textbf{MBPP+} & \textbf{Macro avg.} \\
+& \textbf{SWE-Skills-Bench} & \textbf{Macro avg.} \\
 \midrule
 \multirow{3}{*}{AutoSkill}
- & Raw             & -- & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- \\
+ & Raw             & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- \\
 \midrule
 \multirow{3}{*}{EvoSkill}
- & Raw             & -- & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- \\
+ & Raw             & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- \\
 \midrule
 \multirow{3}{*}{SkillClaw}
- & Raw             & -- & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- \\
+ & Raw             & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{SafeEvolve preserves absolute capability (RQ4).} Task-success
 rates for raw evolution, capability-oriented library governance, and
-\safeevolve on four common skill and coding benchmarks. All values are absolute
+\safeevolve on three common skill benchmarks. All values are absolute
 scores under matched agent, model, and inference budgets. Statistical
 non-inferiority to the corresponding raw method is tested separately and
 reported with confidence intervals.}
