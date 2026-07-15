@@ -294,12 +294,14 @@ backbone comparisons. The target is the complete agent system---its scaffold,
 tool mediation, skill lifecycle, retrieval behavior, and backbone---rather than
 an isolated language model.
 
-The evolution settings include EvoSkill, SkillClaw, AutoSkill, SkillsVote, and
-Hermes-native skill evolution. Hermes-native is an evolution method tied to the
-Hermes agent and is evaluated only in the Hermes / MiniMax configuration; the
-corresponding cells for other target agents are N/A. Each method is evaluated in
-its actual stored representation, including associated scripts or structured
-contracts, rather than after conversion to a common textual summary.
+The evolution settings include EvoSkill, SkillClaw, AutoSkill, SkillsVote,
+CoEvoSkills, and Hermes-native skill evolution. CoEvoSkills is evaluated as a
+general evolution method across all six target-agent configurations.
+Hermes-native is tied to the Hermes agent and is evaluated only in the Hermes /
+MiniMax configuration; the corresponding cells for other target agents are
+N/A. Each method is evaluated in its actual stored representation, including
+associated scripts or structured contracts, rather than after conversion to a
+common textual summary.
 
 \subsection{Metrics}
 
@@ -484,39 +486,39 @@ variation visible instead of hiding it inside one pooled method average.
 \setlength{\tabcolsep}{3.2pt}
 \renewcommand{\arraystretch}{1.04}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{llcccccccc}
+\begin{tabular}{llccccccccc}
 \toprule
 \textbf{Target agent} & \textbf{Backbone} & \textbf{No Evo.} &
 \textbf{Reflect.} & \textbf{Benign Evo.} & \textbf{EvoSkill} &
 \textbf{SkillClaw} & \textbf{AutoSkill} &
-\textbf{SkillsVote} & \textbf{Hermes native} \\
+\textbf{SkillsVote} & \textbf{CoEvoSkills} & \textbf{Hermes native} \\
 \midrule
-\multicolumn{10}{l}{\textbf{A. Attack comparison: malicious ASR (\%; $\downarrow$)}} \\
-Claude Code & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Codex       & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Hermes      & MiniMax      & -- & -- & -- & -- & -- & -- & -- & -- \\
-OpenClaw    & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Claude Code & Haiku        & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Codex       & GPT-5.4-mini & -- & -- & -- & -- & -- & -- & -- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & -- & -- & -- & -- & -- & -- & -- & -- \\
+\multicolumn{11}{l}{\textbf{A. Attack comparison: malicious ASR (\%; $\downarrow$)}} \\
+Claude Code & MiniMax      & -- & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Codex       & MiniMax      & -- & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Hermes      & MiniMax      & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+OpenClaw    & MiniMax      & -- & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Claude Code & Haiku        & -- & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Codex       & GPT-5.4-mini & -- & -- & -- & -- & -- & -- & -- & -- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multicolumn{10}{l}{\textbf{B. Evolved artifact: content unsafety / unsafe generalization / stealthiness ($\downarrow$)}} \\
-Claude Code & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Codex       & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Hermes      & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Claude Code & Haiku        & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Codex       & GPT-5.4-mini & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multicolumn{11}{l}{\textbf{B. Evolved artifact: content unsafety / unsafe generalization / stealthiness ($\downarrow$)}} \\
+Claude Code & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Codex       & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Hermes      & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Claude Code & Haiku        & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Codex       & GPT-5.4-mini & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multicolumn{10}{l}{\textbf{C. Post-attack: carryover harm ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
-Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Codex       & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
-OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Claude Code & Haiku        & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Codex       & GPT-5.4-mini & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\multicolumn{11}{l}{\textbf{C. Post-attack: carryover harm ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
+Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Claude Code & Haiku        & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & GPT-5.4-mini & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Skill evolution across six target-agent configurations
@@ -682,6 +684,11 @@ score.
  & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
+\multirow{3}{*}{CoEvoSkills}
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\midrule
 \multirow{3}{*}{Hermes-native}
  & Raw             & N/A & N/A & --/--/-- & N/A & N/A & N/A & --/--/-- \\
  & Library-Drift   & N/A & N/A & --/--/-- & N/A & N/A & N/A & --/--/-- \\
@@ -704,6 +711,11 @@ score.
  & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
 \multirow{3}{*}{SkillsVote}
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\midrule
+\multirow{3}{*}{CoEvoSkills}
  & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
  & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
  & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
@@ -812,6 +824,11 @@ not change from raw evolution.
  & \safeevolve     & -- & -- & -- & -- \\
 \midrule
 \multirow{3}{*}{SkillsVote}
+ & Raw             & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- \\
+\midrule
+\multirow{3}{*}{CoEvoSkills}
  & Raw             & -- & -- & -- & -- \\
  & Library-Drift   & -- & -- & -- & -- \\
  & \safeevolve     & -- & -- & -- & -- \\
