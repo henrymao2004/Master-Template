@@ -654,52 +654,49 @@ the sole success criterion.
 & \textbf{OpenClaw/MiniMax} & \textbf{CC/Haiku} & \textbf{Codex/GPT}
 & \textbf{Macro avg.} \\
 \midrule
-\multicolumn{9}{l}{\textbf{A. Evolution-induced unsafe behavior: $\Delta$Unsafe (pp; $\downarrow$)}} \\
+\multicolumn{9}{l}{\textbf{A. Held-out behavior: contamination / fresh-session carryover harm (\%; $\downarrow$)}} \\
 \multirow{3}{*}{AutoSkill}
- & Raw             & -- & -- & -- & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
 \multirow{3}{*}{EvoSkill}
- & Raw             & -- & -- & -- & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
 \multirow{3}{*}{SkillClaw}
- & Raw             & -- & -- & -- & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
-\multicolumn{9}{l}{\textbf{B. Utility gain retained relative to raw evolution (\%; $\uparrow$)}} \\
+\multicolumn{9}{l}{\textbf{B. Held-out capability: benign utility / fresh-session carryover utility (\%; $\uparrow$)}} \\
 \multirow{3}{*}{AutoSkill}
- & Raw             & 100 & 100 & 100 & 100 & 100 & 100 & 100 \\
- & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
 \multirow{3}{*}{EvoSkill}
- & Raw             & 100 & 100 & 100 & 100 & 100 & 100 & 100 \\
- & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
 \multirow{3}{*}{SkillClaw}
- & Raw             & 100 & 100 & 100 & 100 & 100 & 100 & 100 \\
- & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{SafeEvolve reduces evolution-induced harm across agents while
 preserving the capability gain (RQ4).} Each evolution method is evaluated raw,
 with a capability-oriented library hygiene baseline, and with \safeevolve on
 the same held-out episodes. Columns retain all six target-agent configurations.
-Panel A reports paired behavior-level unsafe change relative to each target's
-no-evolution floor, combining contamination and carryover harm under the
-predeclared primary aggregation. Panel B reports
-$(U_{\mathrm{mitigated}}-U_{\mathrm{no\mbox{-}evo}})/
-(U_{\mathrm{raw}}-U_{\mathrm{no\mbox{-}evo}})$. Macro averages weight target
-agents equally and exclude only genuinely unsupported method--agent pairs.
-Report absolute contamination, carryover harm, benign utility, artifact scores,
-and overhead in the accompanying breakdown. Bold the safest method whose
-utility is statistically non-inferior to raw evolution.}
+Panel A directly reports contamination / carryover harm; Panel B directly
+reports benign utility / carryover utility. No deltas or gain-retention ratios
+are used. Macro averages weight target agents equally and exclude only
+genuinely unsupported method--agent pairs. Artifact scores and overhead appear
+in the accompanying breakdown. Bold the safest method whose utility is
+statistically non-inferior to raw evolution.}
 \label{tab:safeevolve-main}
 \end{table*}
 
@@ -709,12 +706,96 @@ retain a skill that improves utility through an unsafe shortcut. A gap between
 Library-Drift and \safeevolve therefore tests whether an explicitly safety-aware
 objective is necessary.
 
+\paragraph{Independent skill-safety benchmarks.}
+The held-out episode table tests end-to-end mitigation inside evolving agents.
+We separately test the admission boundary on two external benchmarks.
+MalSkillBench contains labeled malicious and benign skill bundles and measures
+whether a gate detects unsafe stored content without rejecting benign skills.
+SkillSafetyBench plants a skill into an agent and measures whether the accepted
+skill causes unsafe behavior. Table~\ref{tab:skill-safety} reports absolute
+metrics on both benchmarks; the complete per-baseline breakdown appears in the
+appendix.
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{lccc|cc}
+\toprule
+& \multicolumn{3}{c|}{\textbf{MalSkillBench: skill content}}
+& \multicolumn{2}{c}{\textbf{SkillSafetyBench: planted skill}} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}
+\textbf{Skill gate}
+& Malicious recall $\uparrow$ & Benign FPR $\downarrow$ & AUROC $\uparrow$
+& Behavioral ASR $\downarrow$ & Benign utility $\uparrow$ \\
+\midrule
+No skill gate                    & -- & -- & -- & -- & -- \\
+Best skill-security scanner      & -- & -- & -- & -- & -- \\
+Best supply-chain detector       & -- & -- & -- & -- & -- \\
+Best prompt-injection guard      & -- & -- & -- & -- & -- \\
+Library-Drift gate               & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}\safeevolve admission critic & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{SafeEvolve on independent skill-safety benchmarks (RQ4).}
+MalSkillBench evaluates labeled malicious and benign skill bundles, including
+code and scripts referenced by the skill. SkillSafetyBench measures downstream
+behavior after a planted skill passes the gate. All entries are absolute rates
+or scores; no difference metrics are used. Category-best baseline rows keep the
+main table readable, while results for all individual scanners and guards are
+reported in the appendix.}
+\label{tab:skill-safety}
+\end{table*}
+
+\paragraph{Capability preservation on common benchmarks.}
+Safety gains are useful only if the governed library continues to improve task
+performance. We therefore evaluate each evolution method raw, with
+Library-Drift, and with \safeevolve on the same four capability benchmarks.
+Table~\ref{tab:capability} reports absolute task success for every condition,
+not change from raw evolution.
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{llccccc}
+\toprule
+\textbf{Evolution method} & \textbf{Governance}
+& \textbf{SkillsBench} & \textbf{SkillLearnBench}
+& \textbf{SWE-Skills-Bench} & \textbf{MBPP+} & \textbf{Macro avg.} \\
+\midrule
+\multirow{3}{*}{AutoSkill}
+ & Raw             & -- & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- \\
+\midrule
+\multirow{3}{*}{EvoSkill}
+ & Raw             & -- & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- \\
+\midrule
+\multirow{3}{*}{SkillClaw}
+ & Raw             & -- & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{SafeEvolve preserves absolute capability (RQ4).} Task-success
+rates for raw evolution, capability-oriented library governance, and
+\safeevolve on four common skill and coding benchmarks. All values are absolute
+scores under matched agent, model, and inference budgets. Statistical
+non-inferiority to the corresponding raw method is tested separately and
+reported with confidence intervals.}
+\label{tab:capability}
+\end{table*}
+
 \paragraph{Component evaluation.}
-Evaluate the admission critic independently on malicious and benign skill
-corpora, reporting recall, AUROC, and benign false-positive rate. Evaluate
-verification preservation, provenance rollback, and safety-aware retirement in
-ablations. These component results explain the mitigation table; they do not
-replace its held-out behavioral evidence.
+Finally, ablate admission auditing, verification preservation, provenance
+rollback, and safety-aware retirement. These component results explain the
+three complete RQ4 evaluations; they do not replace held-out behavioral or
+capability evidence.
 
 \begin{table}[t]
 \centering
