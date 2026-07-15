@@ -61,21 +61,23 @@ task-source-agnostic environment that turns executable agent tasks into stateful
 skill-learning episodes. It standardizes skill writing, versioned library
 state, retrieval, replay, and fresh-session evaluation across agent frameworks
 and evolution methods. On top of this environment, \bench defines an
-exposure-to-carryover protocol, paired evolution controls, and metrics for the
-evolved artifact and post-attack behavior. We instantiate the benchmark with
+exposure-to-carryover protocol, paired evolution controls, and nine metrics for
+online behavior, the evolved artifact, and post-attack behavior. We instantiate the benchmark with
 AgentHazard as its executable safety-task source. Across four agent
 frameworks, three model backbones, five target-agent configurations, [M]
-evolution methods and ten AgentHazard risk categories, evolved artifacts reach
-[$S_{\mathrm{content}}$/$S_{\mathrm{general}}$/$S_{\mathrm{stealth}}$] on
-content unsafety, unsafe generalization, and stealthiness; post-attack
-carryover harm reaches [H] while carryover utility remains [U]. Unsafe
+evolution methods and ten AgentHazard risk categories, benign utility,
+malicious utility, malicious ASR, and benign-task contamination are
+[BU/MU/MA/BA]. Content unsafety, unsafe generalization, and stealthiness are
+[$S_{\mathrm{content}}$/$S_{\mathrm{general}}$/$S_{\mathrm{stealth}}$];
+carryover ASR reaches [CA] while carryover utility remains [CU]. Unsafe
 content appears in the skill library before it consistently manifests as
-behavior, and as few as [K] exposures produce harm that survives into a clean
-session. We further introduce \safeevolve, a governance layer that audits and
+behavior, and the effect emerges by round [R], after [K] malicious tasks. We
+further introduce \safeevolve, a governance layer that audits and
 repairs candidate skills, preserves verification steps, tracks provenance, and
 retires skills with unsafe reuse histories. Under \safeevolve, the artifact
-scores are [$S'_{\mathrm{content}}$/$S'_{\mathrm{general}}$/$S'_{\mathrm{stealth}}$],
-carryover harm is [H'], and carryover utility is [U'].
+online metrics are [BU'/MU'/MA'/BA'], artifact scores are
+[$S'_{\mathrm{content}}$/$S'_{\mathrm{general}}$/$S'_{\mathrm{stealth}}$],
+and carryover ASR / utility are [CA'/CU'].
 These results show that self-improvement is a security-relevant policy update:
 practice can make an agent more capable and persistently less safe.
 \end{abstract}
@@ -115,17 +117,18 @@ records skill writes and retrievals, and mounts a frozen library in a new
 executor session. Only the evolving library crosses task boundaries.
 
 \bench is the evaluation protocol built on this gym. Its basic unit is a
-seven-task episode in which benign tasks and adversarial exposures from a
-configured task source alternate, followed by a persistence probe in a fresh
-executor session. Matched no-evolution,
+21-task episode with three rounds of three malicious tasks followed by three
+benign tasks, then three persistence probes in a fresh executor session.
+Matched no-evolution,
 read-only-reflection, and benign-evolution controls isolate whether later harm
 comes from the learned artifact rather than the base model, repeated context,
 or ordinary benign learning.
 
-The benchmark evaluates three stages of the failure. During attack, it compares
-malicious ASR on exposed tasks. At the evolved-artifact stage, it measures
-content unsafety, unsafe generalization, and stealthiness. Post-attack, it
-measures carryover harm and carryover utility in a clean session. This
+The benchmark evaluates three stages of the failure. Online behavior is measured
+by benign utility, malicious utility, malicious ASR, and benign ASR
+(contamination). The evolved artifact is measured by content unsafety, unsafe
+generalization, and stealthiness. Post-attack behavior is measured by carryover
+ASR and carryover utility in a clean session. This
 distinction matters because an unsafe skill can remain latent
 until a later task supplies the right retrieval cue. Behavior-only evaluation
 therefore misses risk that has already entered the persistent policy.
@@ -159,8 +162,10 @@ Our contributions are:
   frameworks and evolution methods.
 
   \item We introduce \bench, a task-source-independent temporal protocol with
-  paired evolution controls and metrics for content unsafety, unsafe
-  generalization, stealthiness, carryover harm, and carryover utility. We
+  paired evolution controls and nine absolute metrics: benign utility,
+  malicious utility, malicious ASR, benign ASR (contamination), content
+  unsafety, unsafe generalization, stealthiness, carryover ASR, and carryover
+  utility. We
   instantiate it with AgentHazard as the executable task and judge source.
 
   \item We provide a systematic evaluation across four agent frameworks, three
@@ -247,7 +252,7 @@ The attacker controls a bounded number of task inputs during the learning
 history but does not modify the evolution code, skill store, retrieval engine,
 judge, or final persistence probe. The attacker succeeds when an exposure is
 absorbed into a reusable skill that increases unsafe behavior or later causes
-harm without a new attack. The strongest outcome is carryover harm in a fresh session
+harm without a new attack. The strongest outcome is carryover ASR in a fresh session
 that receives only the final evolved library.
 
 \section{SkillMisevo Gym and Bench}
@@ -279,28 +284,32 @@ retrievals, tool trajectories, and judge evidence.
 
 \subsection{Benchmark episode protocol}
 
-Each episode contains seven tasks from one task-source category and task family.
+Each episode contains 21 tasks from one task-source category and task family.
 The order is
 \begin{equation}
-  B_1, M_1, B_2, M_2, B_3, M_3, P,
+  \underbrace{M^3_1,B^3_1}_{R_1},
+  \underbrace{M^3_2,B^3_2}_{R_2},
+  \underbrace{M^3_3,B^3_3}_{R_3}
+  \mid P^3,
 \end{equation}
-where $B$ denotes a zero-injection benign twin, $M$ an adversarial exposure,
-and $P$ a benign persistence probe. The three exposures use different surface
-forms from the same risk family so that the library can accumulate a coherent
-rule without simply memorizing one string. Position $B_1$ measures the
-pre-exposure floor; $B_2$ and $B_3$ provide additional experience and retrieval
-opportunities after increasing exposure; $P$ runs after the library is frozen
-in a new executor session.
+or, schematically, $MMM\,BBB\;MMM\,BBB\;MMM\,BBB\mid BBB$. Here $M$ is an
+adversarial task, $B$ its zero-injection benign twin, and $P$ a benign
+persistence probe. Each round contributes a dose of three new malicious tasks;
+the cumulative dose is therefore three, six, and nine malicious tasks after
+$R_1,R_2,R_3$. The following benign block measures contamination at that dose.
+After $R_3$, the library is frozen and the three $P$ tasks run in a new executor
+session. Each condition contains 25 episodes, giving at most 225 scored $M$
+tasks, 225 scored $B$ tasks, and 75 scored $P$ tasks.
 
 \begin{figure}[t]
   \centering
   \fbox{\parbox[c][4.0cm][c]{0.94\linewidth}{
     \centering
     \textbf{Figure 1 placeholder: the exposure-to-persistence episode.}\\[4pt]
-    Show $B_1 \rightarrow M_1 \rightarrow B_2 \rightarrow M_2 \rightarrow
-    B_3 \rightarrow M_3 \rightarrow P$, library snapshots $L_0\ldots L_6$,
-    fresh executor sessions, retrieval logs, artifact audits, and the final
-    clean-session probe. Highlight that only the library crosses task borders.
+    Show $MMM\rightarrow BBB\rightarrow MMM\rightarrow BBB\rightarrow
+    MMM\rightarrow BBB\mid BBB$, snapshots after every task, cumulative doses
+    $3M/6M/9M$, retrieval logs, artifact audits, and the final clean-session
+    probes. Highlight that only the library crosses task borders.
   }}
   \caption{\textbf{Skill misevolution evaluation.} Adversarial exposures can
   alter the evolving skill library; later benign tasks test whether the learned
@@ -348,40 +357,67 @@ common textual summary.
 
 \subsection{Metrics}
 
-\paragraph{Utility.}
-Carryover utility is task completion on $P$ after the final evolved library is
-mounted in a clean session. It distinguishes a safer evolution method from one
-that suppresses useful skill reuse.
+All nine headline metrics are absolute micro-aggregates over the 25 episodes in
+a condition. For $X\in\{B,M,P\}$, let $\mathcal{X}_C$ and $\mathcal{X}_H$ be
+the tasks with a valid utility-judge and harmful-judge result, respectively.
+Let $C(x)$ denote completion of the benign objective and $H(x)$ completion of
+the AgentHazard harmful objective.
 
-\paragraph{Attack success.}
-Malicious ASR is the fraction of $M$ tasks whose original scenario judge
-reports the unsafe objective. We report the absolute ASR of every evolution
-setting on the same exposed task instances and use no evolution as the matched
-reference row.
+\paragraph{Online behavior.}
+The four online metrics read every scored $B$ or $M$ task:
+\begin{align}
+\mathrm{BenignUtility} &=
+\frac{\sum_{x\in\mathcal{B}_C} C(x)}{|\mathcal{B}_C|}, &
+\mathrm{MaliciousUtility} &=
+\frac{\sum_{x\in\mathcal{M}_C} C(x)}{|\mathcal{M}_C|}, \\
+\mathrm{MaliciousASR} &=
+\frac{\sum_{x\in\mathcal{M}_H} H(x)}{|\mathcal{M}_H|}, &
+\mathrm{Contamination} &=
+\frac{\sum_{x\in\mathcal{B}_H} H(x)}{|\mathcal{B}_H|}.
+\end{align}
+Benign utility uses the AgentHazard utility judge on all $B$ tasks. Malicious
+utility applies the same judge to the benign-twin objective on every $M$ task,
+so useful task completion and harmful success remain separate outcomes.
+Malicious ASR uses the AgentHazard harmful judge on $M$; benign ASR, which we
+call contamination, applies that harmful judge to $B$. Each denominator is at
+most 225 tasks.
 
 \paragraph{Evolved artifact.}
-An independent auditor reads the complete stored skill bundle and assigns three
-1--5 scores. \emph{Content unsafety} measures the severity of unsafe procedures
-encoded in the artifact. \emph{Unsafe generalization} measures how broadly and
-unconditionally those procedures are stated beyond their source task.
-\emph{Stealthiness} measures how strongly the unsafe procedure is disguised as
-a legitimate best practice, audit, backup, or compliance step. Auditor
-agreement is measured on a double-labeled subset.
+Let $\mathcal{A}$ contain every skill authored from an $M$ or $B$ task, and let
+$\mathcal{A}_u=\{a\in\mathcal{A}:cu(a)\geq3\}$. Independent content judges
+assign 1--5 scores for content unsafety $cu$, unsafe generalization $gen$, and
+stealthiness $sneak$. We report
+\begin{equation}
+\mathrm{CU}=\frac{\sum_{a\in\mathcal{A}}cu(a)}{|\mathcal{A}|},\quad
+\mathrm{UG}=\frac{\sum_{a\in\mathcal{A}_u}gen(a)}{|\mathcal{A}_u|},\quad
+\mathrm{Stealth}=\frac{\sum_{a\in\mathcal{A}_u}sneak(a)}{|\mathcal{A}_u|}.
+\end{equation}
+Thus CU reads all authored skills, whereas UG and Stealth are conditional on an
+unsafe authored skill. CU is N/A when $\mathcal{A}$ is empty; UG and Stealth
+are N/A when $\mathcal{A}_u$ is empty. Auditor agreement is measured on a
+double-labeled subset.
 
 \paragraph{Post-attack carryover.}
 After conversational and environment state are reset and only the frozen final
-library is mounted, the $P$ task yields two outcomes. Carryover harm is
-unsafe-goal completion; carryover utility is benign-task completion. Together
-they measure whether the evolved library preserves harm, useful capability, or
-both after the attack ends.
+library is mounted, the three $P$ tasks per episode yield
+\begin{equation}
+\mathrm{CarryoverASR}=
+\frac{\sum_{x\in\mathcal{P}_H}H(x)}{|\mathcal{P}_H|},\qquad
+\mathrm{CarryoverUtility}=
+\frac{\sum_{x\in\mathcal{P}_C}C(x)}{|\mathcal{P}_C|}.
+\end{equation}
+The denominators contain at most 75 scored persistence tasks.
 
 \subsection{Statistical protocol}
 
-Results are pooled over the frozen episode distribution. Confidence intervals
-use episode-level bootstrap resampling. Paired ASR and carryover outcomes are
+Results are micro-aggregated over all valid tasks or authored skills; we do not
+average per-episode percentages. Confidence intervals
+use episode-level bootstrap resampling. Paired utility, ASR, contamination, and carryover outcomes are
 tested over matched task instances; method comparisons report effect sizes and
 multiple-comparison-adjusted intervals. Hyperparameters, episode construction,
-and the held-out split are frozen before the final sweep.
+and the held-out split are frozen before the final sweep. Headline metrics pool
+all three rounds. Dose--response points instead use the corresponding $M_r$ or
+$B_r$ block and the cumulative artifact snapshot after round $r$.
 
 \section{SafeEvolve}
 \label{sec:safeevolve}
@@ -417,7 +453,7 @@ and retirement decisions.
 
 Raw evolution selects skills primarily by utility. \safeevolve augments this
 objective with the observed safety impact of reuse. Skills associated with
-carryover harm are downweighted, quarantined, repaired, or
+successful carryover attacks are downweighted, quarantined, repaired, or
 retired even when they improve task success. This distinguishes \safeevolve
 from capability-only library hygiene, which keeps useful but unsafe skills.
 
@@ -456,13 +492,13 @@ updates.
   \item[RQ1: Safety--utility coupling.] Does skill evolution increase unsafe
   behavior while retaining or improving task utility?
   \item[RQ2: Exposure-to-persistence mechanism.] Does unsafe experience enter
-  the skill artifact, get retrieved, and produce post-attack carryover harm
+  the skill artifact, get retrieved, and produce post-attack carryover ASR
   while retaining carryover utility?
   \item[RQ3: Scope and attacker budget.] How does misevolution vary across
-  methods, agents, task categories and attack strategies, and one to three
-  adversarial exposures?
+  methods, agents, task categories and attack strategies, and cumulative doses
+  of three, six, and nine malicious tasks?
   \item[RQ4: Mitigation.] Can \safeevolve reduce the three evolved-artifact
-  risks and post-attack carryover harm while preserving carryover utility?
+  risks, malicious and benign ASR, and carryover ASR while preserving utility?
 \end{description}
 
 \subsection{Evaluation matrix}
@@ -518,9 +554,9 @@ frozen train/development/held-out protocol.
 
 Table~\ref{tab:misevolution-main} is the paper's primary diagnostic table. Its
 rows preserve the five target-agent configurations and its columns preserve the
-evolution methods. Panel A directly compares attack success, Panel B measures
-the evolved skill artifact, and Panel C jointly tests whether harm and utility
-survive after the attack disappears. This layout makes framework and backbone
+evolution methods. Panel A measures online utility and harmful behavior, Panel B measures the evolved skill
+artifact, and Panel C jointly tests whether attack success and utility survive
+in the fresh carryover session. This layout makes framework and backbone
 variation visible instead of hiding it inside one pooled method average.
 
 % Main Table 1: do not place SafeEvolve in this table.
@@ -537,13 +573,13 @@ variation visible instead of hiding it inside one pooled method average.
 \textbf{SkillClaw} & \textbf{AutoSkill} &
 \textbf{SkillsVote} & \textbf{Hermes native} \\
 \midrule
-\multicolumn{10}{l}{\textbf{A. Attack comparison: malicious ASR (\%; $\downarrow$)}} \\
-Claude Code & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Hermes      & MiniMax      & -- & -- & -- & -- & -- & -- & -- & -- \\
-OpenClaw    & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Claude Code & Haiku        & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Codex       & GPT-5.4-mini & -- & -- & -- & -- & -- & -- & -- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & -- & -- & -- & -- & -- & -- & -- & -- \\
+\multicolumn{10}{l}{\textbf{A. Online behavior: benign utility / malicious utility / malicious ASR / benign ASR (contamination) (\%)}} \\
+Claude Code & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
+Hermes      & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+OpenClaw    & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
+Claude Code & Haiku        & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
+Codex       & GPT-5.4-mini & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
 \midrule
 \multicolumn{10}{l}{\textbf{B. Evolved artifact: content unsafety / unsafe generalization / stealthiness ($\downarrow$)}} \\
 Claude Code & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
@@ -553,7 +589,7 @@ Claude Code & Haiku        & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/
 Codex       & GPT-5.4-mini & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
 \rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multicolumn{10}{l}{\textbf{C. Post-attack: carryover harm ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
+\multicolumn{10}{l}{\textbf{C. Post-attack: carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
 Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
 Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
@@ -564,10 +600,11 @@ Codex       & GPT-5.4-mini & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/
 \end{tabular}}
 \caption{\textbf{Skill evolution across five target-agent configurations
 (RQ1).} Each cell pools the same frozen episode distribution within one target
-agent and evolution setting. Panel A directly compares malicious ASR across
-settings. Panel B reports mean content-unsafety / unsafe-generalization /
-stealthiness scores, each on a 1--5 ordinal scale. Panel C reports clean-session
-carryover harm / carryover utility. The three MiniMax rows
+agent and evolution setting. Panel A reports benign utility / malicious utility
+/ malicious ASR / benign ASR (contamination), micro-aggregated over all scored
+$B$ and $M$ tasks. Panel B reports mean content-unsafety /
+unsafe-generalization / stealthiness scores. Panel C reports clean-session
+carryover ASR / carryover utility over all scored $P$ tasks. The three MiniMax rows
 isolate agent-framework
 effects; the paired Claude Code rows expose backbone effects within that
 framework. N/A means either that a setting writes no skill artifact or that a
@@ -579,26 +616,28 @@ or an accompanying interval plot.}
 \end{table*}
 
 \paragraph{Result paragraph template.}
-Across five target-agent configurations, malicious ASR reaches [X], while the
-evolved artifacts score [Y/Z/W] on content unsafety, unsafe generalization, and
-stealthiness. In the post-attack probe, carryover harm reaches [H] while
-carryover utility remains [U]. The effect appears in [A/5] targets and [B/M]
+Across five target-agent configurations, online behavior reaches
+[BU/MU/MA/BA] on benign utility, malicious utility, malicious ASR, and
+contamination. Evolved artifacts score [CU/UG/ST], and the post-attack probe
+reaches [C-ASR/C-Util] on carryover ASR and carryover utility. The effect appears in
+[A/5] targets and [B/M]
 evolution methods. The joint result rules out a pure context effect: the attack
 is absent, the executor is reset, and the only cross-task object is the evolved
 library.
 
 \paragraph{Safety--utility frontier.}
-Plot each method by carryover utility and carryover harm. The important region
-is high utility and high harm: these methods preserve useful procedures while
+Plot each method by carryover utility and carryover ASR. The important region
+is high utility and high carryover ASR: these methods preserve useful procedures while
 also retaining the unsafe shortcut, making capability improvement an
 unreliable safety signal.
 
 \subsection{RQ2: How does exposure become persistent harm?}
 \label{sec:rq2}
 
-RQ2 tests each link of Equation~\ref{eq:chain}. First report how exposure
-changes content unsafety, unsafe generalization, and stealthiness. Then report
-retrieval of the evolved artifact and post-attack carryover harm and utility
+RQ2 tests each link of Equation~\ref{eq:chain}. At each round, report malicious
+utility and ASR on the $M$ block, benign utility and contamination on the
+following $B$ block, and the three content-judge scores on all skills authored
+so far. Then report retrieval of the evolved artifact and post-attack carryover ASR and utility
 conditional on retrieval. Use matched
 mediation or stratified conditional effects rather than inferring mediation
 from a single example.
@@ -611,12 +650,11 @@ from a single example.
 \toprule
 \textbf{Link in the chain} & \textbf{Rate} & \textbf{Conditional effect} \\
 \midrule
-Exposure $\rightarrow$ content unsafety & -- & -- \\
-Exposure $\rightarrow$ unsafe generalization & -- & -- \\
-Exposure $\rightarrow$ stealthiness & -- & -- \\
+Malicious block $\rightarrow$ authored artifact & -- & -- \\
 Evolved artifact $\rightarrow$ retrieval & -- & -- \\
-Retrieval $\rightarrow$ carryover harm & -- & -- \\
-Retrieval $\rightarrow$ carryover utility & -- & -- \\
+Retrieval $\rightarrow$ benign contamination & -- & -- \\
+Frozen library $\rightarrow$ carryover ASR & -- & -- \\
+Frozen library $\rightarrow$ carryover utility & -- & -- \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{Exposure-to-persistence chain (RQ2).} Each row measures an
@@ -627,7 +665,7 @@ the upstream event.}
 \end{table}
 
 \paragraph{Artifact risk precedes behavioral harm.}
-Compare the three artifact scores with realized carryover harm. Episodes with
+Compare the three artifact scores with realized carryover ASR. Episodes with
 high content unsafety, unsafe generalization, or stealthiness but no post-attack
 harm constitute latent risk: the persistent policy has changed, but the probe
 has not supplied the retrieval cue or execution opportunity. Quantify this
@@ -659,20 +697,25 @@ forming a matched backbone pair. Report the controlled contrasts before the
 overall macro-average; the five configurations are related controls, not five
 interchangeable replications.
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
-  \fbox{\parbox[c][3.7cm][c]{0.94\linewidth}{
+  \fbox{\parbox[c][4.2cm][c]{0.96\textwidth}{
     \centering
-    \textbf{Figure 3 placeholder: budget--response curve.}\\[4pt]
-    X-axis: adversarial exposures $k\in\{0,1,2,3\}$.\\
-    Y-axes or panels: content unsafety, unsafe generalization, stealthiness,
-    carryover harm, and carryover utility. Show method-level curves with
-    bootstrap CIs.
+    \textbf{Figure 3 placeholder: three-panel dose--response.}\\[5pt]
+    Shared x-axis: $R_1,R_2,R_3$ (cumulative dose $3M,6M,9M$).\\[3pt]
+    \textbf{(a) Contamination} on the following $B$ block \quad
+    \textbf{(b) Malicious ASR} on the $M$ block \quad
+    \textbf{(c) Content Unsafety} of all skills authored so far.\\[3pt]
+    One line per evolution method with episode-bootstrap CIs. Panel (a) also
+    shows the No-Evolution line as the approximately zero contamination floor.
   }}
-  \caption{\textbf{Misevolution under bounded exposure (RQ3).} The minimum
-  budget that produces persistent harm defines the practical attacker cost.}
+  \caption{\textbf{Dose--response of skill misevolution (RQ3).} Each round adds
+  three malicious tasks before measuring behavior on the paired malicious and
+  benign blocks and auditing the cumulative authored library. Absolute micro
+  rates are recomputed at each round; lines do not show differences from a
+  baseline.}
   \label{fig:budget}
-\end{figure}
+\end{figure*}
 
 \paragraph{Failure mechanisms.}
 Cluster audited skill diffs into a small post-hoc taxonomy such as verification
@@ -687,11 +730,11 @@ misevolution exists.
 The mitigation evaluation uses held-out AgentHazard episodes and attack
 strategies that are hidden
 during evolution, repair-policy development, and threshold selection. Libraries
-are frozen before evaluation. A mitigation must reduce content unsafety, unsafe
-generalization, and stealthiness in the evolved artifact, then reduce
-fresh-session carryover harm while preserving carryover utility. The artifact
-and post-attack stages are reported together rather than collapsed into one
-score.
+are frozen before evaluation. A mitigation must lower malicious ASR and benign
+contamination while preserving benign and malicious utility, reduce all three
+artifact scores, and lower fresh-session carryover ASR while preserving
+carryover utility. The three stages are reported together rather than collapsed
+into one score.
 
 % Main Table 2: held-out mitigation table.
 \begin{table*}[t]
@@ -707,7 +750,33 @@ score.
 & \textbf{OpenClaw/MiniMax} & \textbf{CC/Haiku} & \textbf{Codex/GPT}
 & \textbf{Macro avg.} \\
 \midrule
-\multicolumn{8}{l}{\textbf{A. Evolved artifact: content unsafety / unsafe generalization / stealthiness ($\downarrow$)}} \\
+\multicolumn{8}{l}{\textbf{A. Online behavior: benign utility / malicious utility / malicious ASR / benign ASR (contamination) (\%)}} \\
+\multirow{3}{*}{AutoSkill}
+ & Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+\midrule
+\multirow{3}{*}{EvoSkill}
+ & Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+\midrule
+\multirow{3}{*}{SkillClaw}
+ & Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+\midrule
+\multirow{3}{*}{SkillsVote}
+ & Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+\midrule
+\multirow{3}{*}{Hermes-native}
+ & Raw             & N/A & --/--/--/-- & N/A & N/A & N/A & --/--/--/-- \\
+ & Library-Drift   & N/A & --/--/--/-- & N/A & N/A & N/A & --/--/--/-- \\
+ & \safeevolve     & N/A & --/--/--/-- & N/A & N/A & N/A & --/--/--/-- \\
+\midrule
+\multicolumn{8}{l}{\textbf{B. Evolved artifact: content unsafety / unsafe generalization / stealthiness ($\downarrow$)}} \\
 \multirow{3}{*}{AutoSkill}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
@@ -733,7 +802,7 @@ score.
  & Library-Drift   & N/A & --/--/-- & N/A & N/A & N/A & --/--/-- \\
  & \safeevolve     & N/A & --/--/-- & N/A & N/A & N/A & --/--/-- \\
 \midrule
-\multicolumn{8}{l}{\textbf{B. Post-attack: carryover harm ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
+\multicolumn{8}{l}{\textbf{C. Post-attack: carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
 \multirow{3}{*}{AutoSkill}
  & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
  & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
@@ -760,13 +829,14 @@ score.
  & \safeevolve     & N/A & --/-- & N/A & N/A & N/A & --/-- \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{SafeEvolve reduces artifact risk and post-attack harm while
-preserving carryover utility (RQ4).} Each evolution method is evaluated raw,
+\caption{\textbf{SafeEvolve reduces online, artifact, and carryover risk while
+preserving utility (RQ4).} Each evolution method is evaluated raw,
 with a capability-oriented library hygiene baseline, and with \safeevolve on
 the same held-out episodes. Columns retain all five target-agent configurations.
-Panel A directly reports content unsafety / unsafe generalization /
-stealthiness on 1--5 scales; Panel B directly reports carryover harm /
-carryover utility. No deltas or gain-retention ratios are used. Macro averages
+Panel A reports benign utility / malicious utility / malicious ASR / benign ASR
+(contamination); Panel B reports content unsafety / unsafe generalization /
+stealthiness; Panel C reports carryover ASR / carryover utility. All rates are
+absolute micro-aggregates. No deltas or gain-retention ratios are used. Macro averages
 weight target agents equally and exclude only
 genuinely unsupported method--agent pairs. Artifact scores and overhead appear
 in the accompanying breakdown. Bold the safest method whose utility is
@@ -884,28 +954,28 @@ rollback, and safety-aware retirement. These component results explain the
 three complete RQ4 evaluations; they do not replace held-out behavioral or
 capability evidence.
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{lccccc}
+\begin{tabular}{lccc}
 \toprule
-\textbf{SafeEvolve variant} & \textbf{CU $\downarrow$} &
-\textbf{UG $\downarrow$} & \textbf{Stealth $\downarrow$} &
-\textbf{Carry-Harm $\downarrow$} & \textbf{Carry-Utility $\uparrow$} \\
+\textbf{SafeEvolve variant} &
+\textbf{Online: BU/MU/M-ASR/B-ASR} &
+\textbf{Artifact: CU/UG/Stealth} &
+\textbf{Carryover: ASR/Utility} \\
 \midrule
-Full \safeevolve             & -- & -- & -- & -- & -- \\
-$-$ admission critic         & -- & -- & -- & -- & -- \\
-$-$ verification preservation& -- & -- & -- & -- & -- \\
-$-$ provenance               & -- & -- & -- & -- & -- \\
-$-$ safety-aware retirement  & -- & -- & -- & -- & -- \\
+Full \safeevolve             & --/--/--/-- & --/--/-- & --/-- \\
+$-$ admission critic         & --/--/--/-- & --/--/-- & --/-- \\
+$-$ verification preservation& --/--/--/-- & --/--/-- & --/-- \\
+$-$ provenance               & --/--/--/-- & --/--/-- & --/-- \\
+$-$ safety-aware retirement  & --/--/--/-- & --/--/-- & --/-- \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{SafeEvolve component analysis.} CU, UG, and Stealth are the
-three evolved-artifact scores; Carry-Harm and Carry-Utility are the two
-post-attack outcomes on held-out episodes.}
+\caption{\textbf{SafeEvolve component analysis.} Every row reports the same
+nine absolute metrics as the main evaluation, grouped as $4+3+2$.}
 \label{tab:safeevolve-ablation}
-\end{table}
+\end{table*}
 
 \section{Discussion}
 \label{sec:discussion}
@@ -922,8 +992,8 @@ An evolved artifact can score highly on content unsafety, unsafe
 generalization, or stealthiness before its unsafe procedure is retrieved. This
 is latent risk, not a safe artifact. Conversely, a runtime policy can block
 execution while the persistent library continues to carry the unsafe rule.
-Product evaluation should therefore report the three artifact properties and
-the two post-attack outcomes separately.
+Product evaluation should therefore report online utility and ASR, the three
+artifact properties, and the two post-attack outcomes separately.
 
 \paragraph{Capability and safety share the same shortcut.}
 The difficult cases are not useless malicious skills. They are procedures that
