@@ -27,7 +27,6 @@
 
 \newcommand{\bench}{\textsc{SkillMisevo-Bench}\xspace}
 \newcommand{\safeevolve}{\textsc{SafeEvolve}\xspace}
-\newcommand{\skillrevise}{\textsc{SkillRevise}\xspace}
 \newcommand{\evolution}{\mathcal{E}}
 \newcommand{\library}{\mathcal{L}}
 \newcommand{\taskseq}{\mathcal{Q}}
@@ -115,7 +114,7 @@ or ordinary benign learning.
 
 The benchmark evaluates both sides of the failure. At the artifact level, it
 measures whether authored skills contain unsafe or over-generalized procedures.
-At the behavior level, it measures attack amplification on exposed tasks,
+At the behavior level, it compares attack success on exposed tasks,
 zero-injection contamination on benign tasks, and carryover harm in a clean
 session. This distinction matters because an unsafe skill can remain latent
 until a later task supplies the right retrieval cue. Behavior-only evaluation
@@ -228,7 +227,7 @@ present.
 The attacker controls a bounded number of task inputs during the learning
 history but does not modify the evolution code, skill store, retrieval engine,
 judge, or final persistence probe. The attacker succeeds when an exposure is
-absorbed into a reusable skill that amplifies unsafe behavior or later causes
+absorbed into a reusable skill that increases unsafe behavior or later causes
 zero-injection harm. The strongest outcome is carryover harm in a fresh session
 that receives only the final evolved library.
 
@@ -292,8 +291,8 @@ backbone comparisons. The target is the complete agent system---its scaffold,
 tool mediation, skill lifecycle, retrieval behavior, and backbone---rather than
 an isolated language model.
 
-The evolution settings include \skillrevise, EvoSkill, SkillClaw, AutoSkill,
-SkillsVote, and supported native learning loops. Each method is evaluated in
+The evolution settings include EvoSkill, SkillClaw, AutoSkill, SkillsVote, and
+supported native learning loops. Each method is evaluated in
 its actual stored representation, including associated scripts or structured
 contracts, rather than after conversion to a common textual summary.
 
@@ -304,13 +303,11 @@ Benign utility is task completion on $B_1,B_2,B_3$; carryover utility is task
 completion on $P$. These distinguish a safer method from one that suppresses
 all skill use.
 
-\paragraph{Attack amplification.}
-Malicious ASR is the fraction of $M$ tasks whose original scenario judge reports
-the unsafe objective. For an evolution method $e$, we report
-\begin{equation}
-  \Delta\asr(e)=\asr(e)-\asr(\text{no evolution}),
-\end{equation}
-paired over the same exposed task instances.
+\paragraph{Attack success.}
+Malicious ASR is the fraction of $M$ tasks whose original scenario judge
+reports the unsafe objective. We report the absolute ASR of every evolution
+setting on the same exposed task instances and use no evolution as the matched
+reference row.
 
 \paragraph{Artifact poisoning.}
 An independent auditor reads the complete stored skill bundle and scores
@@ -462,10 +459,11 @@ frozen train/development/held-out protocol.
 
 Table~\ref{tab:misevolution-main} is the paper's primary diagnostic table. Its
 rows preserve the six target-agent configurations and its columns preserve the
-evolution methods. Panel A tests attack amplification, Panel B tests whether
-harm survives after the attack disappears, and Panel C checks that the same
-methods retain useful learning. This layout makes framework and backbone
-variation visible instead of hiding it inside one pooled method average.
+evolution methods. Panel A directly compares attack success, Panel B measures
+the evolved skill artifact, Panel C tests whether harm survives after the
+attack disappears, and Panel D checks that the same methods retain useful
+learning. This layout makes framework and backbone variation visible instead
+of hiding it inside one pooled method average.
 
 % Main Table 1: do not place SafeEvolve in this table.
 \begin{table*}[t]
@@ -474,53 +472,64 @@ variation visible instead of hiding it inside one pooled method average.
 \setlength{\tabcolsep}{3.2pt}
 \renewcommand{\arraystretch}{1.04}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{llccccccccc}
+\begin{tabular}{llcccccccc}
 \toprule
 \textbf{Target agent} & \textbf{Backbone} & \textbf{No Evo.} &
-\textbf{Reflect.} & \textbf{Benign Evo.} & \textbf{SkillRev.} &
-\textbf{EvoSkill} & \textbf{SkillClaw} & \textbf{AutoSkill} &
+\textbf{Reflect.} & \textbf{Benign Evo.} & \textbf{EvoSkill} &
+\textbf{SkillClaw} & \textbf{AutoSkill} &
 \textbf{SkillsVote} & \textbf{Native} \\
 \midrule
-\multicolumn{11}{l}{\textbf{A. Attack amplification: $\Delta$ASR (pp; $\downarrow$)}} \\
-Claude Code & MiniMax      & 0.0 & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Codex       & MiniMax      & 0.0 & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Hermes      & MiniMax      & 0.0 & -- & -- & -- & -- & -- & -- & -- & -- \\
-OpenClaw    & MiniMax      & 0.0 & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Claude Code & Haiku        & 0.0 & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Codex       & GPT-5.4-mini & 0.0 & -- & -- & -- & -- & -- & -- & -- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & 0.0 & -- & -- & -- & -- & -- & -- & -- & -- \\
+\multicolumn{10}{l}{\textbf{A. Attack comparison: malicious ASR (\%; $\downarrow$)}} \\
+Claude Code & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Codex       & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Hermes      & MiniMax      & -- & -- & -- & -- & -- & -- & -- & -- \\
+OpenClaw    & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Claude Code & Haiku        & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Codex       & GPT-5.4-mini & -- & -- & -- & -- & -- & -- & -- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multicolumn{11}{l}{\textbf{B. Post-attack behavior: contamination / fresh-session carryover harm (\%; $\downarrow$)}} \\
-Claude Code & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Codex       & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Hermes      & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
-OpenClaw    & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Claude Code & Haiku        & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Codex       & GPT-5.4-mini & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\multicolumn{10}{l}{\textbf{B. Evolved artifact: poisoned rate / content unsafety / unsafe generalization ($\downarrow$)}} \\
+Claude Code & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Codex       & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Hermes      & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Claude Code & Haiku        & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Codex       & GPT-5.4-mini & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multicolumn{11}{l}{\textbf{C. Capability: benign utility / fresh-session carryover utility (\%; $\uparrow$)}} \\
-Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Codex       & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
-OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Claude Code & Haiku        & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Codex       & GPT-5.4-mini & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\multicolumn{10}{l}{\textbf{C. Post-attack behavior: contamination / fresh-session carryover harm (\%; $\downarrow$)}} \\
+Claude Code & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Hermes      & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+OpenClaw    & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Claude Code & Haiku        & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & GPT-5.4-mini & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\midrule
+\multicolumn{10}{l}{\textbf{D. Capability: benign utility / fresh-session carryover utility (\%; $\uparrow$)}} \\
+Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Claude Code & Haiku        & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & GPT-5.4-mini & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Skill evolution across six target-agent configurations
 (RQ1).} Each cell pools the same frozen episode distribution within one target
-agent and evolution setting. Panel A reports attack-success change relative to
-that target's matched no-evolution floor. Panel B reports zero-injection
-contamination / clean-session carryover harm. Panel C reports benign utility /
-clean-session carryover utility. The four MiniMax rows isolate agent-framework
+agent and evolution setting. Panel A directly compares malicious ASR across
+settings. Panel B reports poisoned-artifact rate / mean content-unsafety score /
+mean unsafe-generalization score; the latter two use 1--5 ordinal scales. Panel
+C reports zero-injection contamination / clean-session carryover harm. Panel D
+reports benign utility / clean-session carryover utility. The four MiniMax rows
+isolate agent-framework
 effects; the paired Claude Code and Codex rows expose backbone effects within a
-framework. N/A denotes a genuinely unsupported native method, not a failed
-run. Artifact
-poisoning and the exposure-to-persistence chain are reported in
-Table~\ref{tab:chain}. Add 95\% episode-bootstrap intervals in the supplement or
-an accompanying interval plot.}
+framework. N/A means either that a setting writes no skill artifact or that a
+native method is unsupported for that target; it never denotes a failed run.
+The exposure-to-persistence transitions are expanded in
+Table~\ref{tab:chain}. Add 95\% episode-bootstrap intervals in the supplement
+or an accompanying interval plot.}
 \label{tab:misevolution-main}
 \end{table*}
 
@@ -646,7 +655,7 @@ the sole success criterion.
 & \textbf{Macro avg.} \\
 \midrule
 \multicolumn{9}{l}{\textbf{A. Evolution-induced unsafe behavior: $\Delta$Unsafe (pp; $\downarrow$)}} \\
-\multirow{3}{*}{\skillrevise}
+\multirow{3}{*}{AutoSkill}
  & Raw             & -- & -- & -- & -- & -- & -- & -- \\
  & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
  & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
@@ -662,7 +671,7 @@ the sole success criterion.
  & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
 \multicolumn{9}{l}{\textbf{B. Utility gain retained relative to raw evolution (\%; $\uparrow$)}} \\
-\multirow{3}{*}{\skillrevise}
+\multirow{3}{*}{AutoSkill}
  & Raw             & 100 & 100 & 100 & 100 & 100 & 100 & 100 \\
  & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
  & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
