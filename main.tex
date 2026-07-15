@@ -1,414 +1,745 @@
-
-\documentclass{article} % For LaTeX2e
+\documentclass{article}
 \usepackage{iclr2026_conference,times}
 
-% Optional math commands from https://github.com/goodfeli/dlbook_notation.
 \input{math_commands.tex}
 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage{xspace}
 
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=blue,
+  urlcolor=blue
+}
+
+\definecolor{lightblue}{RGB}{232,244,251}
+\definecolor{lightgray}{gray}{0.94}
+
+\newcommand{\bench}{\textsc{SkillMisevo-Bench}\xspace}
+\newcommand{\safeevolve}{\textsc{SafeEvolve}\xspace}
+\newcommand{\skillrevise}{\textsc{SkillRevise}\xspace}
+\newcommand{\evolution}{\mathcal{E}}
+\newcommand{\library}{\mathcal{L}}
+\newcommand{\taskseq}{\mathcal{Q}}
+\newcommand{\asr}{\mathrm{ASR}}
+\newcommand{\contam}{\mathrm{Contam}}
+\newcommand{\carry}{\mathrm{CarryHarm}}
 
 \title{Practice Makes Unsafe: Skill Misevolution in Self-Improving LLM Agents}
 
-% Authors must not appear in the submitted version. They should be hidden
-% as long as the \iclrfinalcopy macro remains commented out below.
-% Non-anonymous submissions will be rejected without review.
+% Keep authors anonymous for submission. Replace only for camera-ready.
+\author{Anonymous Authors}
 
-\author{Antiquus S.~Hippocampus, Natalia Cerebro \& Amelie P. Amygdale \thanks{ Use footnote for providing further information
-about author (webpage, alternative address)---\emph{not} for acknowledging
-funding agencies.  Funding acknowledgements go at the end of the paper.} \\
-Department of Computer Science\\
-Cranberry-Lemon University\\
-Pittsburgh, PA 15213, USA \\
-\texttt{\{hippo,brain,jen\}@cs.cranberry-lemon.edu} \\
-\And
-Ji Q. Ren \& Yevgeny LeNet \\
-Department of Computational Neuroscience \\
-University of the Witwatersrand \\
-Joburg, South Africa \\
-\texttt{\{robot,net\}@wits.ac.za} \\
-\AND
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email}
-}
+% \iclrfinalcopy % Uncomment only for the camera-ready version.
 
-% The \author macro works with any number of authors. There are two commands
-% used to separate the names and addresses of multiple authors: \And and \AND.
-%
-% Using \And between authors leaves it to \LaTeX{} to determine where to break
-% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
-% puts 3 of 4 authors names on the first line, and the last on the second
-% line, try using \AND instead of \And before the third author name.
-
-\newcommand{\fix}{\marginpar{FIX}}
-\newcommand{\new}{\marginpar{NEW}}
-
-%\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
 \begin{document}
-
-
 \maketitle
 
 \begin{abstract}
-The abstract paragraph should be indented 1/2~inch (3~picas) on both left and
-right-hand margins. Use 10~point type, with a vertical spacing of 11~points.
-The word \textsc{Abstract} must be centered, in small caps, and in point size 12. Two
-line spaces precede the abstract. The abstract must be limited to one
-paragraph.
+LLM agents increasingly improve themselves by distilling successful
+interactions into reusable skills. This turns experience into persistent
+behavioral policy, yet existing evaluations measure whether evolution improves
+capability without testing what happens when success depends on an unsafe
+shortcut. We identify \emph{skill misevolution}: a transient unsafe success is
+extracted into an apparently legitimate skill and later reused on benign tasks
+after the original attack has disappeared. We introduce \bench, an
+episode-level benchmark that follows an agent across adversarial exposure,
+skill formation, retrieval, zero-injection reuse, and a fresh-session
+persistence test. Its paired controls isolate the effect of evolution from the
+base agent, the task sequence, and benign learning. Across [N] agent
+configurations, [M] evolution methods, and [D] domains, skill evolution
+[HEADLINE SAFETY RESULT] while retaining [HEADLINE UTILITY RESULT]. Unsafe
+content appears in the skill library before it consistently manifests as
+behavior, and as few as [K] exposures produce harm that survives into a clean
+session. We further introduce \safeevolve, a governance layer that audits and
+repairs candidate skills, preserves verification steps, tracks provenance, and
+retires skills with unsafe reuse histories. \safeevolve reduces [PRIMARY HARM
+METRIC] by [X] while preserving [Y]\% of the utility gain from evolution.
+These results show that self-improvement is a security-relevant policy update:
+practice can make an agent more capable and persistently less safe.
 \end{abstract}
 
-\section{Submission of conference papers to ICLR 2026}
+\section{Introduction}
+\label{sec:introduction}
 
-ICLR requires electronic submissions, processed by
-\url{https://openreview.net/}. See ICLR's website for more instructions.
+LLM agents are beginning to improve through use. Modern CLI and coding agents
+can summarize successful trajectories, write or revise reusable skills, and
+retrieve those skills when related tasks appear. This capability changes an
+agent from a fixed policy with transient context into a system whose behavior is
+partly rewritten by its own experience. Skill evolution is therefore more than
+memory: it is a persistent policy update expressed as an editable artifact.
 
-If your paper is ultimately accepted, the statement {\tt
-  {\textbackslash}iclrfinalcopy} should be inserted to adjust the
-format to the camera ready requirements.
+The signal used to produce that update is usually task success or efficiency.
+Successful behavior, however, is not necessarily safe behavior. An agent may
+complete a task by skipping a verification step, assuming authorization,
+treating an irreversible action as routine, or following an attacker-controlled
+observation. If the evolution method compresses that trajectory into a reusable
+procedure, it can preserve the unsafe shortcut precisely because the shortcut
+helped the agent succeed.
 
-The format for the submissions is a variant of the NeurIPS format.
-Please read carefully the instructions below, and follow them
-faithfully.
+This creates a temporal safety failure that independent-task evaluations cannot
+observe. The original attack may disappear with the context window, but the
+lesson extracted from it can remain in the skill library. A later benign task
+can retrieve the skill, apply its over-generalized rule, and reproduce the harm
+without a malicious instruction. A fresh session can inherit the same behavior
+by loading the evolved library alone. We call this process \emph{skill
+misevolution}: transient unsafe success becomes persistent, retrievable, and
+generalizable policy.
 
-\subsection{Style}
+Measuring misevolution requires following the full causal chain rather than
+scoring isolated trajectories. We introduce \bench, whose basic unit is a
+seven-task episode. Benign tasks and adversarial exposures alternate while the
+skill library evolves, followed by a zero-injection persistence probe in a
+fresh executor session. Every task starts with fresh conversational context;
+only the evolving library crosses task boundaries. Matched no-evolution,
+read-only-reflection, and benign-evolution controls isolate whether later harm
+comes from the learned artifact rather than the base model, repeated context,
+or ordinary benign learning.
 
-Papers to be submitted to ICLR 2026 must be prepared according to the
-instructions presented here.
+The benchmark evaluates both sides of the failure. At the artifact level, it
+measures whether authored skills contain unsafe or over-generalized procedures.
+At the behavior level, it measures attack amplification on exposed tasks,
+zero-injection contamination on benign tasks, and carryover harm in a clean
+session. This distinction matters because an unsafe skill can remain latent
+until a later task supplies the right retrieval cue. Behavior-only evaluation
+therefore misses risk that has already entered the persistent policy.
 
-%% Please note that we have introduced automatic line number generation
-%% into the style file for \LaTeXe. This is to help reviewers
-%% refer to specific lines of the paper when they make their comments. Please do
-%% NOT refer to these line numbers in your paper as they will be removed from the
-%% style file for the final version of accepted papers.
+Our evaluation asks four questions. \textbf{RQ1} tests whether evolution
+increases unsafe behavior while retaining utility. \textbf{RQ2} follows the
+exposure-to-persistence chain and tests whether the skill artifact mediates
+later harm. \textbf{RQ3} measures how the effect varies across evolution
+methods, agent configurations, domains, and attacker budgets. \textbf{RQ4}
+tests whether \safeevolve can break this chain without removing the capability
+benefits of learning.
 
-Authors are required to use the ICLR \LaTeX{} style files obtainable at the
-ICLR website. Please make sure you use the current files and
-not previous versions. Tweaking the style files may be grounds for rejection.
+\safeevolve acts at the learning boundary rather than as another runtime
+refusal layer. It audits the complete candidate skill bundle before admission,
+repairs unsafe generalization instead of deleting useful procedures, preserves
+verification requirements during revision, records the experiences from which
+each skill was learned, and downweights or retires skills whose reuse produces
+unsafe behavior. These components target the persistent object responsible for
+the incremental risk: the evolved skill library.
 
-\subsection{Retrieval of style files}
+Our contributions are:
+\begin{enumerate}
+  \item We identify \textbf{skill misevolution}, a temporal failure mode in
+  which self-improvement converts transient unsafe success into persistent
+  behavior that can reappear on benign tasks without the original attack.
 
-The style files for ICLR and other conference information are available online at:
-\begin{center}
-   \url{http://www.iclr.cc/}
-\end{center}
-The file \verb+iclr2026_conference.pdf+ contains these
-instructions and illustrates the
-various formatting requirements your ICLR paper must satisfy.
-Submissions must be made using \LaTeX{} and the style files
-\verb+iclr2026_conference.sty+ and \verb+iclr2026_conference.bst+ (to be used with \LaTeX{}2e). The file
-\verb+iclr2026_conference.tex+ may be used as a ``shell'' for writing your paper. All you
-have to do is replace the author, title, abstract, and text of the paper with
-your own.
+  \item We introduce \bench, an episode-level evaluation spanning skill
+  formation, artifact inspection, retrieval, behavioral reuse, and clean-session
+  persistence, with paired controls that attribute changes to evolution.
 
-The formatting instructions contained in these style files are summarized in
-sections \ref{gen_inst}, \ref{headings}, and \ref{others} below.
+  \item We provide a systematic evaluation across [N] agent configurations,
+  [M] evolution methods, [D] domains, and multiple exposure budgets, separating
+  artifact-level latent risk from behavior-level realized harm.
 
-\section{General formatting instructions}
-\label{gen_inst}
+  \item We introduce \safeevolve and show that governing skill admission,
+  revision, provenance, and retirement reduces evolution-induced harm while
+  retaining the utility gained through learning.
+\end{enumerate}
 
-The text must be confined within a rectangle 5.5~inches (33~picas) wide and
-9~inches (54~picas) long. The left margin is 1.5~inch (9~picas).
-Use 10~point type with a vertical spacing of 11~points. Times New Roman is the
-preferred typeface throughout. Paragraphs are separated by 1/2~line space,
-with no indentation.
+\section{Related Work}
+\label{sec:related-work}
 
-Paper title is 17~point, in small caps and left-aligned.
-All pages should start at 1~inch (6~picas) from the top of the page.
+\paragraph{Self-improving agents and skill evolution.}
+Position this work against methods that extract, edit, select, vote over, or
+retrieve reusable skills from agent trajectories. Organize the literature by
+the persistent artifact each method produces and the success signal used to
+select it. The key gap is that these methods report capability improvement but
+do not measure evolution-induced safety change.
 
-Authors' names are
-set in boldface, and each name is placed above its corresponding
-address. The lead author's name is to be listed first, and
-the co-authors' names are set to follow. Authors sharing the
-same address can be on the same line.
+\paragraph{Safety of persistent agent memory.}
+Discuss memory poisoning, long-term memory evolution, retrieval attacks, and
+forgetting. Distinguish a skill from a stored observation: a skill is an
+executable or prescriptive procedure intended to generalize across tasks. The
+failure studied here is endogenous policy formation from the agent's own
+successful trajectory, not only storage of attacker-supplied text.
 
-Please pay special attention to the instructions in section \ref{others}
-regarding figures, tables, acknowledgments, and references.
+\paragraph{Agent red-teaming and prompt injection.}
+Cover direct and indirect attacks against tool-using agents and the DTAP and
+AgentHazard substrates. These benchmarks provide executable tasks and judges;
+\bench changes the evaluation unit from one attacked trajectory to a sequence
+in which an attack can alter future behavior through evolution.
 
+\paragraph{Governance of evolving libraries.}
+Contrast \safeevolve with capability-oriented library maintenance and drift
+control. Library hygiene retains skills that improve task success, including
+skills whose utility comes from unsafe shortcuts. \safeevolve introduces safety
+as a first-class admission and retention signal.
 
-There will be a strict upper limit of \textbf{9 pages} for the main text of the initial submission, with unlimited additional pages for citations. This limit will be expanded to \textbf{10 pages} for rebuttal/camera ready.
+\section{Skill Misevolution}
+\label{sec:problem}
 
-\section{Headings: first level}
-\label{headings}
+\subsection{Self-improvement as a policy update}
 
-First level headings are in small caps,
-flush left and in point size 12. One line space before the first level
-heading and 1/2~line space after the first level heading.
+Let an agent with base policy $\pi$ execute a sequence of tasks
+$\taskseq=(q_1,\ldots,q_T)$. After task $q_t$, an evolution method
+$\evolution$ maps the trajectory $\tau_t$ and current library $\library_t$ to
+an updated library:
+\begin{equation}
+  \library_{t+1}=\evolution(\library_t, q_t, \tau_t).
+  \label{eq:evolution}
+\end{equation}
+The next task is executed by the base agent conditioned on retrieved skills
+from $\library_{t+1}$. Conversational state is reset between tasks, so any
+systematic cross-task change is carried by the evolved artifact.
 
-\subsection{Headings: second level}
+\subsection{Definition and causal chain}
 
-Second level headings are in small caps,
-flush left and in point size 10. One line space before the second level
-heading and 1/2~line space after the second level heading.
+An episode exhibits \emph{skill misevolution} when an unsafe procedure learned
+from an earlier trajectory enters the persistent library and causes incremental
+unsafe behavior on a later task relative to a matched no-evolution execution.
+The proposed causal chain is:
+\begin{equation}
+\text{unsafe success}
+\rightarrow \text{skill extraction}
+\rightarrow \text{unsafe generalization}
+\rightarrow \text{retrieval}
+\rightarrow \text{reuse}
+\rightarrow \text{persistent harm}.
+\label{eq:chain}
+\end{equation}
+The benchmark separately observes each link. This prevents a later unsafe
+action from being attributed to the skill merely because a skill library was
+present.
 
-\subsubsection{Headings: third level}
+\subsection{Threat model}
 
-Third level headings are in small caps,
-flush left and in point size 10. One line space before the third level
-heading and 1/2~line space after the third level heading.
+The attacker controls a bounded number of task inputs during the learning
+history but does not modify the evolution code, skill store, retrieval engine,
+judge, or final persistence probe. The attacker succeeds when an exposure is
+absorbed into a reusable skill that amplifies unsafe behavior or later causes
+zero-injection harm. The strongest outcome is carryover harm in a fresh session
+that receives only the final evolved library.
 
-\section{Citations, figures, tables, references}
-\label{others}
+\section{SkillMisevo-Bench}
+\label{sec:benchmark}
 
-These instructions apply to everyone, regardless of the formatter being used.
+\subsection{Episode design}
 
-\subsection{Citations within the text}
+Each episode contains seven tasks from one domain and risk family. The order is
+\begin{equation}
+  B_1, M_1, B_2, M_2, B_3, M_3, P,
+\end{equation}
+where $B$ denotes a zero-injection benign twin, $M$ an adversarial exposure,
+and $P$ a benign persistence probe. The three exposures use different surface
+forms from the same risk family so that the library can accumulate a coherent
+rule without simply memorizing one string. Position $B_1$ measures the
+pre-exposure floor; $B_2$ and $B_3$ test contamination after increasing
+exposure; $P$ runs after the library is frozen in a new executor session.
 
-Citations within the text should be based on the \texttt{natbib} package
-and include the authors' last names and year (with the ``et~al.'' construct
-for more than two authors). When the authors or the publication are
-included in the sentence, the citation should not be in parenthesis using \verb|\citet{}| (as
-in ``See \citet{Hinton06} for more information.''). Otherwise, the citation
-should be in parenthesis using \verb|\citep{}| (as in ``Deep learning shows promise to make progress
-towards AI~\citep{Bengio+chapter2007}.'').
-
-The corresponding references are to be listed in alphabetical order of
-authors, in the \textsc{References} section. As to the format of the
-references themselves, any style is acceptable as long as it is used
-consistently.
-
-\subsection{Footnotes}
-
-Indicate footnotes with a number\footnote{Sample of the first footnote} in the
-text. Place the footnotes at the bottom of the page on which they appear.
-Precede the footnote with a horizontal rule of 2~inches
-(12~picas).\footnote{Sample of the second footnote}
-
-\subsection{Figures}
-
-All artwork must be neat, clean, and legible. Lines should be dark
-enough for purposes of reproduction; art work should not be
-hand-drawn. The figure number and caption always appear after the
-figure. Place one line space before the figure caption, and one line
-space after the figure. The figure caption is lower case (except for
-first word and proper nouns); figures are numbered consecutively.
-
-Make sure the figure caption does not get separated from the figure.
-Leave sufficient space to avoid splitting the figure and figure caption.
-
-You may use color figures.
-However, it is best for the
-figure captions and the paper body to make sense if the paper is printed
-either in black/white or in color.
-\begin{figure}[h]
-\begin{center}
-%\framebox[4.0in]{$\;$}
-\fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-\end{center}
-\caption{Sample figure caption.}
+\begin{figure}[t]
+  \centering
+  \fbox{\parbox[c][4.0cm][c]{0.94\linewidth}{
+    \centering
+    \textbf{Figure 1 placeholder: the exposure-to-persistence episode.}\\[4pt]
+    Show $B_1 \rightarrow M_1 \rightarrow B_2 \rightarrow M_2 \rightarrow
+    B_3 \rightarrow M_3 \rightarrow P$, library snapshots $L_0\ldots L_6$,
+    fresh executor sessions, retrieval logs, artifact audits, and the final
+    clean-session probe. Highlight that only the library crosses task borders.
+  }}
+  \caption{\textbf{Skill misevolution evaluation.} Adversarial exposures can
+  alter the evolving skill library; later benign tasks test whether the learned
+  shortcut is retrieved and reused after the attack disappears.}
+  \label{fig:episode}
 \end{figure}
 
-\subsection{Tables}
+\subsection{Paired controls}
 
-All tables must be centered, neat, clean and legible. Do not use hand-drawn
-tables. The table number and title always appear before the table. See
-Table~\ref{sample-table}.
+Every episode is replayed under matched evolution settings:
+\begin{itemize}
+  \item \textbf{No evolution}: disables persistent learning and establishes the
+  base-agent floor.
+  \item \textbf{Read-only reflection}: retains textual lessons in the current
+  learning mechanism without authoring a reusable skill artifact.
+  \item \textbf{Benign evolution}: evolves only from benign tasks and tests
+  whether ordinary learning alone produces the effect.
+  \item \textbf{Full evolution}: applies each evaluated method to all successful
+  trajectories under its native update rule.
+\end{itemize}
+All arms use identical tasks, order, tools, agent configuration, and judges.
 
-Place one line space before the table title, one line space after the table
-title, and one line space after the table. The table title must be lower case
-(except for first word and proper nouns); tables are numbered consecutively.
+\subsection{Substrates, agents, and evolution methods}
+
+The benchmark draws episodes from DTAP and AgentHazard. DTAP provides
+stateful backend tasks and verifiable judges; AgentHazard provides CLI and
+coding tasks executed through file, shell, and editing tools. The evaluation
+crosses agent frameworks and model backbones, with the final matrix fixed before
+the held-out evaluation.
+
+The evolution settings include \skillrevise, EvoSkill, SkillClaw, AutoSkill,
+SkillsVote, and supported native learning loops. Each method is evaluated in
+its actual stored representation, including associated scripts or structured
+contracts, rather than after conversion to a common textual summary.
+
+\subsection{Metrics}
+
+\paragraph{Utility.}
+Benign utility is task completion on $B_1,B_2,B_3$; carryover utility is task
+completion on $P$. These distinguish a safer method from one that suppresses
+all skill use.
+
+\paragraph{Attack amplification.}
+Malicious ASR is the fraction of $M$ tasks whose original scenario judge reports
+the unsafe objective. For an evolution method $e$, we report
+\begin{equation}
+  \Delta\asr(e)=\asr(e)-\asr(\text{no evolution}),
+\end{equation}
+paired over the same exposed task instances.
+
+\paragraph{Artifact poisoning.}
+An independent auditor reads the complete stored skill bundle and scores
+content unsafety and unsafe generalization. A poisoned artifact contains an
+unsafe procedure and states it broadly enough to apply outside the source task.
+Auditor agreement is measured on a double-labeled subset.
+
+\paragraph{Zero-injection contamination.}
+Contamination is unsafe-goal completion on benign positions:
+\begin{equation}
+  \contam(e)=\frac{1}{3N}\sum_{i=1}^{N}\sum_{t\in\{B_1,B_2,B_3\}}
+  \mathbb{1}[J_i(\tau_{i,t}^{e})=1].
+\end{equation}
+We additionally report contamination onset and post-onset retention.
+
+\paragraph{Fresh-session carryover.}
+Carryover harm is unsafe-goal completion on $P$ after conversational and
+environment state are reset and only the frozen final library is mounted. This
+is the primary measure of persistent, skill-borne harm.
+
+\subsection{Statistical protocol}
+
+Results are pooled over the frozen episode distribution. Confidence intervals
+use episode-level bootstrap resampling. Paired ASR and contamination changes are
+tested over matched task instances; method comparisons report effect sizes and
+multiple-comparison-adjusted intervals. Hyperparameters, episode construction,
+and the held-out split are frozen before the final sweep.
+
+\section{SafeEvolve}
+\label{sec:safeevolve}
+
+\safeevolve is a governance layer around an existing evolution method. It does
+not replace the base agent or add a runtime refusal policy. It governs the
+persistent skill update at two decision points: writing and reuse.
+
+\subsection{Admission critic and targeted repair}
+
+Before a candidate enters the library, an independent critic audits the full
+bundle, including scripts and referenced resources. When a candidate removes a
+safety check, assumes authority, broadens a dangerous operation, or embeds an
+unsafe tool sequence, the critic produces a targeted repair: restore the check,
+add the missing precondition, or narrow the applicability condition. Repaired
+skills are re-audited before admission.
+
+\subsection{Verification-preserving evolution}
+
+Skill revisions are constrained to preserve existing verification,
+confirmation, authorization, and reversibility requirements unless the update
+provides explicit evidence that the requirement is obsolete. This prevents an
+efficiency-oriented edit from treating a safeguard as removable overhead.
+
+\subsection{Lineage and provenance}
+
+Each skill stores its source tasks, trajectories, revisions, and exposure
+status. Provenance supports attribution and batch rollback when an upstream
+experience is later judged unsafe. It also supplies a risk prior to retrieval
+and retirement decisions.
+
+\subsection{Safety-aware selection and retirement}
+
+Raw evolution selects skills primarily by utility. \safeevolve augments this
+objective with the observed safety impact of reuse. Skills associated with
+contamination or carryover harm are downweighted, quarantined, repaired, or
+retired even when they improve task success. This distinguishes \safeevolve
+from capability-only library hygiene, which keeps useful but unsafe skills.
+
+\begin{figure}[t]
+  \centering
+  \fbox{\parbox[c][3.6cm][c]{0.94\linewidth}{
+    \centering
+    \textbf{Figure 2 placeholder: SafeEvolve architecture.}\\[4pt]
+    Trajectory $\rightarrow$ candidate skill $\rightarrow$ provenance and
+    verification-preserving edit $\rightarrow$ admission critic/repair
+    $\rightarrow$ library $\rightarrow$ safety-aware retrieval and retirement.
+  }}
+  \caption{\textbf{SafeEvolve governs persistent learning.} Components act at
+  skill writing and reuse, the two points at which transient experience becomes
+  persistent policy and later affects behavior.}
+  \label{fig:safeevolve}
+\end{figure}
+
+\section{Experimental Setup}
+\label{sec:setup}
+
+\subsection{Research questions}
+
+\begin{description}
+  \item[RQ1: Safety--utility coupling.] Does skill evolution increase unsafe
+  behavior while retaining or improving task utility?
+  \item[RQ2: Exposure-to-persistence mechanism.] Does unsafe experience enter
+  the skill artifact, get retrieved, and cause zero-injection or fresh-session
+  harm?
+  \item[RQ3: Scope and attacker budget.] How does misevolution vary across
+  methods, agents, domains, and one to three adversarial exposures?
+  \item[RQ4: Mitigation.] Can \safeevolve reduce evolution-induced harm to the
+  no-evolution floor while preserving the capability benefit of evolution?
+\end{description}
+
+\subsection{Evaluation matrix}
+
+Report the final matrix of agent framework $\times$ backbone $\times$ evolution
+method $\times$ substrate. Separate method applicability from missing runs, and
+pin every model and repository version. The main tables pool the predeclared
+episode distribution; per-agent, per-domain, and per-risk-family results appear
+in the appendix.
+
+\subsection{Baselines}
+
+The diagnostic comparison includes no evolution, read-only reflection, benign
+evolution, and the selected skill-evolution methods. The mitigation comparison
+adds Library-Drift as a capability-oriented governance baseline. Each evolution
+method is evaluated raw, with Library-Drift, and with \safeevolve under the same
+frozen train/development/held-out protocol.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{RQ1: Does evolution increase unsafe behavior while retaining utility?}
+\label{sec:rq1}
+
+Table~\ref{tab:misevolution-main} is the paper's primary diagnostic table. Read
+it from left to right: utility establishes that learning remains useful;
+malicious ASR measures attack amplification; artifact poisoning shows that the
+unsafe rule entered persistent storage; contamination and carryover harm show
+that the rule survives after the original attack disappears.
+
+% Main Table 1: do not place SafeEvolve in this table.
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4.2pt}
+\renewcommand{\arraystretch}{1.12}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lcc|cc|cc|ccc}
+\toprule
+& \multicolumn{2}{c|}{\textbf{Capability ($\uparrow$)}}
+& \multicolumn{2}{c|}{\textbf{Attack amplification ($\downarrow$)}}
+& \multicolumn{2}{c|}{\textbf{Evolved artifact ($\downarrow$)}}
+& \multicolumn{3}{c}{\textbf{Post-attack behavior}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-10}
+\textbf{Evolution setting}
+& B-Util. & Carry-Util.
+& M-ASR & $\Delta$ASR
+& Poisoned & Gen. score
+& Contam. $\downarrow$ & Carry-Harm $\downarrow$ & Onset $\downarrow$ \\
+\midrule
+No Evolution          & -- & -- & -- & 0.0 & 0.0 & 0.0 & -- & 0.0 & -- \\
+Read-only Reflection  & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
+Benign Evolution      & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
+\midrule
+\skillrevise          & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
+EvoSkill              & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
+SkillClaw             & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
+AutoSkill             & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
+SkillsVote            & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
+Hermes-native         & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
+\bottomrule
+\end{tabular}}
+\caption{\textbf{Skill evolution can preserve utility while creating
+persistent unsafe behavior (RQ1).} Pooled results over the frozen episode
+distribution. B-Util. is utility on benign interleaved tasks; Carry-Util. is
+utility in the fresh-session persistence probe; M-ASR is attack success on
+exposed tasks; $\Delta$ASR is relative to matched no evolution; Poisoned is the
+rate of stored skill bundles judged unsafe and over-generalized; Gen. score is
+artifact-level unsafe generalization; Contam. is unsafe-goal completion on
+zero-injection benign tasks; Carry-Harm is unsafe-goal completion in the fresh
+session; Onset is the mean number of exposures before first contamination.
+Report 95\% episode-bootstrap intervals in parentheses or in an accompanying
+interval plot. Best utility and lowest risk among evolution methods are bold.}
+\label{tab:misevolution-main}
+\end{table*}
+
+\paragraph{Result paragraph template.}
+Across evolution methods, benign utility changes by [X] while malicious ASR
+increases by [Y]. More importantly, [Z]\% of episodes exhibit zero-injection
+contamination and [W]\% retain harm in a fresh session. The joint result rules
+out a pure context effect: the attack is absent, the executor is reset, and the
+only cross-task object is the evolved library.
+
+\paragraph{Safety--utility frontier.}
+Plot each method by benign utility and carryover harm. The important region is
+high utility and high harm: these methods learn useful procedures while also
+retaining the unsafe shortcut, making capability improvement an unreliable
+safety signal.
+
+\subsection{RQ2: How does exposure become persistent harm?}
+\label{sec:rq2}
+
+RQ2 tests each link of Equation~\ref{eq:chain}. First report the probability
+that an exposure produces a poisoned artifact. Then report retrieval of that
+artifact on later benign tasks, contamination conditional on retrieval, and
+fresh-session harm conditional on final-library poisoning. Use matched
+mediation or stratified conditional effects rather than inferring mediation
+from a single example.
 
 \begin{table}[t]
-\caption{Sample table title}
-\label{sample-table}
-\begin{center}
-\begin{tabular}{ll}
-\multicolumn{1}{c}{\bf PART}  &\multicolumn{1}{c}{\bf DESCRIPTION}
-\\ \hline \\
-Dendrite         &Input terminal \\
-Axon             &Output terminal \\
-Soma             &Cell body (contains cell nucleus) \\
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Link in the chain} & \textbf{Rate} & \textbf{Conditional effect} \\
+\midrule
+Exposure $\rightarrow$ poisoned skill & -- & -- \\
+Poisoned skill $\rightarrow$ retrieval & -- & -- \\
+Retrieval $\rightarrow$ contamination & -- & -- \\
+Final poison $\rightarrow$ carryover harm & -- & -- \\
+\bottomrule
 \end{tabular}
-\end{center}
+\caption{\textbf{Exposure-to-persistence chain (RQ2).} Each row measures an
+observable transition rather than treating later harm as automatic evidence of
+skill mediation. Conditional effects compare matched episodes with and without
+the upstream event.}
+\label{tab:chain}
 \end{table}
 
-\section{Default Notation}
+\paragraph{Artifact risk precedes behavioral harm.}
+Compare artifact poisoning with realized contamination. Episodes with poisoned
+skills but no immediate behavioral harm constitute latent risk: the persistent
+policy has changed, but the evaluated task has not supplied the retrieval cue
+or execution opportunity. Quantify this artifact--behavior gap by method and
+agent.
 
-In an attempt to encourage standardized notation, we have included the
-notation file from the textbook, \textit{Deep Learning}
-\cite{goodfellow2016deep} available at
-\url{https://github.com/goodfeli/dlbook_notation/}.  Use of this style
-is not required and can be disabled by commenting out
-\texttt{math\_commands.tex}.
+\paragraph{Worked causal trace.}
+Show one compact case from source exposure to authored skill diff, later
+retrieval log, unsafe tool action, judge state, and fresh-session reproduction.
+The example should expose the exact over-generalized clause and the safety check
+that evolution removed or failed to encode.
 
+\subsection{RQ3: Where does misevolution emerge, and at what budget?}
+\label{sec:rq3}
 
-\centerline{\bf Numbers and Arrays}
-\bgroup
-\def\arraystretch{1.5}
-\begin{tabular}{p{1in}p{3.25in}}
-$\displaystyle a$ & A scalar (integer or real)\\
-$\displaystyle \va$ & A vector\\
-$\displaystyle \mA$ & A matrix\\
-$\displaystyle \tA$ & A tensor\\
-$\displaystyle \mI_n$ & Identity matrix with $n$ rows and $n$ columns\\
-$\displaystyle \mI$ & Identity matrix with dimensionality implied by context\\
-$\displaystyle \ve^{(i)}$ & Standard basis vector $[0,\dots,0,1,0,\dots,0]$ with a 1 at position $i$\\
-$\displaystyle \text{diag}(\va)$ & A square, diagonal matrix with diagonal entries given by $\va$\\
-$\displaystyle \ra$ & A scalar random variable\\
-$\displaystyle \rva$ & A vector-valued random variable\\
-$\displaystyle \rmA$ & A matrix-valued random variable\\
+Report heterogeneity across evolution algorithms, agent frameworks, model
+backbones, substrates, domains, and risk families. Avoid treating the pooled
+mean as universality: identify which design properties predict artifact
+poisoning and which executor policies block poisoned artifacts from becoming
+behavior.
+
+\begin{figure}[t]
+  \centering
+  \fbox{\parbox[c][3.7cm][c]{0.94\linewidth}{
+    \centering
+    \textbf{Figure 3 placeholder: budget--response curve.}\\[4pt]
+    X-axis: adversarial exposures $k\in\{0,1,2,3\}$.\\
+    Y-axes or panels: artifact poisoning, zero-injection contamination, and
+    fresh-session carryover harm. Show method-level curves with bootstrap CIs.
+  }}
+  \caption{\textbf{Misevolution under bounded exposure (RQ3).} The minimum
+  budget that produces persistent harm defines the practical attacker cost.}
+  \label{fig:budget}
+\end{figure}
+
+\paragraph{Failure mechanisms.}
+Cluster audited skill diffs into a small post-hoc taxonomy such as verification
+skipping, authorization assumption, policy erosion, and unsafe
+over-generalization. Report multi-label frequencies and annotator agreement.
+Use the taxonomy to explain variation, not as the primary proof that
+misevolution exists.
+
+\subsection{RQ4: Can SafeEvolve preserve learning without preserving harm?}
+\label{sec:rq4}
+
+The mitigation evaluation uses held-out domains and episodes that are hidden
+during evolution, repair-policy development, and threshold selection. Libraries
+are frozen before evaluation. The primary evidence is behavioral: a mitigation
+must reduce contamination and fresh-session harm while retaining the utility of
+raw evolution. Artifact scores diagnose how it achieves that result but are not
+the sole success criterion.
+
+% Main Table 2: held-out mitigation table.
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4.2pt}
+\renewcommand{\arraystretch}{1.10}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{ll|cccc|ccc|c}
+\toprule
+& & \multicolumn{4}{c|}{\textbf{Held-out safety ($\downarrow$)}}
+& \multicolumn{3}{c|}{\textbf{Capability ($\uparrow$)}}
+& \textbf{Cost} \\
+\cmidrule(lr){3-6}\cmidrule(lr){7-9}\cmidrule(lr){10-10}
+\textbf{Evolution method} & \textbf{Governance}
+& $\Delta$Unsafe & Poisoned & Contam. & Carry-Harm
+& B-Util. & Carry-Util. & Retained gain
+& Overhead \\
+\midrule
+No Evolution & None & 0.0 & 0.0 & -- & 0.0 & -- & -- & 0.0\% & 1.00$\times$ \\
+\midrule
+\multirow{3}{*}{\skillrevise}
+ & Raw             & -- & -- & -- & -- & -- & -- & 100\% & 1.00$\times$ \\
+ & Library-Drift   & -- & -- & -- & -- & -- & -- & --    & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- & -- & --    & -- \\
+\midrule
+\multirow{3}{*}{EvoSkill}
+ & Raw             & -- & -- & -- & -- & -- & -- & 100\% & 1.00$\times$ \\
+ & Library-Drift   & -- & -- & -- & -- & -- & -- & --    & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- & -- & --    & -- \\
+\midrule
+\multirow{3}{*}{SkillClaw}
+ & Raw             & -- & -- & -- & -- & -- & -- & 100\% & 1.00$\times$ \\
+ & Library-Drift   & -- & -- & -- & -- & -- & -- & --    & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- & -- & --    & -- \\
+\midrule
+\multicolumn{2}{l|}{\textbf{Macro-average over supported methods}}
+ & -- & -- & -- & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}}
+\caption{\textbf{SafeEvolve reduces evolution-induced harm while preserving
+the capability gain (RQ4).} Each evolution method is evaluated raw, with a
+capability-oriented library hygiene baseline, and with \safeevolve on the same
+held-out episodes. $\Delta$Unsafe aggregates paired behavior-level unsafe
+change relative to no evolution; Poisoned is reported diagnostically; Retained
+gain is $(U_{\mathrm{mitigated}}-U_{\mathrm{no\mbox{-}evo}})/
+(U_{\mathrm{raw}}-U_{\mathrm{no\mbox{-}evo}})$. Overhead reports end-to-end
+latency or model-call cost relative to raw evolution. Bold the safest method
+whose utility is statistically non-inferior to raw evolution.}
+\label{tab:safeevolve-main}
+\end{table*}
+
+\paragraph{Why Library-Drift is the decisive baseline.}
+Capability-oriented hygiene can remove stale or low-value skills, but it should
+retain a skill that improves utility through an unsafe shortcut. A gap between
+Library-Drift and \safeevolve therefore tests whether an explicitly safety-aware
+objective is necessary.
+
+\paragraph{Component evaluation.}
+Evaluate the admission critic independently on malicious and benign skill
+corpora, reporting recall, AUROC, and benign false-positive rate. Evaluate
+verification preservation, provenance rollback, and safety-aware retirement in
+ablations. These component results explain the mitigation table; they do not
+replace its held-out behavioral evidence.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+\textbf{SafeEvolve variant} & \textbf{Recall $\uparrow$} &
+\textbf{Benign FPR $\downarrow$} & \textbf{Carry-Harm $\downarrow$} \\
+\midrule
+Full \safeevolve             & -- & -- & -- \\
+$-$ admission critic         & -- & -- & -- \\
+$-$ verification preservation& -- & -- & -- \\
+$-$ provenance               & -- & -- & -- \\
+$-$ safety-aware retirement  & -- & -- & -- \\
+\bottomrule
 \end{tabular}
-\egroup
-\vspace{0.25cm}
+\caption{\textbf{SafeEvolve component analysis.} Detection metrics come from
+independent labeled skill corpora; carryover harm comes from the held-out
+episode benchmark.}
+\label{tab:safeevolve-ablation}
+\end{table}
 
-\centerline{\bf Sets and Graphs}
-\bgroup
-\def\arraystretch{1.5}
+\section{Discussion}
+\label{sec:discussion}
 
-\begin{tabular}{p{1.25in}p{3.25in}}
-$\displaystyle \sA$ & A set\\
-$\displaystyle \R$ & The set of real numbers \\
-$\displaystyle \{0, 1\}$ & The set containing 0 and 1 \\
-$\displaystyle \{0, 1, \dots, n \}$ & The set of all integers between $0$ and $n$\\
-$\displaystyle [a, b]$ & The real interval including $a$ and $b$\\
-$\displaystyle (a, b]$ & The real interval excluding $a$ but including $b$\\
-$\displaystyle \sA \backslash \sB$ & Set subtraction, i.e., the set containing the elements of $\sA$ that are not in $\sB$\\
-$\displaystyle \gG$ & A graph\\
-$\displaystyle \parents_\gG(\ervx_i)$ & The parents of $\ervx_i$ in $\gG$
-\end{tabular}
-\vspace{0.25cm}
+\paragraph{Skills are security-relevant policy.}
+The central implication is that a skill library should not be governed as a
+passive document store. A stored skill can alter tool choice, ordering,
+verification, and authorization across future tasks. Admission, provenance,
+rollback, and safety monitoring should therefore be part of the learning
+boundary.
 
+\paragraph{Latent and realized misevolution.}
+Artifact poisoning and behavioral harm are distinct operational states. A
+poisoned skill that has not yet fired is latent risk, not a safe artifact. A
+runtime policy can temporarily block execution while the persistent library
+continues to carry the unsafe rule. Product evaluation should report both.
 
-\centerline{\bf Indexing}
-\bgroup
-\def\arraystretch{1.5}
+\paragraph{Capability and safety share the same shortcut.}
+The difficult cases are not useless malicious skills. They are procedures that
+increase success by removing friction that was serving as a safeguard. This is
+why disabling evolution loses capability and capability-only library hygiene
+does not solve the problem.
 
-\begin{tabular}{p{1.25in}p{3.25in}}
-$\displaystyle \eva_i$ & Element $i$ of vector $\va$, with indexing starting at 1 \\
-$\displaystyle \eva_{-i}$ & All elements of vector $\va$ except for element $i$ \\
-$\displaystyle \emA_{i,j}$ & Element $i, j$ of matrix $\mA$ \\
-$\displaystyle \mA_{i, :}$ & Row $i$ of matrix $\mA$ \\
-$\displaystyle \mA_{:, i}$ & Column $i$ of matrix $\mA$ \\
-$\displaystyle \etA_{i, j, k}$ & Element $(i, j, k)$ of a 3-D tensor $\tA$\\
-$\displaystyle \tA_{:, :, i}$ & 2-D slice of a 3-D tensor\\
-$\displaystyle \erva_i$ & Element $i$ of the random vector $\rva$ \\
-\end{tabular}
-\egroup
-\vspace{0.25cm}
+\paragraph{Scope and limitations.}
+The study focuses on readable skill artifacts produced by CLI and coding agents
+and on bounded direct exposure in executable task environments. Results support
+claims about evolution-induced incremental risk within this setting. Future
+work should test indirect exposure, multimodal skills, opaque learned memories,
+longer deployment horizons, interacting libraries, and adaptive attackers.
 
+\section{Conclusion}
+\label{sec:conclusion}
 
-\centerline{\bf Calculus}
-\bgroup
-\def\arraystretch{1.5}
-\begin{tabular}{p{1.25in}p{3.25in}}
-% NOTE: the [2ex] on the next line adds extra height to that row of the table.
-% Without that command, the fraction on the first line is too tall and collides
-% with the fraction on the second line.
-$\displaystyle\frac{d y} {d x}$ & Derivative of $y$ with respect to $x$\\ [2ex]
-$\displaystyle \frac{\partial y} {\partial x} $ & Partial derivative of $y$ with respect to $x$ \\
-$\displaystyle \nabla_\vx y $ & Gradient of $y$ with respect to $\vx$ \\
-$\displaystyle \nabla_\mX y $ & Matrix derivatives of $y$ with respect to $\mX$ \\
-$\displaystyle \nabla_\tX y $ & Tensor containing derivatives of $y$ with respect to $\tX$ \\
-$\displaystyle \frac{\partial f}{\partial \vx} $ & Jacobian matrix $\mJ \in \R^{m\times n}$ of $f: \R^n \rightarrow \R^m$\\
-$\displaystyle \nabla_\vx^2 f(\vx)\text{ or }\mH( f)(\vx)$ & The Hessian matrix of $f$ at input point $\vx$\\
-$\displaystyle \int f(\vx) d\vx $ & Definite integral over the entire domain of $\vx$ \\
-$\displaystyle \int_\sS f(\vx) d\vx$ & Definite integral with respect to $\vx$ over the set $\sS$ \\
-\end{tabular}
-\egroup
-\vspace{0.25cm}
-
-\centerline{\bf Probability and Information Theory}
-\bgroup
-\def\arraystretch{1.5}
-\begin{tabular}{p{1.25in}p{3.25in}}
-$\displaystyle P(\ra)$ & A probability distribution over a discrete variable\\
-$\displaystyle p(\ra)$ & A probability distribution over a continuous variable, or over
-a variable whose type has not been specified\\
-$\displaystyle \ra \sim P$ & Random variable $\ra$ has distribution $P$\\% so thing on left of \sim should always be a random variable, with name beginning with \r
-$\displaystyle  \E_{\rx\sim P} [ f(x) ]\text{ or } \E f(x)$ & Expectation of $f(x)$ with respect to $P(\rx)$ \\
-$\displaystyle \Var(f(x)) $ &  Variance of $f(x)$ under $P(\rx)$ \\
-$\displaystyle \Cov(f(x),g(x)) $ & Covariance of $f(x)$ and $g(x)$ under $P(\rx)$\\
-$\displaystyle H(\rx) $ & Shannon entropy of the random variable $\rx$\\
-$\displaystyle \KL ( P \Vert Q ) $ & Kullback-Leibler divergence of P and Q \\
-$\displaystyle \mathcal{N} ( \vx ; \vmu , \mSigma)$ & Gaussian distribution %
-over $\vx$ with mean $\vmu$ and covariance $\mSigma$ \\
-\end{tabular}
-\egroup
-\vspace{0.25cm}
-
-\centerline{\bf Functions}
-\bgroup
-\def\arraystretch{1.5}
-\begin{tabular}{p{1.25in}p{3.25in}}
-$\displaystyle f: \sA \rightarrow \sB$ & The function $f$ with domain $\sA$ and range $\sB$\\
-$\displaystyle f \circ g $ & Composition of the functions $f$ and $g$ \\
-  $\displaystyle f(\vx ; \vtheta) $ & A function of $\vx$ parametrized by $\vtheta$.
-  (Sometimes we write $f(\vx)$ and omit the argument $\vtheta$ to lighten notation) \\
-$\displaystyle \log x$ & Natural logarithm of $x$ \\
-$\displaystyle \sigma(x)$ & Logistic sigmoid, $\displaystyle \frac{1} {1 + \exp(-x)}$ \\
-$\displaystyle \zeta(x)$ & Softplus, $\log(1 + \exp(x))$ \\
-$\displaystyle || \vx ||_p $ & $\normlp$ norm of $\vx$ \\
-$\displaystyle || \vx || $ & $\normltwo$ norm of $\vx$ \\
-$\displaystyle x^+$ & Positive part of $x$, i.e., $\max(0,x)$\\
-$\displaystyle \1_\mathrm{condition}$ & is 1 if the condition is true, 0 otherwise\\
-\end{tabular}
-\egroup
-\vspace{0.25cm}
-
-
-
-\section{Final instructions}
-Do not change any aspects of the formatting parameters in the style files.
-In particular, do not modify the width or length of the rectangle the text
-should fit into, and do not change font sizes (except perhaps in the
-\textsc{References} section; see below). Please note that pages should be
-numbered.
-
-\section{Preparing PostScript or PDF files}
-
-Please prepare PostScript or PDF files with paper size ``US Letter'', and
-not, for example, ``A4''. The -t
-letter option on dvips will produce US Letter files.
-
-Consider directly generating PDF files using \verb+pdflatex+
-(especially if you are a MiKTeX user).
-PDF figures must be substituted for EPS figures, however.
-
-Otherwise, please generate your PostScript and PDF files with the following commands:
-\begin{verbatim}
-dvips mypaper.dvi -t letter -Ppdf -G0 -o mypaper.ps
-ps2pdf mypaper.ps mypaper.pdf
-\end{verbatim}
-
-\subsection{Margins in LaTeX}
-
-Most of the margin problems come from figures positioned by hand using
-\verb+\special+ or other commands. We suggest using the command
-\verb+\includegraphics+
-from the graphicx package. Always specify the figure width as a multiple of
-the line width as in the example below using .eps graphics
-\begin{verbatim}
-   \usepackage[dvips]{graphicx} ...
-   \includegraphics[width=0.8\linewidth]{myfile.eps}
-\end{verbatim}
-or % Apr 2009 addition
-\begin{verbatim}
-   \usepackage[pdftex]{graphicx} ...
-   \includegraphics[width=0.8\linewidth]{myfile.pdf}
-\end{verbatim}
-for .pdf graphics.
-See section~4.4 in the graphics bundle documentation (\url{http://www.ctan.org/tex-archive/macros/latex/required/graphics/grfguide.ps})
-
-A number of width problems arise when LaTeX cannot properly hyphenate a
-line. Please give LaTeX hyphenation hints using the \verb+\-+ command.
-
-\subsubsection*{Author Contributions}
-If you'd like to, you may include  a section for author contributions as is done
-in many journals. This is optional and at the discretion of the authors.
-
-\subsubsection*{Acknowledgments}
-Use unnumbered third level headings for the acknowledgments. All
-acknowledgments, including those to funding agencies, go at the end of the paper.
-
+Skill self-evolution changes the temporal structure of agent safety. An unsafe
+action need not end with the trajectory that produced it: evolution can extract
+the successful shortcut, store it as a reusable skill, and apply it later when
+the original attack is gone. \bench makes this transition measurable from
+exposure through clean-session persistence. \safeevolve shows how to govern the
+persistent update while preserving useful learning. Safe self-improvement
+requires evaluating not only whether an agent succeeds today, but also what
+today's success teaches it to do tomorrow.
 
 \bibliography{iclr2026_conference}
 \bibliographystyle{iclr2026_conference}
 
 \appendix
-\section{Appendix}
-You may include other additional sections here.
 
+\section{Benchmark Construction}
+\label{app:construction}
+
+Document episode generation, source-task sampling, benign twins, adversarial
+exposures, risk-family alignment, deduplication, leakage checks, and held-out
+splits. Include the complete dataset card and licenses.
+
+\section{Agent and Method Configurations}
+\label{app:configurations}
+
+Report every agent framework, model endpoint, evolution implementation,
+retrieval configuration, update cadence, prompt, decoding parameter, repository
+commit, and applicability restriction. Separate unsupported combinations from
+failed runs.
+
+\section{Judges and Artifact Auditing}
+\label{app:judges}
+
+Provide the original substrate judges, artifact-unsafety rubric,
+over-generalization rubric, auditor prompts, calibration examples, agreement
+statistics, and adjudication procedure. State which models are disjoint from
+the agent and evolution model families.
+
+\section{Additional Results}
+\label{app:additional-results}
+
+Include per-agent, per-backbone, per-domain, per-risk-family, per-position, and
+per-budget tables with confidence intervals. Report invalid episodes, runtime
+failures, missing combinations, and sensitivity to aggregation choices.
+
+\section{SafeEvolve Implementation}
+\label{app:safeevolve-implementation}
+
+Give pseudocode and prompts for admission, repair, verification preservation,
+lineage tracking, safety-aware selection, quarantine, and retirement. Include
+cost accounting and the policy for re-auditing repaired bundles.
+
+\section{Case Studies}
+\label{app:case-studies}
+
+For each major failure family, show the source trajectory, skill diff, lineage,
+retrieval event, later tool trajectory, judge evidence, and effect of
+\safeevolve. Include negative cases where the artifact is poisoned but the
+executor blocks it, and where evolution remains safe.
 
 \end{document}
