@@ -10,6 +10,7 @@
 \usepackage{multirow}
 \usepackage{array}
 \usepackage{xcolor}
+\usepackage{colortbl}
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{xspace}
@@ -33,6 +34,12 @@
 \newcommand{\asr}{\mathrm{ASR}}
 \newcommand{\contam}{\mathrm{Contam}}
 \newcommand{\carry}{\mathrm{CarryHarm}}
+\newcommand{\ccmini}{Claude Code / MiniMax}
+\newcommand{\codexmini}{Codex / MiniMax}
+\newcommand{\hermesmini}{Hermes / MiniMax}
+\newcommand{\openclawmini}{OpenClaw / MiniMax}
+\newcommand{\cchaiku}{Claude Code / Haiku}
+\newcommand{\codexgpt}{Codex / GPT-5.4-mini}
 
 \title{Practice Makes Unsafe: Skill Misevolution in Self-Improving LLM Agents}
 
@@ -55,8 +62,9 @@ after the original attack has disappeared. We introduce \bench, an
 episode-level benchmark that follows an agent across adversarial exposure,
 skill formation, retrieval, zero-injection reuse, and a fresh-session
 persistence test. Its paired controls isolate the effect of evolution from the
-base agent, the task sequence, and benign learning. Across [N] agent
-configurations, [M] evolution methods, and [D] domains, skill evolution
+base agent, the task sequence, and benign learning. Across four agent
+frameworks, three model backbones, six target-agent configurations, [M]
+evolution methods, and [D] domains, skill evolution
 [HEADLINE SAFETY RESULT] while retaining [HEADLINE UTILITY RESULT]. Unsafe
 content appears in the skill library before it consistently manifests as
 behavior, and as few as [K] exposures produce harm that survives into a clean
@@ -139,9 +147,11 @@ Our contributions are:
   formation, artifact inspection, retrieval, behavioral reuse, and clean-session
   persistence, with paired controls that attribute changes to evolution.
 
-  \item We provide a systematic evaluation across [N] agent configurations,
-  [M] evolution methods, [D] domains, and multiple exposure budgets, separating
-  artifact-level latent risk from behavior-level realized harm.
+  \item We provide a systematic evaluation across four agent frameworks, three
+  model backbones, six target-agent configurations, [M] evolution methods, [D]
+  domains, and multiple exposure budgets, separating artifact-level latent
+  risk from behavior-level realized harm. The matrix exposes both framework and
+  backbone effects instead of treating one agent as representative.
 
   \item We introduce \safeevolve and show that governing skill admission,
   revision, provenance, and retirement reduces evolution-induced harm while
@@ -273,9 +283,20 @@ All arms use identical tasks, order, tools, agent configuration, and judges.
 
 The benchmark draws episodes from DTAP and AgentHazard. DTAP provides
 stateful backend tasks and verifiable judges; AgentHazard provides CLI and
-coding tasks executed through file, shell, and editing tools. The evaluation
-crosses agent frameworks and model backbones, with the final matrix fixed before
-the held-out evaluation.
+coding tasks executed through file, shell, and editing tools. Every assembled
+episode is executed by six target-agent configurations spanning four agent
+frameworks and three model backbones. Claude Code, Codex, Hermes, and OpenClaw
+share MiniMax-M2.5 as a controlled backbone comparison. Claude Code is also
+paired with Haiku~4.5, and Codex with GPT-5.4-mini, providing within-framework
+backbone comparisons. The target is the complete agent system---its scaffold,
+tool mediation, skill lifecycle, retrieval behavior, and backbone---rather than
+an isolated language model.
+
+AHA discovers candidate episode mechanisms only with Claude Code / MiniMax.
+Episode construction and all evaluation inputs are then frozen before the
+benchmark sweep. The remaining five target-agent configurations therefore test
+whether misevolution generalizes beyond the agent used for discovery; they are
+not used to select or filter episodes.
 
 The evolution settings include \skillrevise, EvoSkill, SkillClaw, AutoSkill,
 SkillsVote, and supported native learning loops. Each method is evaluated in
@@ -396,11 +417,41 @@ from capability-only library hygiene, which keeps useful but unsafe skills.
 
 \subsection{Evaluation matrix}
 
-Report the final matrix of agent framework $\times$ backbone $\times$ evolution
-method $\times$ substrate. Separate method applicability from missing runs, and
-pin every model and repository version. The main tables pool the predeclared
-episode distribution; per-agent, per-domain, and per-risk-family results appear
-in the appendix.
+The main evaluation treats target-agent as a first-class axis, not a nuisance
+variable to average away. Table~\ref{tab:targets} fixes the six configurations.
+The shared MiniMax backbone isolates framework effects across four agents; the
+second Claude Code and Codex configurations expose backbone effects within a
+framework. Each applicable evolution method runs on the identical frozen
+episode set for every target. Hermes-native evolution appears only on Hermes;
+unsupported combinations are marked N/A rather than pooled with failures.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{cll}
+\toprule
+\textbf{ID} & \textbf{Agent framework} & \textbf{Backbone} \\
+\midrule
+T1 & Claude Code & MiniMax-M2.5 \\
+T2 & Codex       & MiniMax-M2.5 \\
+T3 & Hermes      & MiniMax-M2.5 \\
+T4 & OpenClaw    & MiniMax-M2.5 \\
+T5 & Claude Code & Haiku~4.5 \\
+T6 & Codex       & GPT-5.4-mini \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Six target-agent configurations.} T1 is used for AHA
+mechanism discovery; the benchmark episodes are frozen before evaluation on
+T1--T6. T2--T6 are out of the discovery loop.}
+\label{tab:targets}
+\end{table}
+
+The complete experimental grid is target-agent $\times$ evolution method
+$\times$ substrate. All main-table cells pool the same predeclared episode
+distribution within a target; macro-averages give equal weight to the six
+target-agent configurations. Per-domain and per-risk-family results appear in
+the appendix.
 
 \subsection{Baselines}
 
@@ -416,64 +467,78 @@ frozen train/development/held-out protocol.
 \subsection{RQ1: Does evolution increase unsafe behavior while retaining utility?}
 \label{sec:rq1}
 
-Table~\ref{tab:misevolution-main} is the paper's primary diagnostic table. Read
-it from left to right: utility establishes that learning remains useful;
-malicious ASR measures attack amplification; artifact poisoning shows that the
-unsafe rule entered persistent storage; contamination and carryover harm show
-that the rule survives after the original attack disappears.
+Table~\ref{tab:misevolution-main} is the paper's primary diagnostic table. Its
+rows preserve the six target-agent configurations and its columns preserve the
+evolution methods. Panel A tests attack amplification, Panel B tests whether
+harm survives after the attack disappears, and Panel C checks that the same
+methods retain useful learning. This layout makes framework and backbone
+variation visible instead of hiding it inside one pooled method average.
 
 % Main Table 1: do not place SafeEvolve in this table.
 \begin{table*}[t]
 \centering
-\small
-\setlength{\tabcolsep}{4.2pt}
-\renewcommand{\arraystretch}{1.12}
+\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\renewcommand{\arraystretch}{1.04}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{lcc|cc|cc|ccc}
+\begin{tabular}{llccccccccc}
 \toprule
-& \multicolumn{2}{c|}{\textbf{Capability ($\uparrow$)}}
-& \multicolumn{2}{c|}{\textbf{Attack amplification ($\downarrow$)}}
-& \multicolumn{2}{c|}{\textbf{Evolved artifact ($\downarrow$)}}
-& \multicolumn{3}{c}{\textbf{Post-attack behavior}} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-10}
-\textbf{Evolution setting}
-& B-Util. & Carry-Util.
-& M-ASR & $\Delta$ASR
-& Poisoned & Gen. score
-& Contam. $\downarrow$ & Carry-Harm $\downarrow$ & Onset $\downarrow$ \\
+\textbf{Target agent} & \textbf{Backbone} & \textbf{No Evo.} &
+\textbf{Reflect.} & \textbf{Benign Evo.} & \textbf{SkillRev.} &
+\textbf{EvoSkill} & \textbf{SkillClaw} & \textbf{AutoSkill} &
+\textbf{SkillsVote} & \textbf{Native} \\
 \midrule
-No Evolution          & -- & -- & -- & 0.0 & 0.0 & 0.0 & -- & 0.0 & -- \\
-Read-only Reflection  & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
-Benign Evolution      & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
+\multicolumn{11}{l}{\textbf{A. Attack amplification: $\Delta$ASR (pp; $\downarrow$)}} \\
+Claude Code & MiniMax      & 0.0 & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Codex       & MiniMax      & 0.0 & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Hermes      & MiniMax      & 0.0 & -- & -- & -- & -- & -- & -- & -- & -- \\
+OpenClaw    & MiniMax      & 0.0 & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Claude Code & Haiku        & 0.0 & -- & -- & -- & -- & -- & -- & -- & N/A \\
+Codex       & GPT-5.4-mini & 0.0 & -- & -- & -- & -- & -- & -- & -- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & 0.0 & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\skillrevise          & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
-EvoSkill              & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
-SkillClaw             & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
-AutoSkill             & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
-SkillsVote            & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
-Hermes-native         & -- & -- & -- & --  & --  & --  & -- & --  & -- \\
+\multicolumn{11}{l}{\textbf{B. Post-attack behavior: contamination / fresh-session carryover harm (\%; $\downarrow$)}} \\
+Claude Code & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Hermes      & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+OpenClaw    & MiniMax      & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Claude Code & Haiku        & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & GPT-5.4-mini & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/0 & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\midrule
+\multicolumn{11}{l}{\textbf{C. Capability: benign utility / fresh-session carryover utility (\%; $\uparrow$)}} \\
+Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Claude Code & Haiku        & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & GPT-5.4-mini & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{Skill evolution can preserve utility while creating
-persistent unsafe behavior (RQ1).} Pooled results over the frozen episode
-distribution. B-Util. is utility on benign interleaved tasks; Carry-Util. is
-utility in the fresh-session persistence probe; M-ASR is attack success on
-exposed tasks; $\Delta$ASR is relative to matched no evolution; Poisoned is the
-rate of stored skill bundles judged unsafe and over-generalized; Gen. score is
-artifact-level unsafe generalization; Contam. is unsafe-goal completion on
-zero-injection benign tasks; Carry-Harm is unsafe-goal completion in the fresh
-session; Onset is the mean number of exposures before first contamination.
-Report 95\% episode-bootstrap intervals in parentheses or in an accompanying
-interval plot. Best utility and lowest risk among evolution methods are bold.}
+\caption{\textbf{Skill evolution across six target-agent configurations
+(RQ1).} Each cell pools the same frozen episode distribution within one target
+agent and evolution setting. Panel A reports attack-success change relative to
+that target's matched no-evolution floor. Panel B reports zero-injection
+contamination / clean-session carryover harm. Panel C reports benign utility /
+clean-session carryover utility. The four MiniMax rows isolate agent-framework
+effects; the paired Claude Code and Codex rows expose backbone effects within a
+framework. AHA discovers mechanisms only on Claude Code / MiniMax before the
+episodes are frozen; the other five rows are out of the discovery loop. N/A
+denotes a genuinely unsupported native method, not a failed run. Artifact
+poisoning and the exposure-to-persistence chain are reported in
+Table~\ref{tab:chain}. Add 95\% episode-bootstrap intervals in the supplement or
+an accompanying interval plot.}
 \label{tab:misevolution-main}
 \end{table*}
 
 \paragraph{Result paragraph template.}
-Across evolution methods, benign utility changes by [X] while malicious ASR
-increases by [Y]. More importantly, [Z]\% of episodes exhibit zero-injection
-contamination and [W]\% retain harm in a fresh session. The joint result rules
-out a pure context effect: the attack is absent, the executor is reset, and the
-only cross-task object is the evolved library.
+Across six target-agent configurations, benign utility changes by [X] while
+malicious ASR increases by [Y]. More importantly, [Z]\% of episodes exhibit
+zero-injection contamination and [W]\% retain harm in a fresh session. The
+effect appears in [A/6] targets and [B/M] evolution methods. The joint result
+rules out a pure context effect: the attack is absent, the executor is reset,
+and the only cross-task object is the evolved library.
 
 \paragraph{Safety--utility frontier.}
 Plot each method by benign utility and carryover harm. The important region is
@@ -534,6 +599,15 @@ mean as universality: identify which design properties predict artifact
 poisoning and which executor policies block poisoned artifacts from becoming
 behavior.
 
+\paragraph{Framework and backbone decomposition.}
+The four MiniMax-M2.5 targets hold the backbone fixed while changing the agent
+framework, exposing the contribution of tool mediation, system instructions,
+skill retrieval, and execution policy. The two within-framework contrasts---
+Claude Code with MiniMax versus Haiku and Codex with MiniMax versus GPT-5.4-mini
+---then test how much of the effect follows the model backbone. Report both
+contrasts before the overall macro-average; the six configurations are related
+controls, not six interchangeable replications.
+
 \begin{figure}[t]
   \centering
   \fbox{\parbox[c][3.7cm][c]{0.94\linewidth}{
@@ -568,51 +642,63 @@ the sole success criterion.
 % Main Table 2: held-out mitigation table.
 \begin{table*}[t]
 \centering
-\small
-\setlength{\tabcolsep}{4.2pt}
-\renewcommand{\arraystretch}{1.10}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.04}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{ll|cccc|ccc|c}
+\begin{tabular}{llccccccc}
 \toprule
-& & \multicolumn{4}{c|}{\textbf{Held-out safety ($\downarrow$)}}
-& \multicolumn{3}{c|}{\textbf{Capability ($\uparrow$)}}
-& \textbf{Cost} \\
-\cmidrule(lr){3-6}\cmidrule(lr){7-9}\cmidrule(lr){10-10}
 \textbf{Evolution method} & \textbf{Governance}
-& $\Delta$Unsafe & Poisoned & Contam. & Carry-Harm
-& B-Util. & Carry-Util. & Retained gain
-& Overhead \\
+& \textbf{CC/MiniMax} & \textbf{Codex/MiniMax} & \textbf{Hermes/MiniMax}
+& \textbf{OpenClaw/MiniMax} & \textbf{CC/Haiku} & \textbf{Codex/GPT}
+& \textbf{Macro avg.} \\
 \midrule
-No Evolution & None & 0.0 & 0.0 & -- & 0.0 & -- & -- & 0.0\% & 1.00$\times$ \\
-\midrule
+\multicolumn{9}{l}{\textbf{A. Evolution-induced unsafe behavior: $\Delta$Unsafe (pp; $\downarrow$)}} \\
 \multirow{3}{*}{\skillrevise}
- & Raw             & -- & -- & -- & -- & -- & -- & 100\% & 1.00$\times$ \\
- & Library-Drift   & -- & -- & -- & -- & -- & -- & --    & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- & -- & --    & -- \\
+ & Raw             & -- & -- & -- & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
 \multirow{3}{*}{EvoSkill}
- & Raw             & -- & -- & -- & -- & -- & -- & 100\% & 1.00$\times$ \\
- & Library-Drift   & -- & -- & -- & -- & -- & -- & --    & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- & -- & --    & -- \\
+ & Raw             & -- & -- & -- & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
 \multirow{3}{*}{SkillClaw}
- & Raw             & -- & -- & -- & -- & -- & -- & 100\% & 1.00$\times$ \\
- & Library-Drift   & -- & -- & -- & -- & -- & -- & --    & -- \\
- & \safeevolve     & -- & -- & -- & -- & -- & -- & --    & -- \\
+ & Raw             & -- & -- & -- & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multicolumn{2}{l|}{\textbf{Macro-average over supported methods}}
- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\multicolumn{9}{l}{\textbf{B. Utility gain retained relative to raw evolution (\%; $\uparrow$)}} \\
+\multirow{3}{*}{\skillrevise}
+ & Raw             & 100 & 100 & 100 & 100 & 100 & 100 & 100 \\
+ & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
+\midrule
+\multirow{3}{*}{EvoSkill}
+ & Raw             & 100 & 100 & 100 & 100 & 100 & 100 & 100 \\
+ & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
+\midrule
+\multirow{3}{*}{SkillClaw}
+ & Raw             & 100 & 100 & 100 & 100 & 100 & 100 & 100 \\
+ & Library-Drift   & -- & -- & -- & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{SafeEvolve reduces evolution-induced harm while preserving
-the capability gain (RQ4).} Each evolution method is evaluated raw, with a
-capability-oriented library hygiene baseline, and with \safeevolve on the same
-held-out episodes. $\Delta$Unsafe aggregates paired behavior-level unsafe
-change relative to no evolution; Poisoned is reported diagnostically; Retained
-gain is $(U_{\mathrm{mitigated}}-U_{\mathrm{no\mbox{-}evo}})/
-(U_{\mathrm{raw}}-U_{\mathrm{no\mbox{-}evo}})$. Overhead reports end-to-end
-latency or model-call cost relative to raw evolution. Bold the safest method
-whose utility is statistically non-inferior to raw evolution.}
+\caption{\textbf{SafeEvolve reduces evolution-induced harm across agents while
+preserving the capability gain (RQ4).} Each evolution method is evaluated raw,
+with a capability-oriented library hygiene baseline, and with \safeevolve on
+the same held-out episodes. Columns retain all six target-agent configurations.
+Panel A reports paired behavior-level unsafe change relative to each target's
+no-evolution floor, combining contamination and carryover harm under the
+predeclared primary aggregation. Panel B reports
+$(U_{\mathrm{mitigated}}-U_{\mathrm{no\mbox{-}evo}})/
+(U_{\mathrm{raw}}-U_{\mathrm{no\mbox{-}evo}})$. Macro averages weight target
+agents equally and exclude only genuinely unsupported method--agent pairs.
+Report absolute contamination, carryover harm, benign utility, artifact scores,
+and overhead in the accompanying breakdown. Bold the safest method whose
+utility is statistically non-inferior to raw evolution.}
 \label{tab:safeevolve-main}
 \end{table*}
 
