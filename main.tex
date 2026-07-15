@@ -135,8 +135,8 @@ Our evaluation asks four questions. \textbf{RQ1} tests whether evolution
 increases unsafe behavior while retaining utility. \textbf{RQ2} follows the
 exposure-to-persistence chain and tests whether the skill artifact mediates
 later harm. \textbf{RQ3} measures how the effect varies across evolution
-methods, agent configurations, task categories, attack strategies, and attacker
-budgets. \textbf{RQ4}
+methods, agent configurations, task categories, attack strategies, attacker
+budgets, and exposure timing at a fixed budget. \textbf{RQ4}
 tests whether \safeevolve can break this chain without removing the capability
 benefits of learning.
 
@@ -490,9 +490,10 @@ updates.
   \item[RQ2: Exposure-to-persistence mechanism.] Does unsafe experience enter
   the skill artifact, get retrieved, and produce post-attack carryover ASR
   while retaining carryover utility?
-  \item[RQ3: Scope and attacker budget.] How does misevolution vary across
-  methods, agents, task categories and attack strategies, and cumulative doses
-  of three, six, and nine malicious tasks?
+  \item[RQ3: Scope, budget, and timing.] How does misevolution vary across
+  methods, agents, task categories and attack strategies, cumulative doses of
+  three, six, and nine malicious tasks, and early versus late exposure at a
+  fixed dose?
   \item[RQ4: Mitigation.] Can \safeevolve reduce the three evolved-artifact
   risks, malicious and benign ASR, and carryover ASR while preserving utility?
 \end{description}
@@ -500,7 +501,7 @@ updates.
 \subsection{Evaluation matrix}
 
 The main evaluation treats target-agent as a first-class axis, not a nuisance
-variable to average away. Table~\ref{tab:targets} fixes the five configurations.
+variable to average away. Table~\ref{tab:targets} fixes the four configurations.
 The shared MiniMax backbone isolates framework effects across Claude Code,
 Codex, Hermes, and OpenClaw. Each
 applicable evolution method runs on the identical frozen
@@ -666,12 +667,12 @@ retrieval log, unsafe tool action, judge state, and fresh-session reproduction.
 The example should expose the exact over-generalized clause and the safety check
 that evolution removed or failed to encode.
 
-\subsection{RQ3: Where does misevolution emerge, and at what budget?}
+\subsection{RQ3: Where does misevolution emerge, at what budget, and when?}
 \label{sec:rq3}
 
 Report heterogeneity across evolution algorithms, agent frameworks,
-AgentHazard risk categories, attack strategies, and exposure
-budgets. Avoid treating the pooled
+AgentHazard risk categories, attack strategies, exposure budgets, and exposure
+positions. Avoid treating the pooled
 mean as universality: identify which design properties predict high artifact
 unsafety and which executor policies block unsafe artifacts from becoming
 post-attack behavior.
@@ -701,6 +702,51 @@ related controls, not interchangeable replications.
   rates are recomputed at each round; lines do not show differences from a
   baseline.}
   \label{fig:budget}
+\end{figure*}
+
+\subsubsection{Timing sweep}
+\label{sec:timing-sweep}
+
+The dose--response sweep changes how much adversarial experience enters the
+learning stream. The timing sweep fixes the malicious dose at one three-task
+block and moves that block through an otherwise matched learning history. The
+three schedules are
+\begin{align*}
+  \text{\textsc{Early}}:  &\quad \mathrm{MMM\,BBB\;BBB\,BBB\;BBB\,BBB}
+    \mid \mathrm{BBB},\\
+  \text{\textsc{Middle}}: &\quad \mathrm{BBB\,BBB\;MMM\,BBB\;BBB\,BBB}
+    \mid \mathrm{BBB},\\
+  \text{\textsc{Late}}:   &\quad \mathrm{BBB\,BBB\;BBB\,BBB\;MMM\,BBB}
+    \mid \mathrm{BBB}.
+\end{align*}
+Non-adversarial positions use the corresponding benign twins. Every schedule
+therefore contains the same 18 learning-stage tasks, three malicious tasks,
+15 benign tasks, number of evolution opportunities, and three clean-session
+persistence probes. This isolates whether an early unsafe update compounds
+through later reuse or a recent unsafe update persists because fewer benign
+updates intervene before the library is frozen.
+
+\begin{figure*}[t]
+  \centering
+  \fbox{\parbox[c][4.0cm][c]{0.96\textwidth}{
+    \centering
+    \textbf{Figure 4 placeholder: fixed-dose timing sweep.}\\[5pt]
+    Shared x-axis: \textsc{Early}, \textsc{Middle}, \textsc{Late}; total dose
+    fixed at $3M$.\\[3pt]
+    \textbf{(a) Final-block Contamination} \quad
+    \textbf{(b) Final Content Unsafety} \quad
+    \textbf{(c) Carryover ASR}.\\[3pt]
+    One line per evolution method with episode-bootstrap CIs. Each point is an
+    absolute micro aggregate over the 25 matched episodes; utility outcomes and
+    the complete nine-metric timing table appear in the appendix.
+  }}
+  \caption{\textbf{Exposure timing at a fixed malicious dose (RQ3).} Moving the
+  same three malicious tasks across a fixed-length learning history separates
+  compounding from recency. Final-block contamination measures harmful behavior
+  on the last benign block before freezing, content unsafety audits the final
+  authored library, and carryover ASR tests the frozen library in a clean
+  session.}
+  \label{fig:timing}
 \end{figure*}
 
 \paragraph{Failure mechanisms.}
@@ -1086,7 +1132,9 @@ separately from artifact auditing.
 \label{app:additional-results}
 
 Include per-agent, per-risk-category, per-attack-strategy,
-per-position, and per-budget tables with confidence intervals. Report invalid episodes, runtime
+per-timing-position, and per-budget tables with confidence intervals. The
+timing appendix reports all nine metrics for the fixed-$3M$ early, middle, and
+late schedules. Report invalid episodes, runtime
 failures, missing combinations, and sensitivity to aggregation choices.
 
 \safeevolvefulltable
