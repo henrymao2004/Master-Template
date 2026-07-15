@@ -736,7 +736,8 @@ artifact scores, and lower fresh-session carryover ASR while preserving
 carryover utility. The three stages are reported together rather than collapsed
 into one score.
 
-% Main Table 2: held-out mitigation table.
+% Appendix table defined here and rendered after \appendix.
+\newcommand{\safeevolvefulltable}{%
 \begin{table*}[t]
 \centering
 \scriptsize
@@ -829,8 +830,8 @@ into one score.
  & \safeevolve     & N/A & --/-- & N/A & N/A & N/A & --/-- \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{SafeEvolve reduces online, artifact, and carryover risk while
-preserving utility (RQ4).} Each evolution method is evaluated raw,
+\caption{\textbf{Full SafeEvolve breakdown by evolution method and target
+agent.} Each evolution method is evaluated raw,
 with a capability-oriented library hygiene baseline, and with \safeevolve on
 the same held-out episodes. Columns retain all five target-agent configurations.
 Panel A reports benign utility / malicious utility / malicious ASR / benign ASR
@@ -838,11 +839,50 @@ Panel A reports benign utility / malicious utility / malicious ASR / benign ASR
 stealthiness; Panel C reports carryover ASR / carryover utility. All rates are
 absolute micro-aggregates. No deltas or gain-retention ratios are used. Macro averages
 weight target agents equally and exclude only
-genuinely unsupported method--agent pairs. Artifact scores and overhead appear
-in the accompanying breakdown. Bold the safest method whose utility is
-statistically non-inferior to raw evolution. Hermes-native is evaluated only in
+genuinely unsupported method--agent pairs. Bold marks the safest method whose
+utility is statistically non-inferior to raw evolution. Hermes-native is evaluated only in
 the Hermes / MiniMax column; its macro entry therefore summarizes that single
 supported target rather than imputing results for other agents.}
+\label{tab:safeevolve-full}
+\end{table*}
+}
+
+% Main Table 2: method-averaged held-out mitigation results.
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.06}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Governance} & \textbf{CC/MiniMax} & \textbf{Hermes/MiniMax}
+& \textbf{OpenClaw/MiniMax} & \textbf{CC/Haiku} & \textbf{Codex/GPT}
+& \textbf{Macro avg.} \\
+\midrule
+\multicolumn{7}{l}{\textbf{A. Online behavior: benign utility / malicious utility / malicious ASR / benign ASR (contamination) (\%)}} \\
+Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+\rowcolor{lightblue}\safeevolve & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+\midrule
+\multicolumn{7}{l}{\textbf{B. Evolved artifact: content unsafety / unsafe generalization / stealthiness ($\downarrow$)}} \\
+Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\rowcolor{lightblue}\safeevolve & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\midrule
+\multicolumn{7}{l}{\textbf{C. Post-attack: carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
+Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\rowcolor{lightblue}\safeevolve & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\bottomrule
+\end{tabular}}
+\caption{\textbf{SafeEvolve reduces online, artifact, and carryover risk while
+preserving utility (RQ4).} For each target agent and governance condition, we
+first compute every metric as an absolute micro-aggregate, then macro-average
+equally over all applicable evolution methods. The final column gives the
+equal-weight target-agent average. Unsupported method--agent pairs are
+excluded. The complete per-method breakdown is reported in
+Appendix~Table~\ref{tab:safeevolve-full}.}
 \label{tab:safeevolve-main}
 \end{table*}
 
@@ -1053,7 +1093,7 @@ Provide the original AgentHazard trajectory judge and the complete 1--5 rubrics 
 unsafety, unsafe generalization, and stealthiness, together with auditor
 prompts, calibration examples, agreement statistics, and the adjudication
 procedure. State which models are disjoint from the agent and evolution model
-families. Provide the post-attack carryover-harm and carryover-utility judges
+families. Provide the post-attack carryover-ASR and carryover-utility judges
 separately from artifact auditing.
 
 \section{Additional Results}
@@ -1062,6 +1102,8 @@ separately from artifact auditing.
 Include per-agent, per-backbone, per-risk-category, per-attack-strategy,
 per-position, and per-budget tables with confidence intervals. Report invalid episodes, runtime
 failures, missing combinations, and sensitivity to aggregation choices.
+
+\safeevolvefulltable
 
 \section{SafeEvolve Implementation}
 \label{app:safeevolve-implementation}
