@@ -292,12 +292,6 @@ backbone comparisons. The target is the complete agent system---its scaffold,
 tool mediation, skill lifecycle, retrieval behavior, and backbone---rather than
 an isolated language model.
 
-AHA discovers candidate episode mechanisms only with Claude Code / MiniMax.
-Episode construction and all evaluation inputs are then frozen before the
-benchmark sweep. The remaining five target-agent configurations therefore test
-whether misevolution generalizes beyond the agent used for discovery; they are
-not used to select or filter episodes.
-
 The evolution settings include \skillrevise, EvoSkill, SkillClaw, AutoSkill,
 SkillsVote, and supported native learning loops. Each method is evaluated in
 its actual stored representation, including associated scripts or structured
@@ -429,21 +423,20 @@ unsupported combinations are marked N/A rather than pooled with failures.
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{cll}
+\begin{tabular}{ll}
 \toprule
-\textbf{ID} & \textbf{Agent framework} & \textbf{Backbone} \\
+\textbf{Agent framework} & \textbf{Backbone} \\
 \midrule
-T1 & Claude Code & MiniMax-M2.5 \\
-T2 & Codex       & MiniMax-M2.5 \\
-T3 & Hermes      & MiniMax-M2.5 \\
-T4 & OpenClaw    & MiniMax-M2.5 \\
-T5 & Claude Code & Haiku~4.5 \\
-T6 & Codex       & GPT-5.4-mini \\
+Claude Code & MiniMax-M2.5 \\
+Codex       & MiniMax-M2.5 \\
+Hermes      & MiniMax-M2.5 \\
+OpenClaw    & MiniMax-M2.5 \\
+Claude Code & Haiku~4.5 \\
+Codex       & GPT-5.4-mini \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{Six target-agent configurations.} T1 is used for AHA
-mechanism discovery; the benchmark episodes are frozen before evaluation on
-T1--T6. T2--T6 are out of the discovery loop.}
+\caption{\textbf{Six target-agent configurations.} The matrix supports
+controlled comparisons across agent frameworks and model backbones.}
 \label{tab:targets}
 \end{table}
 
@@ -523,9 +516,8 @@ that target's matched no-evolution floor. Panel B reports zero-injection
 contamination / clean-session carryover harm. Panel C reports benign utility /
 clean-session carryover utility. The four MiniMax rows isolate agent-framework
 effects; the paired Claude Code and Codex rows expose backbone effects within a
-framework. AHA discovers mechanisms only on Claude Code / MiniMax before the
-episodes are frozen; the other five rows are out of the discovery loop. N/A
-denotes a genuinely unsupported native method, not a failed run. Artifact
+framework. N/A denotes a genuinely unsupported native method, not a failed
+run. Artifact
 poisoning and the exposure-to-persistence chain are reported in
 Table~\ref{tab:chain}. Add 95\% episode-bootstrap intervals in the supplement or
 an accompanying interval plot.}
