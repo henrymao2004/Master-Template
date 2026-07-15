@@ -292,7 +292,9 @@ tool mediation, skill lifecycle, retrieval behavior, and backbone---rather than
 an isolated language model.
 
 The evolution settings include EvoSkill, SkillClaw, AutoSkill, SkillsVote, and
-supported native learning loops. Each method is evaluated in
+Hermes-native skill evolution. Hermes-native is an evolution method tied to the
+Hermes agent and is evaluated only in the Hermes / MiniMax configuration; the
+corresponding cells for other target agents are N/A. Each method is evaluated in
 its actual stored representation, including associated scripts or structured
 contracts, rather than after conversion to a common textual summary.
 
@@ -373,6 +375,17 @@ objective with the observed safety impact of reuse. Skills associated with
 contamination or carryover harm are downweighted, quarantined, repaired, or
 retired even when they improve task success. This distinguishes \safeevolve
 from capability-only library hygiene, which keeps useful but unsafe skills.
+
+\paragraph{Hermes-native integration.}
+Hermes-native evolution enters the same governance interface at its skill-write
+approval boundary. In the raw condition, a native candidate follows Hermes's
+ordinary approval and storage path. Library-Drift applies capability-oriented
+maintenance after writing. Under \safeevolve, the complete native skill bundle
+is audited and, when necessary, repaired before approval; accepted skills then
+receive the same provenance, safety-aware retrieval, and retirement treatment
+as skills produced by agent-agnostic evolution methods. This preserves Hermes's
+native authoring loop while changing only the governance of its persistent
+updates.
 
 \begin{figure}[t]
   \centering
@@ -477,7 +490,7 @@ of hiding it inside one pooled method average.
 \textbf{Target agent} & \textbf{Backbone} & \textbf{No Evo.} &
 \textbf{Reflect.} & \textbf{Benign Evo.} & \textbf{EvoSkill} &
 \textbf{SkillClaw} & \textbf{AutoSkill} &
-\textbf{SkillsVote} & \textbf{Native} \\
+\textbf{SkillsVote} & \textbf{Hermes native} \\
 \midrule
 \multicolumn{10}{l}{\textbf{A. Attack comparison: malicious ASR (\%; $\downarrow$)}} \\
 Claude Code & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
@@ -670,6 +683,11 @@ the sole success criterion.
  & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
  & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
+\multirow{3}{*}{Hermes-native}
+ & Raw             & N/A & N/A & --/-- & N/A & N/A & N/A & --/-- \\
+ & Library-Drift   & N/A & N/A & --/-- & N/A & N/A & N/A & --/-- \\
+ & \safeevolve     & N/A & N/A & --/-- & N/A & N/A & N/A & --/-- \\
+\midrule
 \multicolumn{9}{l}{\textbf{B. Held-out capability: benign utility / fresh-session carryover utility (\%; $\uparrow$)}} \\
 \multirow{3}{*}{AutoSkill}
  & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
@@ -685,6 +703,11 @@ the sole success criterion.
  & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
  & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
  & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\midrule
+\multirow{3}{*}{Hermes-native}
+ & Raw             & N/A & N/A & --/-- & N/A & N/A & N/A & --/-- \\
+ & Library-Drift   & N/A & N/A & --/-- & N/A & N/A & N/A & --/-- \\
+ & \safeevolve     & N/A & N/A & --/-- & N/A & N/A & N/A & --/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{SafeEvolve reduces evolution-induced harm across agents while
@@ -696,7 +719,9 @@ reports benign utility / carryover utility. No deltas or gain-retention ratios
 are used. Macro averages weight target agents equally and exclude only
 genuinely unsupported method--agent pairs. Artifact scores and overhead appear
 in the accompanying breakdown. Bold the safest method whose utility is
-statistically non-inferior to raw evolution.}
+statistically non-inferior to raw evolution. Hermes-native is evaluated only in
+the Hermes / MiniMax column; its macro entry therefore summarizes that single
+supported target rather than imputing results for other agents.}
 \label{tab:safeevolve-main}
 \end{table*}
 
@@ -780,6 +805,11 @@ not change from raw evolution.
  & Raw             & -- & -- & -- & -- \\
  & Library-Drift   & -- & -- & -- & -- \\
  & \safeevolve     & -- & -- & -- & -- \\
+\midrule
+\multirow{3}{*}{Hermes-native}
+ & Raw             & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{SafeEvolve preserves absolute capability (RQ4).} Task-success
@@ -787,7 +817,8 @@ rates for raw evolution, capability-oriented library governance, and
 \safeevolve on three common skill benchmarks. All values are absolute
 scores under matched agent, model, and inference budgets. Statistical
 non-inferiority to the corresponding raw method is tested separately and
-reported with confidence intervals.}
+reported with confidence intervals. Hermes-native rows use the Hermes / MiniMax
+agent configuration.}
 \label{tab:capability}
 \end{table*}
 
