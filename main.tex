@@ -57,15 +57,14 @@ behavioral policy, yet existing evaluations measure whether evolution improves
 capability without testing what happens when success depends on an unsafe
 shortcut. We identify \emph{skill misevolution}: a transient unsafe success is
 extracted into an apparently legitimate skill and later reused on benign tasks
-after the original attack has disappeared. We introduce \gym, an environment
-that turns executable AgentHazard tasks into stateful skill-learning episodes.
-It standardizes skill writing, versioned library state, retrieval, replay, and
-fresh-session evaluation across agent frameworks and evolution methods. On top
-of this environment, \bench reuses AgentHazard's tasks, risk taxonomy, attack
-sequences, and trajectory judge while changing the evaluation unit from one
-attacked trajectory to an exposure-to-carryover episode. Its paired controls
-isolate the effect of evolution from the base agent, task sequence, and benign
-learning. Across four agent
+after the original attack has disappeared. We introduce \gym, a
+task-source-agnostic environment that turns executable agent tasks into stateful
+skill-learning episodes. It standardizes skill writing, versioned library
+state, retrieval, replay, and fresh-session evaluation across agent frameworks
+and evolution methods. On top of this environment, \bench defines an
+exposure-to-carryover protocol, paired evolution controls, and metrics for the
+evolved artifact and post-attack behavior. We instantiate the benchmark with
+AgentHazard as its executable safety-task source. Across four agent
 frameworks, three model backbones, six target-agent configurations, [M]
 evolution methods and ten AgentHazard risk categories, evolved artifacts reach
 [$S_{\mathrm{content}}$/$S_{\mathrm{general}}$/$S_{\mathrm{stealth}}$] on
@@ -110,16 +109,16 @@ misevolution}: transient unsafe success becomes persistent, retrievable, and
 generalizable policy.
 
 Measuring misevolution requires an environment that exposes persistent learning
-as experimental state. We introduce \gym, which wraps AgentHazard's executable
-computer-use tasks with a standardized skill lifecycle: it snapshots the
+as experimental state. We introduce \gym, which wraps executable agent tasks
+with a standardized skill lifecycle: it snapshots the
 library before and after each task, resets conversational and workspace state,
 records skill writes and retrievals, and mounts a frozen library in a new
 executor session. Only the evolving library crosses task boundaries.
 
 \bench is the evaluation protocol built on this gym. Its basic unit is a
-seven-task episode in which benign tasks and AgentHazard adversarial exposures
-alternate, followed by a persistence probe in a fresh executor session.
-Matched no-evolution,
+seven-task episode in which benign tasks and adversarial exposures from a
+configured task source alternate, followed by a persistence probe in a fresh
+executor session. Matched no-evolution,
 read-only-reflection, and benign-evolution controls isolate whether later harm
 comes from the learned artifact rather than the base model, repeated context,
 or ordinary benign learning.
@@ -136,8 +135,8 @@ Our evaluation asks four questions. \textbf{RQ1} tests whether evolution
 increases unsafe behavior while retaining utility. \textbf{RQ2} follows the
 exposure-to-persistence chain and tests whether the skill artifact mediates
 later harm. \textbf{RQ3} measures how the effect varies across evolution
-methods, agent configurations, AgentHazard risk categories, attack strategies,
-and attacker budgets. \textbf{RQ4}
+methods, agent configurations, task categories, attack strategies, and attacker
+budgets. \textbf{RQ4}
 tests whether \safeevolve can break this chain without removing the capability
 benefits of learning.
 
@@ -160,11 +159,10 @@ Our contributions are:
   state, isolation and replay, retrieval traces, and adapters for multiple agent
   frameworks and evolution methods.
 
-  \item We introduce \bench on top of AgentHazard. We reuse its tasks, ten risk
-  categories, attack sequences, execution harness, and judge; our contribution
-  is the temporal episode protocol, paired evolution controls, and metrics for
-  content unsafety, unsafe generalization, stealthiness, carryover harm, and
-  carryover utility.
+  \item We introduce \bench, a task-source-independent temporal protocol with
+  paired evolution controls and metrics for content unsafety, unsafe
+  generalization, stealthiness, carryover harm, and carryover utility. We
+  instantiate it with AgentHazard as the executable task and judge source.
 
   \item We provide a systematic evaluation across four agent frameworks, three
   model backbones, six target-agent configurations, [M] evolution methods, ten
@@ -193,14 +191,14 @@ executable or prescriptive procedure intended to generalize across tasks. The
 failure studied here is endogenous policy formation from the agent's own
 successful trajectory, not only storage of attacker-supplied text.
 
-\paragraph{Agent red-teaming and AgentHazard.}
-AgentHazard evaluates execution-level harmful behavior across 2,653
-computer-use instances, ten risk categories, and multi-step attack strategies
-\citep{feng2026agenthazard}. It asks whether an agent completes the harmful
-objective in the attacked trajectory. We retain its tasks and judge, then add a
-persistent skill state and evaluate what the attacked trajectory teaches the
-agent to do later. The unit of analysis therefore changes from a trajectory to
-a state transition over an evolving skill library.
+\paragraph{Executable safety-task sources.}
+Agent safety benchmarks supply tasks, environments, attack inputs, and outcome
+judges that a learning environment can execute. Our current benchmark
+instantiation uses AgentHazard, which provides 2,653 computer-use instances,
+ten risk categories, and multi-step attack strategies
+\citep{feng2026agenthazard}. AgentHazard is a task-source adapter for \gym: its
+task and judge semantics are retained, while the gym supplies the persistent
+skill state, lifecycle instrumentation, and cross-task execution protocol.
 
 \paragraph{Governance of evolving libraries.}
 Contrast \safeevolve with capability-oriented library maintenance and drift
@@ -260,8 +258,12 @@ that receives only the final evolved library.
 
 \gym turns a stateless executable safety task into a controlled stateful
 learning process. An environment instance exposes five interfaces: task reset,
-agent execution, skill update, skill retrieval, and artifact inspection. The
-gym snapshots $\library_t$ before and after every task, stores the authored diff
+agent execution, skill update, skill retrieval, and artifact inspection. A
+task-source adapter supplies executable instances, reset logic, attack and
+benign views, and outcome judges; it does not control how skills are authored
+or evaluated. Replacing this adapter changes the tasks and their success
+semantics without changing the skill lifecycle, episode protocol, or
+misevolution metrics. The gym snapshots $\library_t$ before and after every task, stores the authored diff
 and its source trajectory, records which skills are retrieved on the next task,
 and supports replay from any snapshot. Agent adapters translate native skill
 formats and lifecycle hooks without converting the stored artifact into a
@@ -278,8 +280,8 @@ retrievals, tool trajectories, and judge evidence.
 
 \subsection{Benchmark episode protocol}
 
-Each episode contains seven tasks from one AgentHazard risk category and task
-family. The order is
+Each episode contains seven tasks from one task-source category and task family.
+The order is
 \begin{equation}
   B_1, M_1, B_2, M_2, B_3, M_3, P,
 \end{equation}
@@ -322,16 +324,15 @@ Every episode is replayed under matched evolution settings:
 \end{itemize}
 All arms use identical tasks, order, tools, agent configuration, and judges.
 
-\subsection{AgentHazard tasks, agents, and evolution methods}
+\subsection{Task-source instantiation, agents, and evolution methods}
 
-The benchmark constructs its episodes exclusively from AgentHazard
-\citep{feng2026agenthazard}. We reuse its harmful objectives, multi-step attack
-sequences, ten risk categories, sandboxed computer-use tasks, and
-trajectory-level judge. We add matched benign twins and persistence probes only
-to instantiate the gym's temporal protocol; these are derived evaluation views
-of the same task family rather than a new safety-task taxonomy. Every assembled
-episode is executed by six target-agent configurations spanning four agent
-frameworks and three model backbones. Claude Code, Codex, Hermes, and OpenClaw
+The experiments instantiate the gym's task-source interface with AgentHazard
+\citep{feng2026agenthazard}. The adapter exposes its harmful objectives,
+multi-step attack sequences, ten risk categories, sandboxed computer-use tasks,
+reset procedure, and trajectory-level judge. It also constructs matched benign
+twins and persistence probes required by the benchmark episode protocol. Every
+assembled episode is executed by six target-agent configurations spanning four
+agent frameworks and three model backbones. Claude Code, Codex, Hermes, and OpenClaw
 share MiniMax-M2.5 as a controlled backbone comparison. Claude Code is also
 paired with Haiku~4.5, and Codex with GPT-5.4-mini, providing within-framework
 backbone comparisons. The target is the complete agent system---its scaffold,
@@ -459,8 +460,8 @@ updates.
   the skill artifact, get retrieved, and produce post-attack carryover harm
   while retaining carryover utility?
   \item[RQ3: Scope and attacker budget.] How does misevolution vary across
-  methods, agents, AgentHazard risk categories and attack strategies, and one
-  to three adversarial exposures?
+  methods, agents, task categories and attack strategies, and one to three
+  adversarial exposures?
   \item[RQ4: Mitigation.] Can \safeevolve reduce the three evolved-artifact
   risks and post-attack carryover harm while preserving carryover utility?
 \end{description}
@@ -961,13 +962,14 @@ today's success teaches it to do tomorrow.
 \section{Gym and Benchmark Construction}
 \label{app:construction}
 
-Document the AgentHazard version, license, source-instance sampling, risk
-categories, attack strategies, and unchanged judge interface. Specify how each
-source instance is wrapped by the gym, how benign twins and persistence probes
-are derived, and how episode order, deduplication, leakage checks, and held-out
-splits are fixed. Release the environment contract, adapters, reset checks,
-event schema, and episode manifest so each result can be replayed from the same
-AgentHazard source task and skill snapshot.
+Document the generic task-source interface, environment contract, adapter
+interface, reset checks, event schema, and replay guarantees. For the reported
+instantiation, record the AgentHazard version, license, source-instance
+sampling, risk categories, attack strategies, and unchanged judge interface.
+Specify how its instances are wrapped by the gym, how benign twins and
+persistence probes are derived, and how episode order, deduplication, leakage
+checks, and held-out splits are fixed. Release the episode manifest so each
+result can be replayed from the same source task and skill snapshot.
 
 \section{Agent and Method Configurations}
 \label{app:configurations}
