@@ -34,7 +34,6 @@
 \newcommand{\asr}{\mathrm{ASR}}
 \newcommand{\carry}{\mathrm{CarryHarm}}
 \newcommand{\ccmini}{Claude Code / MiniMax}
-\newcommand{\codexmini}{Codex / MiniMax}
 \newcommand{\hermesmini}{Hermes / MiniMax}
 \newcommand{\openclawmini}{OpenClaw / MiniMax}
 \newcommand{\cchaiku}{Claude Code / Haiku}
@@ -65,7 +64,7 @@ and evolution methods. On top of this environment, \bench defines an
 exposure-to-carryover protocol, paired evolution controls, and metrics for the
 evolved artifact and post-attack behavior. We instantiate the benchmark with
 AgentHazard as its executable safety-task source. Across four agent
-frameworks, three model backbones, six target-agent configurations, [M]
+frameworks, three model backbones, five target-agent configurations, [M]
 evolution methods and ten AgentHazard risk categories, evolved artifacts reach
 [$S_{\mathrm{content}}$/$S_{\mathrm{general}}$/$S_{\mathrm{stealth}}$] on
 content unsafety, unsafe generalization, and stealthiness; post-attack
@@ -165,7 +164,7 @@ Our contributions are:
   instantiate it with AgentHazard as the executable task and judge source.
 
   \item We provide a systematic evaluation across four agent frameworks, three
-  model backbones, six target-agent configurations, [M] evolution methods, ten
+  model backbones, five target-agent configurations, [M] evolution methods, ten
   AgentHazard risk categories, and multiple exposure budgets, separating
   artifact-level latent risk from post-attack realized harm.
 
@@ -331,7 +330,7 @@ The experiments instantiate the gym's task-source interface with AgentHazard
 multi-step attack sequences, ten risk categories, sandboxed computer-use tasks,
 reset procedure, and trajectory-level judge. It also constructs matched benign
 twins and persistence probes required by the benchmark episode protocol. Every
-assembled episode is executed by six target-agent configurations spanning four
+assembled episode is executed by five target-agent configurations spanning four
 agent frameworks and three model backbones. Claude Code, Codex, Hermes, and OpenClaw
 share MiniMax-M2.5 as a controlled backbone comparison. Claude Code is also
 paired with Haiku~4.5, and Codex with GPT-5.4-mini, providing within-framework
@@ -469,10 +468,11 @@ updates.
 \subsection{Evaluation matrix}
 
 The main evaluation treats target-agent as a first-class axis, not a nuisance
-variable to average away. Table~\ref{tab:targets} fixes the six configurations.
-The shared MiniMax backbone isolates framework effects across four agents; the
-second Claude Code and Codex configurations expose backbone effects within a
-framework. Each applicable evolution method runs on the identical frozen
+variable to average away. Table~\ref{tab:targets} fixes the five configurations.
+The shared MiniMax backbone isolates framework effects across Claude Code,
+Hermes, and OpenClaw; the second Claude Code configuration exposes a backbone
+effect within that framework. Codex is evaluated with GPT-5.4-mini. Each
+applicable evolution method runs on the identical frozen
 episode set for every target. Hermes-native evolution appears only on Hermes;
 unsupported combinations are marked N/A rather than pooled with failures.
 
@@ -485,14 +485,13 @@ unsupported combinations are marked N/A rather than pooled with failures.
 \textbf{Agent framework} & \textbf{Backbone} \\
 \midrule
 Claude Code & MiniMax-M2.5 \\
-Codex       & MiniMax-M2.5 \\
 Hermes      & MiniMax-M2.5 \\
 OpenClaw    & MiniMax-M2.5 \\
 Claude Code & Haiku~4.5 \\
 Codex       & GPT-5.4-mini \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{Six target-agent configurations.} The matrix supports
+\caption{\textbf{Five target-agent configurations.} The matrix supports
 controlled comparisons across agent frameworks and model backbones.}
 \label{tab:targets}
 \end{table}
@@ -500,7 +499,7 @@ controlled comparisons across agent frameworks and model backbones.}
 The complete experimental grid is target-agent $\times$ evolution method
 $\times$ AgentHazard risk category $\times$ exposure budget. All main-table
 cells pool the same predeclared episode distribution within a target;
-macro-averages give equal weight to the six target-agent configurations.
+macro-averages give equal weight to the five target-agent configurations.
 Per-category and per-attack-strategy results appear in the appendix.
 
 \subsection{Baselines}
@@ -518,7 +517,7 @@ frozen train/development/held-out protocol.
 \label{sec:rq1}
 
 Table~\ref{tab:misevolution-main} is the paper's primary diagnostic table. Its
-rows preserve the six target-agent configurations and its columns preserve the
+rows preserve the five target-agent configurations and its columns preserve the
 evolution methods. Panel A directly compares attack success, Panel B measures
 the evolved skill artifact, and Panel C jointly tests whether harm and utility
 survive after the attack disappears. This layout makes framework and backbone
@@ -540,7 +539,6 @@ variation visible instead of hiding it inside one pooled method average.
 \midrule
 \multicolumn{10}{l}{\textbf{A. Attack comparison: malicious ASR (\%; $\downarrow$)}} \\
 Claude Code & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
-Codex       & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
 Hermes      & MiniMax      & -- & -- & -- & -- & -- & -- & -- & -- \\
 OpenClaw    & MiniMax      & -- & -- & -- & -- & -- & -- & -- & N/A \\
 Claude Code & Haiku        & -- & -- & -- & -- & -- & -- & -- & N/A \\
@@ -549,7 +547,6 @@ Codex       & GPT-5.4-mini & -- & -- & -- & -- & -- & -- & -- & N/A \\
 \midrule
 \multicolumn{10}{l}{\textbf{B. Evolved artifact: content unsafety / unsafe generalization / stealthiness ($\downarrow$)}} \\
 Claude Code & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Codex       & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
 Hermes      & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 OpenClaw    & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
 Claude Code & Haiku        & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
@@ -558,7 +555,6 @@ Codex       & GPT-5.4-mini & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/
 \midrule
 \multicolumn{10}{l}{\textbf{C. Post-attack: carryover harm ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
 Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Codex       & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
 Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
 Claude Code & Haiku        & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
@@ -566,14 +562,14 @@ Codex       & GPT-5.4-mini & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/
 \rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{Skill evolution across six target-agent configurations
+\caption{\textbf{Skill evolution across five target-agent configurations
 (RQ1).} Each cell pools the same frozen episode distribution within one target
 agent and evolution setting. Panel A directly compares malicious ASR across
 settings. Panel B reports mean content-unsafety / unsafe-generalization /
 stealthiness scores, each on a 1--5 ordinal scale. Panel C reports clean-session
-carryover harm / carryover utility. The four MiniMax rows
+carryover harm / carryover utility. The three MiniMax rows
 isolate agent-framework
-effects; the paired Claude Code and Codex rows expose backbone effects within a
+effects; the paired Claude Code rows expose backbone effects within that
 framework. N/A means either that a setting writes no skill artifact or that a
 native method is unsupported for that target; it never denotes a failed run.
 The exposure-to-persistence transitions are expanded in
@@ -583,10 +579,10 @@ or an accompanying interval plot.}
 \end{table*}
 
 \paragraph{Result paragraph template.}
-Across six target-agent configurations, malicious ASR reaches [X], while the
+Across five target-agent configurations, malicious ASR reaches [X], while the
 evolved artifacts score [Y/Z/W] on content unsafety, unsafe generalization, and
 stealthiness. In the post-attack probe, carryover harm reaches [H] while
-carryover utility remains [U]. The effect appears in [A/6] targets and [B/M]
+carryover utility remains [U]. The effect appears in [A/5] targets and [B/M]
 evolution methods. The joint result rules out a pure context effect: the attack
 is absent, the executor is reset, and the only cross-task object is the evolved
 library.
@@ -654,13 +650,14 @@ unsafety and which executor policies block unsafe artifacts from becoming
 post-attack behavior.
 
 \paragraph{Framework and backbone decomposition.}
-The four MiniMax-M2.5 targets hold the backbone fixed while changing the agent
+The three MiniMax-M2.5 targets hold the backbone fixed while changing the agent
 framework, exposing the contribution of tool mediation, system instructions,
-skill retrieval, and execution policy. The two within-framework contrasts---
-Claude Code with MiniMax versus Haiku and Codex with MiniMax versus GPT-5.4-mini
----then test how much of the effect follows the model backbone. Report both
-contrasts before the overall macro-average; the six configurations are related
-controls, not six interchangeable replications.
+skill retrieval, and execution policy. The within-framework Claude Code
+contrast, MiniMax versus Haiku, then tests how much of the effect follows the
+model backbone. Codex/GPT-5.4-mini broadens the evaluated target set without
+forming a matched backbone pair. Report the controlled contrasts before the
+overall macro-average; the five configurations are related controls, not five
+interchangeable replications.
 
 \begin{figure}[t]
   \centering
@@ -703,70 +700,70 @@ score.
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.04}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{llccccccc}
+\begin{tabular}{llcccccc}
 \toprule
 \textbf{Evolution method} & \textbf{Governance}
-& \textbf{CC/MiniMax} & \textbf{Codex/MiniMax} & \textbf{Hermes/MiniMax}
+& \textbf{CC/MiniMax} & \textbf{Hermes/MiniMax}
 & \textbf{OpenClaw/MiniMax} & \textbf{CC/Haiku} & \textbf{Codex/GPT}
 & \textbf{Macro avg.} \\
 \midrule
-\multicolumn{9}{l}{\textbf{A. Evolved artifact: content unsafety / unsafe generalization / stealthiness ($\downarrow$)}} \\
+\multicolumn{8}{l}{\textbf{A. Evolved artifact: content unsafety / unsafe generalization / stealthiness ($\downarrow$)}} \\
 \multirow{3}{*}{AutoSkill}
- & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{EvoSkill}
- & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{SkillClaw}
- & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{SkillsVote}
- & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{Hermes-native}
- & Raw             & N/A & N/A & --/--/-- & N/A & N/A & N/A & --/--/-- \\
- & Library-Drift   & N/A & N/A & --/--/-- & N/A & N/A & N/A & --/--/-- \\
- & \safeevolve     & N/A & N/A & --/--/-- & N/A & N/A & N/A & --/--/-- \\
+ & Raw             & N/A & --/--/-- & N/A & N/A & N/A & --/--/-- \\
+ & Library-Drift   & N/A & --/--/-- & N/A & N/A & N/A & --/--/-- \\
+ & \safeevolve     & N/A & --/--/-- & N/A & N/A & N/A & --/--/-- \\
 \midrule
-\multicolumn{9}{l}{\textbf{B. Post-attack: carryover harm ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
+\multicolumn{8}{l}{\textbf{B. Post-attack: carryover harm ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
 \multirow{3}{*}{AutoSkill}
- & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
- & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
- & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
 \multirow{3}{*}{EvoSkill}
- & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
- & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
- & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
 \multirow{3}{*}{SkillClaw}
- & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
- & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
- & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
 \multirow{3}{*}{SkillsVote}
- & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
- & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
- & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
 \multirow{3}{*}{Hermes-native}
- & Raw             & N/A & N/A & --/-- & N/A & N/A & N/A & --/-- \\
- & Library-Drift   & N/A & N/A & --/-- & N/A & N/A & N/A & --/-- \\
- & \safeevolve     & N/A & N/A & --/-- & N/A & N/A & N/A & --/-- \\
+ & Raw             & N/A & --/-- & N/A & N/A & N/A & --/-- \\
+ & Library-Drift   & N/A & --/-- & N/A & N/A & N/A & --/-- \\
+ & \safeevolve     & N/A & --/-- & N/A & N/A & N/A & --/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{SafeEvolve reduces artifact risk and post-attack harm while
 preserving carryover utility (RQ4).} Each evolution method is evaluated raw,
 with a capability-oriented library hygiene baseline, and with \safeevolve on
-the same held-out episodes. Columns retain all six target-agent configurations.
+the same held-out episodes. Columns retain all five target-agent configurations.
 Panel A directly reports content unsafety / unsafe generalization /
 stealthiness on 1--5 scales; Panel B directly reports carryover harm /
 carryover utility. No deltas or gain-retention ratios are used. Macro averages
