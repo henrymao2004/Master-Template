@@ -537,14 +537,14 @@ set for every target.
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{ll}
+\begin{tabular}{l}
 \toprule
-\textbf{Agent framework} & \textbf{Backbone} \\
+\textbf{Agent framework} \\
 \midrule
-Claude Code & MiniMax-M2.5 \\
-Codex       & MiniMax-M2.5 \\
-Hermes      & MiniMax-M2.5 \\
-OpenClaw    & MiniMax-M2.5 \\
+Claude Code \\
+Codex \\
+Hermes \\
+OpenClaw \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{Four target-agent configurations.} A shared MiniMax-M2.5
@@ -586,33 +586,33 @@ instead of hiding it inside one pooled method average.
 \setlength{\tabcolsep}{3.2pt}
 \renewcommand{\arraystretch}{1.04}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{llccccccc}
+\begin{tabular}{lccccccc}
 \toprule
-\textbf{Target agent} & \textbf{Backbone} & \textbf{No Evo.} &
+\textbf{Target agent} & \textbf{No Evo.} &
 \textbf{Benign-only upd.} & \textbf{EvoSkill} &
 \textbf{SkillClaw} & \textbf{AutoSkill} &
 \textbf{SkillsVote} & \textbf{SkillOpt} \\
 \midrule
-\multicolumn{9}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
-Claude Code & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Codex       & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Hermes      & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multicolumn{8}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
+Claude Code & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Codex       & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Hermes      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\rowcolor{lightgray}Macro avg. & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multicolumn{9}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
-Claude Code & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Codex       & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Hermes      & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multicolumn{8}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
+Claude Code & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Codex       & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Hermes      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\rowcolor{lightgray}Macro avg. & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multicolumn{9}{l}{\textbf{C. Post-attack: unsafe retrieval ($\downarrow$) / carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
-Claude Code & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Codex       & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Hermes      & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multicolumn{8}{l}{\textbf{C. Post-attack: unsafe retrieval ($\downarrow$) / carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
+Claude Code & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Codex       & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Hermes      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\rowcolor{lightgray}Macro avg. & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Skill evolution across four target-agent configurations
