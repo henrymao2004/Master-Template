@@ -962,73 +962,93 @@ retain a skill that improves utility through an unsafe shortcut. A gap between
 Library-Drift and \safeevolve therefore tests whether an explicitly safety-aware
 objective is necessary.
 
-\paragraph{Independent skill-safety benchmarks.}
+\paragraph{Full-system evaluation on SkillSafetyBench.}
 The held-out episode table tests end-to-end mitigation inside evolving agents.
-We separately test the admission boundary on two external benchmarks.
-MalSkillBench contains labeled malicious and benign skill bundles and measures
-whether a gate detects unsafe stored content without rejecting benign skills
-\citep{guo2026malskillbench}. SkillSafetyBench places adversarial content in
-skill-facing local artifacts and measures whether an agent both completes the
-nominal task and realizes the attack \citep{jin2026skillsafetybench}. Its unsafe
-outcome on a nominally benign task is close to our benign ASR (contamination),
-but the causal setting is different: SkillSafetyBench supplies the adversarial
-artifact in the evaluated run, whereas contamination in \bench is
-harmful behavior on a later zero-injection benign task caused by a skill learned
-from earlier malicious experience. We therefore report SkillSafetyBench under
-its own protocol rather than treating its ASR as contamination.
+We then test the complete \safeevolve pipeline on SkillSafetyBench, which places
+adversarial content in skill-facing local artifacts and measures whether an
+agent both completes the nominal task and realizes the attack
+\citep{jin2026skillsafetybench}. For each case, the original clean SkillsBench
+skill is the ancestor and the attacked skill bundle is the proposed update.
+\safeevolve runs admission, repair, verification preservation, lineage,
+quarantine/rollback, selection, and governed reuse over the complete bundle and
+its referenced files before the resulting skill is executed in the official
+environment. The gym's multi-round episodes remain the test of longitudinal
+retirement; SkillSafetyBench supplies an independent one-update, downstream
+behavior test.
 
-Table~\ref{tab:skill-safety} uses each benchmark's native metrics and official
-aggregation. We do not relabel detector accuracy as behavioral safety or merge
-the two benchmarks into a synthetic score. The complete per-baseline and
-per-risk-domain breakdown appears in the appendix.
+SkillSafetyBench's unsafe outcome on a nominally benign task resembles benign
+ASR (contamination), but the causal setting differs: it supplies the adversarial
+artifact in the evaluated run, whereas \bench contamination is harmful behavior
+on a later zero-injection benign task caused by a skill learned from earlier
+malicious experience. We therefore retain SkillSafetyBench's official ASR, task
+success, and task-success-conditional ASR rather than relabeling its result as
+contamination.
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{7pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Governance} & \textbf{ASR $\downarrow$}
+& \textbf{Task success $\uparrow$} & \textbf{Conditional ASR $\downarrow$} \\
+\midrule
+Raw attacked update & -- & -- & -- \\
+Library-Drift & -- & -- & -- \\
+\rowcolor{lightblue}Full \safeevolve & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Full SafeEvolve on SkillSafetyBench (RQ4).} Results use the
+official overall attack success rate (ASR), nominal task success, and
+task-success-conditional ASR. Entries macro-average the four target-agent
+configurations after computing each metric under its official denominator.
+Per-agent and RD1--RD6 results appear in the appendix.}
+\label{tab:skill-safety}
+\end{table*}
+
+\paragraph{Admission-auditor evaluation on MalSkillBench.}
+MalSkillBench is a labeled static corpus of malicious and benign skill bundles
+\citep{guo2026malskillbench}. It cannot exercise repair trajectories, lineage,
+retirement, or downstream reuse, so we use it only to diagnose \safeevolve's
+admission auditor. Table~\ref{tab:malskill} follows the benchmark's official
+classification protocol; it is supporting component evidence rather than a
+substitute for the two full-system evaluations.
 
 \begin{table*}[t]
 \centering
 \small
 \setlength{\tabcolsep}{6pt}
-\renewcommand{\arraystretch}{1.08}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lcccccc|ccc}
+\begin{tabular}{lcccccc}
 \toprule
-& \multicolumn{6}{c|}{\textbf{MalSkillBench: skill-content detection}}
-& \multicolumn{3}{c}{\textbf{SkillSafetyBench: agent behavior}} \\
-\cmidrule(lr){2-7}\cmidrule(lr){8-10}
-\textbf{Skill gate}
-& Acc. $\uparrow$ & Prec. $\uparrow$ & Rec. $\uparrow$ & F1 $\uparrow$
-& FP $\downarrow$ & FN $\downarrow$
-& ASR $\downarrow$ & Task success $\uparrow$ & Cond. ASR $\downarrow$ \\
+\textbf{Detector} & \textbf{Acc. $\uparrow$} & \textbf{Prec. $\uparrow$}
+& \textbf{Rec. $\uparrow$} & \textbf{F1 $\uparrow$}
+& \textbf{FP $\downarrow$} & \textbf{FN $\downarrow$} \\
 \midrule
-No skill gate                    & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Best skill-security scanner      & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Best supply-chain detector       & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Best prompt-injection guard      & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Library-Drift gate               & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}\safeevolve admission critic & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Best published skill detector & -- & -- & -- & -- & -- & -- \\
+Best published supply-chain detector & -- & -- & -- & -- & -- & -- \\
+Best published prompt-injection detector & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}\safeevolve admission auditor & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}
-}
-\caption{\textbf{SafeEvolve on independent skill-safety benchmarks (RQ4).}
-Every column follows the source benchmark. MalSkillBench reports accuracy,
-precision, recall, F1, and false-positive/false-negative counts on its pinned
-test set. SkillSafetyBench reports overall attack success rate (ASR), nominal
-task success, and task-success-conditional ASR. Category-best baseline rows keep
-the main table readable; individual detectors, risk-domain ASR, and confidence
-intervals are reported in the appendix.}
-\label{tab:skill-safety}
+\caption{\textbf{SafeEvolve admission-auditor evaluation.} Accuracy,
+precision, recall, F1, false-positive count, and false-negative count are
+computed on MalSkillBench's pinned official test set. The appendix reports all
+individual detectors.}
+\label{tab:malskill}
 \end{table*}
 
 \paragraph{Capability preservation on common benchmarks.}
 Safety gains are useful only if the governed library continues to improve task
 performance. We therefore evaluate each evolution method raw, with
-Library-Drift, and with \safeevolve on three external capability benchmarks.
+Library-Drift, and with \safeevolve on two external capability benchmarks.
 Here too we preserve each benchmark's official evaluation contract rather than
-reducing all three to a common accuracy column. SkillsBench reports task-macro
+reducing both to a common accuracy column. SkillsBench reports task-macro
 pass rates and skill gain \citep{li2026skillsbench}; SkillLearnBench separates
 skill quality, trajectory behavior, and task outcome
-\citep{zhong2026skilllearnbench}; SWE-Skills-Bench jointly reports pass rate and
-token efficiency \citep{han2026sweskillsbench}. Table~\ref{tab:capability}
-shows method-averaged results in the main paper, with every evolution method
-reported separately in the appendix.
+\citep{zhong2026skilllearnbench}. Table~\ref{tab:capability} shows
+method-averaged results in the main paper, with every evolution method reported
+separately in the appendix.
 
 \begin{table*}[t]
 \centering
@@ -1054,23 +1074,13 @@ reported separately in the appendix.
  & Usage (\%) $\uparrow$               & -- & -- & -- \\
  & Solving tokens $\downarrow$          & -- & -- & -- \\
  & Accuracy (\%) $\uparrow$            & -- & -- & -- \\
-\midrule
-\multirow{7}{*}{SWE-Skills-Bench}
- & No-skill pass (\%) $\uparrow$       & -- & -- & -- \\
- & Evolved-skill pass (\%) $\uparrow$  & -- & -- & -- \\
- & Skill utility $\Delta$ (pp) $\uparrow$ & -- & -- & -- \\
- & No-skill tokens $\downarrow$         & -- & -- & -- \\
- & Evolved-skill tokens $\downarrow$    & -- & -- & -- \\
- & Token overhead ratio $\downarrow$    & -- & -- & -- \\
- & Cost efficiency $\uparrow$           & -- & -- & -- \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{SafeEvolve preserves capability under each benchmark's native
 protocol (RQ4).} Entries macro-average equally over applicable evolution
 methods after computing the official metric for each method. SkillsBench uses
 task-macro pass rate, absolute improvement, and normalized gain;
-SkillLearnBench reports its three-level quality/trajectory/outcome metrics;
-SWE-Skills-Bench reports pass rate, token cost, overhead, and cost efficiency.
+SkillLearnBench reports its three-level quality/trajectory/outcome metrics.
 The no-skill reference is repeated to keep each official comparison
 self-contained. We do not average heterogeneous metrics across benchmarks.
 Full per-method results and confidence intervals appear in the appendix.}
@@ -1209,44 +1219,60 @@ those metrics. MalSkillBench false positives and false negatives are counts on
 the pinned test set. SkillSafetyBench conditional ASR excludes cases without a
 task reward and conditions on task reward equal to one. SkillsBench averages
 repeated trials within task before averaging across tasks. SkillLearnBench
-retains its three evaluation levels. SWE-Skills-Bench averages pass and token
-outcomes over the instances belonging to each skill before aggregating skills.
+retains its three evaluation levels.
 
 \begin{table*}[t]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lcccccc|ccc}
+\begin{tabular}{lccccc}
 \toprule
-& \multicolumn{6}{c|}{\textbf{MalSkillBench}}
-& \multicolumn{3}{c}{\textbf{SkillSafetyBench}} \\
-\textbf{Gate or detector} & Acc. & Prec. & Rec. & F1 & FP & FN
-& ASR & Task success & Cond. ASR \\
+\textbf{Governance} & \textbf{CC/MiniMax} & \textbf{Codex/MiniMax}
+& \textbf{Hermes/MiniMax} & \textbf{OpenClaw/MiniMax}
+& \textbf{Macro avg.} \\
 \midrule
-No skill gate & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Skill Security Scan & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-SkillScan & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-SkillScan-Security & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Cisco Skill Scanner (static) & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Cisco Skill Scanner (LLM) & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-AI-Infra-Guard & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-LLM Guard & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Panguard Skill Auditor (static) & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Snyk Agent Scan & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Sentry Skill Scanner (static) & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Sentry Skill Scanner (full) & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-VirusTotal & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-Library-Drift gate & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}\safeevolve admission critic & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Raw attacked update & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Library-Drift & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\rowcolor{lightblue}Full \safeevolve & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{Complete external skill-safety results.} The left block
-reproduces MalSkillBench's official six-column detector protocol. The right
-block runs each admissible gate before SkillSafetyBench execution and reports
-its official behavioral metrics. The supplementary result package additionally
-reports SkillSafetyBench ASR for RD1--RD6.}
+\caption{\textbf{Full SafeEvolve on SkillSafetyBench by target agent.} Each
+cell reports official overall ASR / task success / task-success-conditional ASR.
+The clean skill is the ancestor and the attacked bundle is the proposed update;
+all applicable \safeevolve stages run before downstream execution. Separate
+tables report ASR for RD1--RD6.}
 \label{tab:skill-safety-full}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Detector} & \textbf{Acc.} & \textbf{Prec.} & \textbf{Rec.}
+& \textbf{F1} & \textbf{FP} & \textbf{FN} \\
+\midrule
+Skill Security Scan & -- & -- & -- & -- & -- & -- \\
+SkillScan & -- & -- & -- & -- & -- & -- \\
+SkillScan-Security & -- & -- & -- & -- & -- & -- \\
+Cisco Skill Scanner (static) & -- & -- & -- & -- & -- & -- \\
+Cisco Skill Scanner (LLM) & -- & -- & -- & -- & -- & -- \\
+AI-Infra-Guard & -- & -- & -- & -- & -- & -- \\
+LLM Guard & -- & -- & -- & -- & -- & -- \\
+Panguard Skill Auditor (static) & -- & -- & -- & -- & -- & -- \\
+Snyk Agent Scan & -- & -- & -- & -- & -- & -- \\
+Sentry Skill Scanner (static) & -- & -- & -- & -- & -- & -- \\
+Sentry Skill Scanner (full) & -- & -- & -- & -- & -- & -- \\
+VirusTotal & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}\safeevolve admission auditor & -- & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Complete MalSkillBench admission-auditor results.} Columns
+follow the official classification protocol. FP and FN are counts on the pinned
+test set; the remaining entries are rates.}
+\label{tab:malskill-full}
 \end{table*}
 
 \begin{table*}[t]
@@ -1298,34 +1324,6 @@ official three levels: artifact quality (coverage, executability, safety),
 trajectory (alignment, usage), and outcome (solving tokens, accuracy). Cell
 order is Raw / Library-Drift / \safeevolve.}
 \label{tab:skilllearnbench-full}
-\end{table*}
-
-\begin{table*}[t]
-\centering
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{llccccccc}
-\toprule
-\textbf{Evolution method} & \textbf{Governance}
-& \textbf{No-skill pass} & \textbf{Evolved-skill pass}
-& \textbf{Utility $\Delta$} & \textbf{No-skill tokens}
-& \textbf{Evolved-skill tokens} & \textbf{Overhead ratio}
-& \textbf{Cost efficiency} \\
-\midrule
-AutoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-EvoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-SkillClaw & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-SkillsVote & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-SkillOpt & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-Hermes-native & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-\bottomrule
-\end{tabular}}
-\caption{\textbf{SWE-Skills-Bench capability breakdown.} Columns preserve the
-official paired pass-rate and token-cost protocol. Utility $\Delta$, token
-overhead, and cost efficiency are derived from the matched with-skill and
-without-skill conditions. Cell order is Raw / Library-Drift / \safeevolve.}
-\label{tab:swe-skills-bench-full}
 \end{table*}
 
 \section{SafeEvolve Implementation}
