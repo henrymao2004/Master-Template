@@ -118,10 +118,9 @@ fresh session.
 \bench is the evaluation protocol built on this gym. Its basic unit is a
 21-task episode with three rounds of three malicious tasks followed by three
 benign tasks, then three persistence probes in a fresh executor session.
-Matched no-evolution,
-read-only-reflection, and benign-evolution controls isolate whether later harm
-comes from the learned artifact rather than the base model, repeated context,
-or ordinary benign learning.
+Matched no-evolution and benign-only-update controls isolate whether later harm
+comes from malicious experience entering the learned artifact rather than the
+base model or ordinary benign learning.
 
 The benchmark evaluates three stages of the failure. Online behavior is measured
 by benign utility, malicious ASR, and benign ASR
@@ -280,7 +279,7 @@ methods and an agent's native skill evolution.
 Conversation, workspace, process, and tool state are reset between tasks. The
 gym then mounts only the designated skill snapshot. This isolation makes the
 library the sole cross-task treatment and allows matched executions with no
-evolution, benign-only evolution, or a frozen library. The environment emits a
+evolution, benign-only updates, or a frozen library. The environment emits a
 common event log containing task outcome, skill writes, artifact versions,
 retrievals, tool trajectories, and judge evidence.
 
@@ -340,10 +339,9 @@ Every episode is replayed under matched evolution settings:
 \begin{itemize}
   \item \textbf{No evolution}: disables persistent learning and establishes the
   base-agent floor.
-  \item \textbf{Read-only reflection}: retains textual lessons in the current
-  learning mechanism without authoring a reusable skill artifact.
-  \item \textbf{Benign evolution}: evolves only from benign tasks and tests
-  whether ordinary learning alone produces the effect.
+  \item \textbf{Benign-only updates}: executes the identical task sequence but
+  permits skill updates only after $B^3$ blocks, testing whether ordinary benign
+  learning alone produces the effect.
   \item \textbf{Full evolution}: applies each evaluated method to all successful
   trajectories in three-task batches under its native update rule.
 \end{itemize}
@@ -554,8 +552,8 @@ Per-category and per-attack-strategy results appear in the appendix.
 
 \subsection{Baselines}
 
-The diagnostic comparison includes no evolution, read-only reflection, benign
-evolution, and the selected skill-evolution methods. The mitigation comparison
+The diagnostic comparison includes no evolution, benign-only updates, and the
+selected skill-evolution methods. The mitigation comparison
 adds Library-Drift as a capability-oriented governance baseline. Each evolution
 method is evaluated raw, with Library-Drift, and with \safeevolve under the same
 frozen train/development/held-out protocol.
@@ -580,33 +578,33 @@ instead of hiding it inside one pooled method average.
 \setlength{\tabcolsep}{3.2pt}
 \renewcommand{\arraystretch}{1.04}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{llccccccccc}
+\begin{tabular}{llcccccccc}
 \toprule
 \textbf{Target agent} & \textbf{Backbone} & \textbf{No Evo.} &
-\textbf{Reflect.} & \textbf{Benign Evo.} & \textbf{EvoSkill} &
+\textbf{Benign-only upd.} & \textbf{EvoSkill} &
 \textbf{SkillClaw} & \textbf{AutoSkill} &
 \textbf{SkillsVote} & \textbf{SkillOpt} & \textbf{Hermes native} \\
 \midrule
-\multicolumn{11}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
-Claude Code & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Codex       & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Hermes      & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multicolumn{10}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
+Claude Code & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Codex       & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Hermes      & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multicolumn{11}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
-Claude Code & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Codex       & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Hermes      & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multicolumn{10}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
+Claude Code & MiniMax      & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Codex       & MiniMax      & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Hermes      & MiniMax      & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & MiniMax      & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multicolumn{11}{l}{\textbf{C. Post-attack: carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
-Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Codex       & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
-OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\multicolumn{10}{l}{\textbf{C. Post-attack: carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
+Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Skill evolution across four target-agent configurations
