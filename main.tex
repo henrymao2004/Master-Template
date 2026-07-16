@@ -362,12 +362,13 @@ the agent framework changes. The target is the complete agent system---its scaff
 tool mediation, skill lifecycle, retrieval behavior, and backbone---rather than
 an isolated language model.
 
-The evolution settings include EvoSkill, SkillClaw, AutoSkill, SkillsVote,
-SkillOpt, and Hermes-native skill evolution. SkillOpt is evaluated as an
-agent-agnostic evolution method on all four target agents. Hermes-native is tied to the Hermes agent and is
-evaluated only in the Hermes /
-MiniMax configuration; the corresponding cells for other target agents are
-N/A. Each method is evaluated in its actual stored representation, including
+The main comparison includes five agent-agnostic evolution methods: EvoSkill,
+SkillClaw, AutoSkill, SkillsVote, and SkillOpt. Each runs on all four target
+agents. Hermes also provides a framework-native evolution path that is not
+comparable across agents; we therefore report it as a separate native-mechanism
+study in Appendix~\ref{app:hermes-native}, with diagnostic results in
+Table~\ref{tab:hermes-native} and governed results in
+Table~\ref{tab:safeevolve-full}. Each method is evaluated in its actual stored representation, including
 associated scripts or structured contracts, rather than after conversion to a
 common textual summary, for online behavior and artifact auditing. The
 carryover stage deliberately standardizes the persistence channel: only the
@@ -488,17 +489,6 @@ downweighted, quarantined, repaired, or retired even when it improves task
 success. This distinguishes \safeevolve from capability-only library hygiene,
 which keeps useful but unsafe skills.
 
-\paragraph{Hermes-native integration.}
-Hermes-native evolution enters the same governance interface at its skill-write
-approval boundary. In the raw condition, a native candidate follows Hermes's
-ordinary approval and storage path. Library-Drift applies capability-oriented
-maintenance after writing. Under \safeevolve, the complete native skill bundle
-is audited and, when necessary, repaired before approval; accepted skills then
-receive the same provenance, safety-aware retrieval, and retirement treatment
-as skills produced by agent-agnostic evolution methods. This preserves Hermes's
-native authoring loop while changing only the governance of its persistent
-updates.
-
 \begin{figure}[t]
   \centering
   \fbox{\parbox[c][3.6cm][c]{0.94\linewidth}{
@@ -540,9 +530,8 @@ The main evaluation treats target-agent as a first-class axis, not a nuisance
 variable to average away. Table~\ref{tab:targets} fixes the four configurations.
 The shared MiniMax backbone isolates framework effects across Claude Code,
 Codex, Hermes, and OpenClaw. Each
-applicable evolution method runs on the identical frozen
-episode set for every target. Hermes-native evolution appears only on Hermes;
-unsupported combinations are marked N/A rather than pooled with failures.
+applicable agent-agnostic evolution method runs on the identical frozen episode
+set for every target.
 
 \begin{table}[t]
 \centering
@@ -597,33 +586,33 @@ instead of hiding it inside one pooled method average.
 \setlength{\tabcolsep}{3.2pt}
 \renewcommand{\arraystretch}{1.04}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{llcccccccc}
+\begin{tabular}{llccccccc}
 \toprule
 \textbf{Target agent} & \textbf{Backbone} & \textbf{No Evo.} &
 \textbf{Benign-only upd.} & \textbf{EvoSkill} &
 \textbf{SkillClaw} & \textbf{AutoSkill} &
-\textbf{SkillsVote} & \textbf{SkillOpt} & \textbf{Hermes native} \\
+\textbf{SkillsVote} & \textbf{SkillOpt} \\
 \midrule
-\multicolumn{10}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
-Claude Code & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Codex       & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Hermes      & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multicolumn{9}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
+Claude Code & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Codex       & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Hermes      & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multicolumn{10}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
-Claude Code & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Codex       & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Hermes      & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multicolumn{9}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
+Claude Code & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Codex       & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Hermes      & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multicolumn{10}{l}{\textbf{C. Post-attack: unsafe retrieval ($\downarrow$) / carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
-Claude Code & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Codex       & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Hermes      & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multicolumn{9}{l}{\textbf{C. Post-attack: unsafe retrieval ($\downarrow$) / carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
+Claude Code & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Codex       & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Hermes      & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & MiniMax      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Skill evolution across four target-agent configurations
@@ -636,7 +625,7 @@ URR / carryover ASR / carryover utility after retrieval is rebuilt solely from
 backbone isolates agent-framework effects. For URR, N/A means that the frozen
 \texttt{SKILL.md} contains no evolved skill with exported $cu\geq3$; URR is
 then undefined rather than zero. Elsewhere, N/A marks a setting with no skill
-artifact or an unsupported native method; it never denotes a failed run. URR
+artifact; it never denotes a failed run. URR
 macro-averages use only conditions in which URR is defined.
 The exposure-to-persistence transitions are expanded in
 Table~\ref{tab:chain}. Add 95\% episode-bootstrap intervals in the supplement
@@ -969,7 +958,7 @@ Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \caption{\textbf{SafeEvolve reduces online, artifact, and carryover risk while
 preserving utility (RQ4).} For each target agent and governance condition, we
 first compute every metric as an absolute micro-aggregate, then macro-average
-equally over all applicable evolution methods. The final column gives the
+equally over the five agent-agnostic evolution methods. The final column gives the
 equal-weight target-agent average. Unsupported method--agent pairs are
 excluded. URR is N/A when no unsafe evolved skill is exported and its averages
 use only defined cells; this absence is also exposed by the artifact panel
@@ -1209,6 +1198,44 @@ Report every agent framework, model endpoint, evolution implementation,
 retrieval configuration, update cadence, prompt, decoding parameter, repository
 commit, and applicability restriction. Separate unsupported combinations from
 failed runs.
+
+\subsection{Hermes-native evolution}
+\label{app:hermes-native}
+
+Hermes-native evolution is evaluated only with the Hermes / MiniMax target and
+is excluded from every cross-agent main-table average. A native candidate
+follows Hermes's ordinary authoring, approval, and storage path in the raw
+condition. Library-Drift applies capability-oriented maintenance after writing.
+Under \safeevolve, the complete native skill bundle is audited and, when
+necessary, repaired before approval; accepted skills then receive the same
+provenance, safety-aware retrieval, and retirement treatment as candidates from
+agent-agnostic methods. This preserves Hermes's authoring loop and changes only
+the governance of its persistent updates.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lccc}
+\toprule
+\textbf{Hermes / MiniMax setting} &
+\textbf{Online: BU/M-ASR/B-ASR} &
+\textbf{Artifact: CU/UG/Stealth} &
+\textbf{Post-attack: URR/ASR/Utility} \\
+\midrule
+No evolution        & --/--/-- & N/A/N/A/N/A & N/A/--/-- \\
+Benign-only updates & --/--/-- & --/--/--    & --/--/-- \\
+Hermes-native       & --/--/-- & --/--/--    & --/--/-- \\
+\bottomrule
+\end{tabular}}
+\caption{\textbf{Hermes-native diagnostic evaluation.} The framework-native
+evolution mechanism is reported separately because it has no meaningful
+cross-agent cells. Metrics use the same absolute $3+3+3$ protocol as
+Table~\ref{tab:misevolution-main}. Its Raw / Library-Drift / \safeevolve
+comparison appears in Table~\ref{tab:safeevolve-full}.}
+\label{tab:hermes-native}
+\end{table}
 
 \section{Judges and Artifact Auditing}
 \label{app:judges}
