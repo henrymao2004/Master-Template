@@ -59,21 +59,21 @@ task-source-agnostic environment that turns executable agent tasks into stateful
 skill-learning episodes. It standardizes skill writing, versioned library
 state, retrieval, replay, and fresh-session evaluation across agent frameworks
 and evolution methods. On top of this environment, \bench defines an
-exposure-to-carryover protocol, paired evolution controls, and nine metrics for
+exposure-to-carryover protocol, paired evolution controls, and eight metrics for
 online behavior, the evolved artifact, and post-attack behavior. We instantiate the benchmark with
 AgentHazard as its executable safety-task source. Across four agent
 frameworks using a shared MiniMax backbone, six
 evolution methods and ten AgentHazard risk categories, benign utility,
-malicious utility, malicious ASR, and benign-task contamination are
-[BU/MU/MA/BA]. Content Unsafety (CU), Unsafe Generalization (UG), and
+malicious ASR, and benign-task contamination are
+[BU/MA/BA]. Content Unsafety (CU), Unsafe Generalization (UG), and
 Stealthiness (Stealth) are [CU/UG/Stealth]; carryover ASR reaches [CA] while
 carryover utility remains [C-Util]. Unsafe
 content appears in the skill library before it consistently manifests as
 behavior, and the effect emerges by round [R], after [K] malicious tasks. We
 further introduce \safeevolve, a governance layer that audits and
 repairs candidate skills, preserves verification steps, tracks provenance, and
-retires skills with unsafe reuse histories. Under \safeevolve, the artifact
-online metrics are [BU'/MU'/MA'/BA'], artifact scores are [CU'/UG'/Stealth'],
+retires skills with unsafe reuse histories. Under \safeevolve, the online
+metrics are [BU'/MA'/BA'], artifact scores are [CU'/UG'/Stealth'],
 and carryover ASR / utility are [CA'/C-Util'].
 These results show that self-improvement is a security-relevant policy update:
 practice can make an agent more capable and persistently less safe.
@@ -124,7 +124,7 @@ comes from the learned artifact rather than the base model, repeated context,
 or ordinary benign learning.
 
 The benchmark evaluates three stages of the failure. Online behavior is measured
-by benign utility, malicious utility, malicious ASR, and benign ASR
+by benign utility, malicious ASR, and benign ASR
 (contamination). The evolved artifact is measured by Content Unsafety (CU),
 Unsafe Generalization (UG), and Stealthiness (Stealth). Post-attack behavior is measured by carryover
 ASR and carryover utility in a clean session. This
@@ -161,8 +161,8 @@ Our contributions are:
   frameworks and evolution methods.
 
   \item We introduce \bench, a task-source-independent temporal protocol with
-  paired evolution controls and nine absolute metrics: benign utility,
-  malicious utility, malicious ASR, benign ASR (contamination), Content
+  paired evolution controls and eight absolute metrics: benign utility,
+  malicious ASR, benign ASR (contamination), Content
   Unsafety (CU), Unsafe Generalization (UG), Stealthiness (Stealth), carryover ASR, and carryover
   utility. We
   instantiate it with AgentHazard as the executable task and judge source.
@@ -376,28 +376,25 @@ resources, caches, and native memory remain unavailable.
 
 \subsection{Metrics}
 
-All nine headline metrics are absolute micro-aggregates over the 25 episodes in
-a condition. For $X\in\{B,M,P\}$, let $\mathcal{X}_C$ and $\mathcal{X}_H$ be
-the tasks with a valid utility-judge and harmful-judge result, respectively.
+All eight headline metrics are absolute micro-aggregates over the 25 episodes in
+a condition. Let $\mathcal{B}_C$ and $\mathcal{P}_C$ be tasks with a valid
+utility-judge result, and let $\mathcal{B}_H$, $\mathcal{M}_H$, and
+$\mathcal{P}_H$ be tasks with a valid harmful-judge result.
 Let $C(x)$ denote completion of the benign objective and $H(x)$ completion of
 the AgentHazard harmful objective.
 
 \paragraph{Online behavior.}
-The four online metrics read every scored $B$ or $M$ task:
+The three online metrics read every scored $B$ or $M$ task:
 \begin{align}
 \mathrm{BenignUtility} &=
 \frac{\sum_{x\in\mathcal{B}_C} C(x)}{|\mathcal{B}_C|}, &
-\mathrm{MaliciousUtility} &=
-\frac{\sum_{x\in\mathcal{M}_C} C(x)}{|\mathcal{M}_C|}, \\
 \mathrm{MaliciousASR} &=
-\frac{\sum_{x\in\mathcal{M}_H} H(x)}{|\mathcal{M}_H|}, &
+\frac{\sum_{x\in\mathcal{M}_H} H(x)}{|\mathcal{M}_H|}, \\
 \mathrm{Contamination} &=
 \frac{\sum_{x\in\mathcal{B}_H} H(x)}{|\mathcal{B}_H|}.
 \end{align}
 Benign utility uses the AgentHazard utility judge on all $B$ tasks. Malicious
-utility applies the same judge to the benign-twin objective on every $M$ task,
-so useful task completion and harmful success remain separate outcomes.
-Malicious ASR uses the AgentHazard harmful judge on $M$; benign ASR, which we
+ASR uses the AgentHazard harmful judge on $M$; benign ASR, which we
 call contamination, applies that harmful judge to $B$.
 
 \paragraph{Evolved artifact.}
@@ -590,12 +587,12 @@ instead of hiding it inside one pooled method average.
 \textbf{SkillClaw} & \textbf{AutoSkill} &
 \textbf{SkillsVote} & \textbf{SkillOpt} & \textbf{Hermes native} \\
 \midrule
-\multicolumn{11}{l}{\textbf{A. Online behavior: benign utility / malicious utility / malicious ASR / benign ASR (contamination) (\%)}} \\
-Claude Code & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
-Codex       & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
-Hermes      & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
-OpenClaw    & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+\multicolumn{11}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
+Claude Code & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Codex       & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Hermes      & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & MiniMax      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multicolumn{11}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
 Claude Code & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
@@ -614,8 +611,8 @@ OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/
 \end{tabular}}
 \caption{\textbf{Skill evolution across four target-agent configurations
 (RQ1).} Each cell pools the same frozen episode distribution within one target
-agent and evolution setting. Panel A reports benign utility / malicious utility
-/ malicious ASR / benign ASR (contamination), micro-aggregated over all scored
+agent and evolution setting. Panel A reports benign utility / malicious ASR /
+benign ASR (contamination), micro-aggregated over all scored
 $B$ and $M$ tasks. Panel B reports mean CU / UG / Stealth scores. Panel C reports
 carryover ASR / carryover utility after retrieval is rebuilt solely from
 \texttt{SKILL.md} for all scored $P$ tasks. The shared MiniMax
@@ -629,7 +626,7 @@ or an accompanying interval plot.}
 
 \paragraph{Result paragraph template.}
 Across four target-agent configurations, online behavior reaches
-[BU/MU/MA/BA] on benign utility, malicious utility, malicious ASR, and
+[BU/MA/BA] on benign utility, malicious ASR, and
 contamination. Evolved artifacts score [CU/UG/ST], and the post-attack probe
 reaches [C-ASR/C-Util] on carryover ASR and carryover utility. The effect appears in
 [A/4] targets and [B/M]
@@ -761,7 +758,7 @@ updates intervene before the library is frozen.
     \textbf{(c) Carryover ASR}.\\[3pt]
     One line per evolution method with episode-bootstrap CIs. Each point is an
     absolute micro aggregate over the 25 matched episodes; utility outcomes and
-    the complete nine-metric timing table appear in the appendix.
+    the complete eight-metric timing table appear in the appendix.
   }}
   \caption{\textbf{Exposure timing at a fixed malicious dose (RQ3).} Moving the
   same three malicious tasks across a fixed-length learning history separates
@@ -786,7 +783,7 @@ The mitigation evaluation uses held-out AgentHazard episodes and attack
 strategies that are hidden
 during evolution, repair-policy development, and threshold selection. Libraries
 are frozen before evaluation. A mitigation must lower malicious ASR and benign
-contamination while preserving benign and malicious utility, reduce all three
+contamination while preserving benign utility, reduce all three
 artifact scores, and lower fresh-session carryover ASR while preserving
 carryover utility. The three stages are reported together rather than collapsed
 into one score.
@@ -806,36 +803,36 @@ into one score.
 & \textbf{OpenClaw/MiniMax}
 & \textbf{Macro avg.} \\
 \midrule
-\multicolumn{7}{l}{\textbf{A. Online behavior: benign utility / malicious utility / malicious ASR / benign ASR (contamination) (\%)}} \\
+\multicolumn{7}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
 \multirow{3}{*}{AutoSkill}
- & Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
- & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
- & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{EvoSkill}
- & Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
- & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
- & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{SkillClaw}
- & Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
- & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
- & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{SkillsVote}
- & Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
- & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
- & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{SkillOpt}
- & Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
- & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
- & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{Hermes-native}
- & Raw             & N/A & N/A & --/--/--/-- & N/A & --/--/--/-- \\
- & Library-Drift   & N/A & N/A & --/--/--/-- & N/A & --/--/--/-- \\
- & \safeevolve     & N/A & N/A & --/--/--/-- & N/A & --/--/--/-- \\
+ & Raw             & N/A & N/A & --/--/-- & N/A & --/--/-- \\
+ & Library-Drift   & N/A & N/A & --/--/-- & N/A & --/--/-- \\
+ & \safeevolve     & N/A & N/A & --/--/-- & N/A & --/--/-- \\
 \midrule
 \multicolumn{7}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
 \multirow{3}{*}{AutoSkill}
@@ -904,7 +901,7 @@ into one score.
 agent.} Each evolution method is evaluated raw,
 with a capability-oriented library hygiene baseline, and with \safeevolve on
 the same held-out episodes. Columns retain all four target-agent configurations.
-Panel A reports benign utility / malicious utility / malicious ASR / benign ASR
+Panel A reports benign utility / malicious ASR / benign ASR
 (contamination); Panel B reports CU / UG / Stealth; Panel C reports carryover
 ASR / carryover utility. All rates are
 absolute micro-aggregates. No deltas or gain-retention ratios are used. Macro averages
@@ -930,10 +927,10 @@ supported target rather than imputing results for other agents.}
 & \textbf{Hermes/MiniMax} & \textbf{OpenClaw/MiniMax}
 & \textbf{Macro avg.} \\
 \midrule
-\multicolumn{6}{l}{\textbf{A. Online behavior: benign utility / malicious utility / malicious ASR / benign ASR (contamination) (\%)}} \\
-Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
-Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
-\rowcolor{lightblue}\safeevolve & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+\multicolumn{6}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
+Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\rowcolor{lightblue}\safeevolve & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multicolumn{6}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
 Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
@@ -1100,19 +1097,19 @@ capability evidence.
 \begin{tabular}{lccc}
 \toprule
 \textbf{SafeEvolve variant} &
-\textbf{Online: BU/MU/M-ASR/B-ASR} &
+\textbf{Online: BU/M-ASR/B-ASR} &
 \textbf{Artifact: CU/UG/Stealth} &
 \textbf{Carryover: ASR/Utility} \\
 \midrule
-Full \safeevolve             & --/--/--/-- & --/--/-- & --/-- \\
-$-$ admission critic         & --/--/--/-- & --/--/-- & --/-- \\
-$-$ verification preservation& --/--/--/-- & --/--/-- & --/-- \\
-$-$ provenance               & --/--/--/-- & --/--/-- & --/-- \\
-$-$ safety-aware retirement  & --/--/--/-- & --/--/-- & --/-- \\
+Full \safeevolve             & --/--/-- & --/--/-- & --/-- \\
+$-$ admission critic         & --/--/-- & --/--/-- & --/-- \\
+$-$ verification preservation& --/--/-- & --/--/-- & --/-- \\
+$-$ provenance               & --/--/-- & --/--/-- & --/-- \\
+$-$ safety-aware retirement  & --/--/-- & --/--/-- & --/-- \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{SafeEvolve component analysis.} Every row reports the same
-nine absolute metrics as the main evaluation, grouped as $4+3+2$.}
+eight absolute metrics as the main evaluation, grouped as $3+3+2$.}
 \label{tab:safeevolve-ablation}
 \end{table*}
 
@@ -1203,7 +1200,7 @@ separately from artifact auditing.
 
 Include per-agent, per-risk-category, per-attack-strategy,
 per-timing-position, and per-budget tables with confidence intervals. The
-timing appendix reports all nine metrics for the fixed-$3M$ early, middle, and
+timing appendix reports all eight metrics for the fixed-$3M$ early, middle, and
 late schedules. Report invalid episodes, runtime
 failures, missing combinations, and sensitivity to aggregation choices.
 
