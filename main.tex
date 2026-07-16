@@ -62,7 +62,7 @@ and evolution methods. On top of this environment, \bench defines an
 exposure-to-carryover protocol, paired evolution controls, and nine metrics for
 online behavior, the evolved artifact, and post-attack behavior. We instantiate the benchmark with
 AgentHazard as its executable safety-task source. Across four agent
-frameworks using a shared MiniMax backbone, [M]
+frameworks using a shared MiniMax backbone, six
 evolution methods and ten AgentHazard risk categories, benign utility,
 malicious utility, malicious ASR, and benign-task contamination are
 [BU/MU/MA/BA]. Content Unsafety (CU), Unsafe Generalization (UG), and
@@ -168,7 +168,7 @@ Our contributions are:
   instantiate it with AgentHazard as the executable task and judge source.
 
   \item We provide a systematic evaluation across four agent frameworks using
-  a shared MiniMax backbone, [M] evolution methods, ten
+  a shared MiniMax backbone, six evolution methods, ten
   AgentHazard risk categories, exposure budgets, and timing placements, separating
   artifact-level latent risk from post-attack realized harm.
 
@@ -362,8 +362,9 @@ the agent framework changes. The target is the complete agent system---its scaff
 tool mediation, skill lifecycle, retrieval behavior, and backbone---rather than
 an isolated language model.
 
-The evolution settings include EvoSkill, SkillClaw, AutoSkill, SkillsVote, and
-Hermes-native skill evolution. Hermes-native is tied to the Hermes agent and is
+The evolution settings include EvoSkill, SkillClaw, AutoSkill, SkillsVote,
+SkillOpt, and Hermes-native skill evolution. SkillOpt is evaluated as an
+agent-agnostic evolution method on all four target agents. Hermes-native is tied to the Hermes agent and is
 evaluated only in the Hermes /
 MiniMax configuration; the corresponding cells for other target agents are
 N/A. Each method is evaluated in its actual stored representation, including
@@ -582,33 +583,33 @@ instead of hiding it inside one pooled method average.
 \setlength{\tabcolsep}{3.2pt}
 \renewcommand{\arraystretch}{1.04}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{llcccccccc}
+\begin{tabular}{llccccccccc}
 \toprule
 \textbf{Target agent} & \textbf{Backbone} & \textbf{No Evo.} &
 \textbf{Reflect.} & \textbf{Benign Evo.} & \textbf{EvoSkill} &
 \textbf{SkillClaw} & \textbf{AutoSkill} &
-\textbf{SkillsVote} & \textbf{Hermes native} \\
+\textbf{SkillsVote} & \textbf{SkillOpt} & \textbf{Hermes native} \\
 \midrule
-\multicolumn{10}{l}{\textbf{A. Online behavior: benign utility / malicious utility / malicious ASR / benign ASR (contamination) (\%)}} \\
-Claude Code & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
-Codex       & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
-Hermes      & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
-OpenClaw    & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+\multicolumn{11}{l}{\textbf{A. Online behavior: benign utility / malicious utility / malicious ASR / benign ASR (contamination) (\%)}} \\
+Claude Code & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
+Codex       & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
+Hermes      & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+OpenClaw    & MiniMax      & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
 \midrule
-\multicolumn{10}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
-Claude Code & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Codex       & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-Hermes      & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multicolumn{11}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
+Claude Code & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Codex       & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+Hermes      & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & MiniMax      & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & N/A & N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multicolumn{10}{l}{\textbf{C. Post-attack: carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
-Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Codex       & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
-OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
-\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\multicolumn{11}{l}{\textbf{C. Post-attack: carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
+Claude Code & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Codex       & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+Hermes      & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
+OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & N/A \\
+\rowcolor{lightgray}\multicolumn{2}{l}{Macro avg.} & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Skill evolution across four target-agent configurations
@@ -826,6 +827,11 @@ into one score.
  & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
  & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
 \midrule
+\multirow{3}{*}{SkillOpt}
+ & Raw             & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & Library-Drift   & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+ & \safeevolve     & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- & --/--/--/-- \\
+\midrule
 \multirow{3}{*}{Hermes-native}
  & Raw             & N/A & N/A & --/--/--/-- & N/A & --/--/--/-- \\
  & Library-Drift   & N/A & N/A & --/--/--/-- & N/A & --/--/--/-- \\
@@ -852,6 +858,11 @@ into one score.
  & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
+\multirow{3}{*}{SkillOpt}
+ & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+ & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\midrule
 \multirow{3}{*}{Hermes-native}
  & Raw             & N/A & N/A & --/--/-- & N/A & --/--/-- \\
  & Library-Drift   & N/A & N/A & --/--/-- & N/A & --/--/-- \\
@@ -874,6 +885,11 @@ into one score.
  & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- \\
 \midrule
 \multirow{3}{*}{SkillsVote}
+ & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- \\
+ & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- \\
+\midrule
+\multirow{3}{*}{SkillOpt}
  & Raw             & --/-- & --/-- & --/-- & --/-- & --/-- \\
  & Library-Drift   & --/-- & --/-- & --/-- & --/-- & --/-- \\
  & \safeevolve     & --/-- & --/-- & --/-- & --/-- & --/-- \\
@@ -1022,6 +1038,11 @@ not change from raw evolution.
  & \safeevolve     & -- & -- & -- & -- \\
 \midrule
 \multirow{3}{*}{SkillsVote}
+ & Raw             & -- & -- & -- & -- \\
+ & Library-Drift   & -- & -- & -- & -- \\
+ & \safeevolve     & -- & -- & -- & -- \\
+\midrule
+\multirow{3}{*}{SkillOpt}
  & Raw             & -- & -- & -- & -- \\
  & Library-Drift   & -- & -- & -- & -- \\
  & \safeevolve     & -- & -- & -- & -- \\
