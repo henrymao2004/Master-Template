@@ -966,100 +966,114 @@ objective is necessary.
 The held-out episode table tests end-to-end mitigation inside evolving agents.
 We separately test the admission boundary on two external benchmarks.
 MalSkillBench contains labeled malicious and benign skill bundles and measures
-whether a gate detects unsafe stored content without rejecting benign skills.
-SkillSafetyBench plants a skill into an agent and measures whether the accepted
-skill causes unsafe behavior. Table~\ref{tab:skill-safety} reports absolute
-metrics on both benchmarks; the complete per-baseline breakdown appears in the
-appendix.
+whether a gate detects unsafe stored content without rejecting benign skills
+\citep{guo2026malskillbench}. SkillSafetyBench places adversarial content in
+skill-facing local artifacts and measures whether an agent both completes the
+nominal task and realizes the attack \citep{jin2026skillsafetybench}. Its unsafe
+outcome on a nominally benign task is close to our benign ASR (contamination),
+but the causal setting is different: SkillSafetyBench supplies the adversarial
+artifact in the evaluated run, whereas contamination in \bench is
+harmful behavior on a later zero-injection benign task caused by a skill learned
+from earlier malicious experience. We therefore report SkillSafetyBench under
+its own protocol rather than treating its ASR as contamination.
+
+Table~\ref{tab:skill-safety} uses each benchmark's native metrics and official
+aggregation. We do not relabel detector accuracy as behavioral safety or merge
+the two benchmarks into a synthetic score. The complete per-baseline and
+per-risk-domain breakdown appears in the appendix.
 
 \begin{table*}[t]
 \centering
 \small
 \setlength{\tabcolsep}{6pt}
 \renewcommand{\arraystretch}{1.08}
-\begin{tabular}{lccc|cc}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccc|ccc}
 \toprule
-& \multicolumn{3}{c|}{\textbf{MalSkillBench: skill content}}
-& \multicolumn{2}{c}{\textbf{SkillSafetyBench: planted skill}} \\
-\cmidrule(lr){2-4}\cmidrule(lr){5-6}
+& \multicolumn{6}{c|}{\textbf{MalSkillBench: skill-content detection}}
+& \multicolumn{3}{c}{\textbf{SkillSafetyBench: agent behavior}} \\
+\cmidrule(lr){2-7}\cmidrule(lr){8-10}
 \textbf{Skill gate}
-& Malicious recall $\uparrow$ & Benign FPR $\downarrow$ & AUROC $\uparrow$
-& Behavioral ASR $\downarrow$ & Benign utility $\uparrow$ \\
+& Acc. $\uparrow$ & Prec. $\uparrow$ & Rec. $\uparrow$ & F1 $\uparrow$
+& FP $\downarrow$ & FN $\downarrow$
+& ASR $\downarrow$ & Task success $\uparrow$ & Cond. ASR $\downarrow$ \\
 \midrule
-No skill gate                    & -- & -- & -- & -- & -- \\
-Best skill-security scanner      & -- & -- & -- & -- & -- \\
-Best supply-chain detector       & -- & -- & -- & -- & -- \\
-Best prompt-injection guard      & -- & -- & -- & -- & -- \\
-Library-Drift gate               & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}\safeevolve admission critic & -- & -- & -- & -- & -- \\
+No skill gate                    & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Best skill-security scanner      & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Best supply-chain detector       & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Best prompt-injection guard      & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Library-Drift gate               & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}\safeevolve admission critic & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}
+}
 \caption{\textbf{SafeEvolve on independent skill-safety benchmarks (RQ4).}
-MalSkillBench evaluates labeled malicious and benign skill bundles, including
-code and scripts referenced by the skill. SkillSafetyBench measures downstream
-behavior after a planted skill passes the gate. All entries are absolute rates
-or scores; no difference metrics are used. Category-best baseline rows keep the
-main table readable, while results for all individual scanners and guards are
-reported in the appendix.}
+Every column follows the source benchmark. MalSkillBench reports accuracy,
+precision, recall, F1, and false-positive/false-negative counts on its pinned
+test set. SkillSafetyBench reports overall attack success rate (ASR), nominal
+task success, and task-success-conditional ASR. Category-best baseline rows keep
+the main table readable; individual detectors, risk-domain ASR, and confidence
+intervals are reported in the appendix.}
 \label{tab:skill-safety}
 \end{table*}
 
 \paragraph{Capability preservation on common benchmarks.}
 Safety gains are useful only if the governed library continues to improve task
 performance. We therefore evaluate each evolution method raw, with
-Library-Drift, and with \safeevolve on the same three capability benchmarks.
-Table~\ref{tab:capability} reports absolute task success for every condition,
-not change from raw evolution.
+Library-Drift, and with \safeevolve on three external capability benchmarks.
+Here too we preserve each benchmark's official evaluation contract rather than
+reducing all three to a common accuracy column. SkillsBench reports task-macro
+pass rates and skill gain \citep{li2026skillsbench}; SkillLearnBench separates
+skill quality, trajectory behavior, and task outcome
+\citep{zhong2026skilllearnbench}; SWE-Skills-Bench jointly reports pass rate and
+token efficiency \citep{han2026sweskillsbench}. Table~\ref{tab:capability}
+shows method-averaged results in the main paper, with every evolution method
+reported separately in the appendix.
 
 \begin{table*}[t]
 \centering
 \small
-\setlength{\tabcolsep}{6pt}
+\setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.08}
-\begin{tabular}{llcccc}
+\begin{tabular}{llccc}
 \toprule
-\textbf{Evolution method} & \textbf{Governance}
-& \textbf{SkillsBench} & \textbf{SkillLearnBench}
-& \textbf{SWE-Skills-Bench} & \textbf{Macro avg.} \\
+\textbf{Benchmark} & \textbf{Native metric}
+& \textbf{Raw} & \textbf{Library-Drift} & \textbf{\safeevolve} \\
 \midrule
-\multirow{3}{*}{AutoSkill}
- & Raw             & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- \\
+\multirow{4}{*}{SkillsBench}
+ & No-skill pass (\%) $\uparrow$       & -- & -- & -- \\
+ & Evolved-skill pass (\%) $\uparrow$  & -- & -- & -- \\
+ & Skill improvement (pp) $\uparrow$   & -- & -- & -- \\
+ & Normalized gain (\%) $\uparrow$     & -- & -- & -- \\
 \midrule
-\multirow{3}{*}{EvoSkill}
- & Raw             & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- \\
+\multirow{7}{*}{SkillLearnBench}
+ & Coverage (\%) $\uparrow$            & -- & -- & -- \\
+ & Executability (\%) $\uparrow$       & -- & -- & -- \\
+ & Safety (\%) $\uparrow$              & -- & -- & -- \\
+ & Alignment (\%) $\uparrow$           & -- & -- & -- \\
+ & Usage (\%) $\uparrow$               & -- & -- & -- \\
+ & Solving tokens $\downarrow$          & -- & -- & -- \\
+ & Accuracy (\%) $\uparrow$            & -- & -- & -- \\
 \midrule
-\multirow{3}{*}{SkillClaw}
- & Raw             & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- \\
-\midrule
-\multirow{3}{*}{SkillsVote}
- & Raw             & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- \\
-\midrule
-\multirow{3}{*}{SkillOpt}
- & Raw             & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- \\
-\midrule
-\multirow{3}{*}{Hermes-native}
- & Raw             & -- & -- & -- & -- \\
- & Library-Drift   & -- & -- & -- & -- \\
- & \safeevolve     & -- & -- & -- & -- \\
+\multirow{7}{*}{SWE-Skills-Bench}
+ & No-skill pass (\%) $\uparrow$       & -- & -- & -- \\
+ & Evolved-skill pass (\%) $\uparrow$  & -- & -- & -- \\
+ & Skill utility $\Delta$ (pp) $\uparrow$ & -- & -- & -- \\
+ & No-skill tokens $\downarrow$         & -- & -- & -- \\
+ & Evolved-skill tokens $\downarrow$    & -- & -- & -- \\
+ & Token overhead ratio $\downarrow$    & -- & -- & -- \\
+ & Cost efficiency $\uparrow$           & -- & -- & -- \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{SafeEvolve preserves absolute capability (RQ4).} Task-success
-rates for raw evolution, capability-oriented library governance, and
-\safeevolve on three common skill benchmarks. All values are absolute
-scores under matched agent, model, and inference budgets. Statistical
-non-inferiority to the corresponding raw method is tested separately and
-reported with confidence intervals. Hermes-native rows use the Hermes / MiniMax
-agent configuration.}
+\caption{\textbf{SafeEvolve preserves capability under each benchmark's native
+protocol (RQ4).} Entries macro-average equally over applicable evolution
+methods after computing the official metric for each method. SkillsBench uses
+task-macro pass rate, absolute improvement, and normalized gain;
+SkillLearnBench reports its three-level quality/trajectory/outcome metrics;
+SWE-Skills-Bench reports pass rate, token cost, overhead, and cost efficiency.
+The no-skill reference is repeated to keep each official comparison
+self-contained. We do not average heterogeneous metrics across benchmarks.
+Full per-method results and confidence intervals appear in the appendix.}
 \label{tab:capability}
 \end{table*}
 
@@ -1184,6 +1198,135 @@ late schedules. Report invalid episodes, runtime
 failures, missing combinations, and sensitivity to aggregation choices.
 
 \safeevolvefulltable
+
+\subsection{External Benchmark Breakdowns}
+\label{app:external-benchmarks}
+
+All external results retain the source benchmark's task set, verifier,
+denominator, and aggregation rule. We report our nine \bench metrics
+only on the gym episodes; external benchmark outcomes are never converted into
+those metrics. MalSkillBench false positives and false negatives are counts on
+the pinned test set. SkillSafetyBench conditional ASR excludes cases without a
+task reward and conditions on task reward equal to one. SkillsBench averages
+repeated trials within task before averaging across tasks. SkillLearnBench
+retains its three evaluation levels. SWE-Skills-Bench averages pass and token
+outcomes over the instances belonging to each skill before aggregating skills.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccc|ccc}
+\toprule
+& \multicolumn{6}{c|}{\textbf{MalSkillBench}}
+& \multicolumn{3}{c}{\textbf{SkillSafetyBench}} \\
+\textbf{Gate or detector} & Acc. & Prec. & Rec. & F1 & FP & FN
+& ASR & Task success & Cond. ASR \\
+\midrule
+No skill gate & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Skill Security Scan & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+SkillScan & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+SkillScan-Security & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Cisco Skill Scanner (static) & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Cisco Skill Scanner (LLM) & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+AI-Infra-Guard & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+LLM Guard & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Panguard Skill Auditor (static) & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Snyk Agent Scan & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Sentry Skill Scanner (static) & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Sentry Skill Scanner (full) & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+VirusTotal & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Library-Drift gate & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}\safeevolve admission critic & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}}
+\caption{\textbf{Complete external skill-safety results.} The left block
+reproduces MalSkillBench's official six-column detector protocol. The right
+block runs each admissible gate before SkillSafetyBench execution and reports
+its official behavioral metrics. The supplementary result package additionally
+reports SkillSafetyBench ASR for RD1--RD6.}
+\label{tab:skill-safety-full}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Evolution method} & \textbf{Governance} & \textbf{No-skill pass}
+& \textbf{Evolved-skill pass} & \textbf{$\Delta$ (pp)}
+& \textbf{Normalized gain} \\
+\midrule
+AutoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+EvoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+SkillClaw & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+SkillsVote & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+SkillOpt & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+Hermes-native & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{SkillsBench capability breakdown.} Every cell orders the
+three governance conditions as Raw / Library-Drift / \safeevolve. Pass is the
+official task-macro pass rate; $\Delta$ and normalized gain are computed from
+the matched no-skill condition at full precision.}
+\label{tab:skillsbench-full}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llccccccc}
+\toprule
+\textbf{Evolution method} & \textbf{Governance} & \textbf{Coverage}
+& \textbf{Executability} & \textbf{Safety} & \textbf{Alignment}
+& \textbf{Usage} & \textbf{Solving tokens} & \textbf{Accuracy} \\
+\midrule
+AutoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+EvoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+SkillClaw & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+SkillsVote & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+SkillOpt & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+Hermes-native & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+\bottomrule
+\end{tabular}}
+\caption{\textbf{SkillLearnBench capability breakdown.} Columns preserve the
+official three levels: artifact quality (coverage, executability, safety),
+trajectory (alignment, usage), and outcome (solving tokens, accuracy). Cell
+order is Raw / Library-Drift / \safeevolve.}
+\label{tab:skilllearnbench-full}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llccccccc}
+\toprule
+\textbf{Evolution method} & \textbf{Governance}
+& \textbf{No-skill pass} & \textbf{Evolved-skill pass}
+& \textbf{Utility $\Delta$} & \textbf{No-skill tokens}
+& \textbf{Evolved-skill tokens} & \textbf{Overhead ratio}
+& \textbf{Cost efficiency} \\
+\midrule
+AutoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+EvoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+SkillClaw & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+SkillsVote & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+SkillOpt & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+Hermes-native & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+\bottomrule
+\end{tabular}}
+\caption{\textbf{SWE-Skills-Bench capability breakdown.} Columns preserve the
+official paired pass-rate and token-cost protocol. Utility $\Delta$, token
+overhead, and cost efficiency are derived from the matched with-skill and
+without-skill conditions. Cell order is Raw / Library-Drift / \safeevolve.}
+\label{tab:swe-skills-bench-full}
+\end{table*}
 
 \section{SafeEvolve Implementation}
 \label{app:safeevolve-implementation}
