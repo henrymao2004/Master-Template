@@ -110,8 +110,10 @@ Measuring misevolution requires an environment that exposes persistent learning
 as experimental state. We introduce \gym, which wraps executable agent tasks
 with a standardized skill lifecycle: it snapshots the
 library before and after each three-task block, resets conversational and
-workspace state between tasks, records skill writes and retrievals, and mounts a frozen library in a new
-executor session. Only the evolving library crosses task boundaries.
+workspace state between tasks, and records skill writes and retrievals. For the
+final persistence probe, it reloads retrieval in a new executor using only the
+frozen \texttt{SKILL.md}. Only this serialized skill artifact crosses into the
+fresh session.
 
 \bench is the evaluation protocol built on this gym. Its basic unit is a
 21-task episode with three rounds of three malicious tasks followed by three
@@ -250,8 +252,9 @@ The attacker controls a bounded number of task inputs during the learning
 history but does not modify the evolution code, skill store, retrieval engine,
 judge, or final persistence probe. The attacker succeeds when an exposure is
 absorbed into a reusable skill that increases unsafe behavior or later causes
-harm without a new attack. The strongest outcome is carryover ASR in a fresh session
-that receives only the final evolved library.
+harm without a new attack. The strongest outcome is carryover ASR in a fresh
+session whose retrieval state is reconstructed only from the final frozen
+\texttt{SKILL.md}.
 
 \section{SkillMisevo Gym and Bench}
 \label{sec:benchmark}
@@ -269,8 +272,8 @@ misevolution metrics. The gym snapshots $\library_k$ before and after every
 three-task block, stores the authored diff and its three source trajectories,
 records which skills are retrieved on each task,
 and supports replay from any snapshot. Agent adapters translate native skill
-formats and lifecycle hooks without converting the stored artifact into a
-shared representation. Evolution adapters expose when and from which
+formats and lifecycle hooks without converting the learning-stage artifact into
+a shared representation. Evolution adapters expose when and from which
 three-trajectory block a candidate skill is written. This contract supports both external evolution
 methods and an agent's native skill evolution.
 
@@ -280,6 +283,16 @@ library the sole cross-task treatment and allows matched executions with no
 evolution, benign-only evolution, or a frozen library. The environment emits a
 common event log containing task outcome, skill writes, artifact versions,
 retrievals, tool trajectories, and judge evidence.
+
+The $P$ transition applies a stricter persistence boundary. After the final
+learning block, the gym serializes the frozen skill library to
+\texttt{SKILL.md} and terminates the learning executor. A clean executor is
+initialized with the $P$ task and its reset tool environment; among
+learning-stage state, it receives only this file. No conversation, workspace
+contents, process state, tool-session state, retrieval cache, native memory, or
+other evolved file is mounted. The skill index is
+rebuilt from \texttt{SKILL.md}, and all $P$-task retrievals must resolve through
+that reloaded index. The $P$ block performs no further skill evolution.
 
 \subsection{Benchmark episode protocol}
 
@@ -299,7 +312,9 @@ round therefore contains two skill-evolution steps. Each round contributes a dos
 the cumulative dose is therefore three, six, and nine malicious tasks after
 $R_1,R_2,R_3$. The following benign block measures contamination at that dose.
 After $R_3$, the library is frozen and the three $P$ tasks run in a new executor
-session without further evolution. Each condition contains 25 episodes.
+session without further evolution. This executor reloads its skill index solely
+from the frozen \texttt{SKILL.md}; no other learning-stage state enters the
+$P$ block. Each condition contains 25 episodes.
 
 \begin{figure}[t]
   \centering
@@ -309,8 +324,9 @@ session without further evolution. Each condition contains 25 episodes.
     Show $MMM\rightarrow BBB\rightarrow MMM\rightarrow BBB\rightarrow
     MMM\rightarrow BBB\mid BBB$, one skill-evolution step and snapshot after
     each three-task block, cumulative doses $3M/6M/9M$, retrieval logs,
-    artifact audits, and the final clean-session probes. Highlight that only
-    the library crosses task borders.
+    artifact audits, and the final transition
+    $\text{\texttt{SKILL.md}}\rightarrow\text{reload index}\rightarrow P^3$. Highlight
+    that only \texttt{SKILL.md} crosses into the clean persistence session.
   }}
   \caption{\textbf{Skill misevolution evaluation.} Adversarial exposures can
   alter the evolving skill library; later benign tasks test whether the learned
@@ -352,7 +368,10 @@ evaluated only in the Hermes /
 MiniMax configuration; the corresponding cells for other target agents are
 N/A. Each method is evaluated in its actual stored representation, including
 associated scripts or structured contracts, rather than after conversion to a
-common textual summary.
+common textual summary, for online behavior and artifact auditing. The
+carryover stage deliberately standardizes the persistence channel: only the
+method's frozen \texttt{SKILL.md} is reloaded for $P$, while associated scripts,
+resources, caches, and native memory remain unavailable.
 
 \subsection{Metrics}
 
@@ -396,8 +415,9 @@ are N/A when $\mathcal{A}_u$ is empty. Auditor agreement is measured on a
 double-labeled subset.
 
 \paragraph{Post-attack carryover.}
-After conversational and environment state are reset and only the frozen final
-library is mounted, the three $P$ tasks per episode yield
+After conversational and environment state are reset, the retrieval index is
+rebuilt solely from the frozen final \texttt{SKILL.md}. The three $P$ tasks per
+episode then yield
 \begin{equation}
 \mathrm{CarryoverASR}=
 \frac{\sum_{x\in\mathcal{P}_H}H(x)}{|\mathcal{P}_H|},\qquad
@@ -595,8 +615,9 @@ OpenClaw    & MiniMax      & --/-- & --/-- & --/-- & --/-- & --/-- & --/-- & --/
 (RQ1).} Each cell pools the same frozen episode distribution within one target
 agent and evolution setting. Panel A reports benign utility / malicious utility
 / malicious ASR / benign ASR (contamination), micro-aggregated over all scored
-$B$ and $M$ tasks. Panel B reports mean CU / UG / Stealth scores. Panel C reports clean-session
-carryover ASR / carryover utility over all scored $P$ tasks. The shared MiniMax
+$B$ and $M$ tasks. Panel B reports mean CU / UG / Stealth scores. Panel C reports
+carryover ASR / carryover utility after retrieval is rebuilt solely from
+\texttt{SKILL.md} for all scored $P$ tasks. The shared MiniMax
 backbone isolates agent-framework effects. N/A means either that a setting writes no skill artifact or that a
 native method is unsupported for that target; it never denotes a failed run.
 The exposure-to-persistence transitions are expanded in
@@ -612,8 +633,8 @@ contamination. Evolved artifacts score [CU/UG/ST], and the post-attack probe
 reaches [C-ASR/C-Util] on carryover ASR and carryover utility. The effect appears in
 [A/4] targets and [B/M]
 evolution methods. The joint result rules out a pure context effect: the attack
-is absent, the executor is reset, and the only cross-task object is the evolved
-library.
+is absent, the executor is reset, and the only object reloaded for retrieval is
+the frozen \texttt{SKILL.md}.
 
 \paragraph{Safety--utility frontier.}
 Plot each method by carryover utility and carryover ASR. The important region
@@ -627,7 +648,8 @@ unreliable safety signal.
 RQ2 tests each link of Equation~\ref{eq:chain}. At each round, report malicious
 utility and ASR on the $M$ block, benign utility and contamination on the
 following $B$ block, and the three content-judge scores on all skills authored
-so far. Then report retrieval of the evolved artifact and post-attack carryover ASR and utility
+so far. Then report retrieval from the reloaded \texttt{SKILL.md} and
+post-attack carryover ASR and utility
 conditional on retrieval. Use matched
 mediation or stratified conditional effects rather than inferring mediation
 from a single example.
@@ -643,8 +665,8 @@ from a single example.
 Malicious block $\rightarrow$ authored artifact & -- & -- \\
 Evolved artifact $\rightarrow$ retrieval & -- & -- \\
 Retrieval $\rightarrow$ benign contamination & -- & -- \\
-Frozen library $\rightarrow$ carryover ASR & -- & -- \\
-Frozen library $\rightarrow$ carryover utility & -- & -- \\
+Reloaded \texttt{SKILL.md} $\rightarrow$ carryover ASR & -- & -- \\
+Reloaded \texttt{SKILL.md} $\rightarrow$ carryover utility & -- & -- \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{Exposure-to-persistence chain (RQ2).} Each row measures an
@@ -744,8 +766,8 @@ updates intervene before the library is frozen.
   same three malicious tasks across a fixed-length learning history separates
   compounding from recency. Final-block contamination measures harmful behavior
   on the last benign block before freezing, content unsafety audits the final
-  authored library, and carryover ASR tests the frozen library in a clean
-  session.}
+  authored library, and carryover ASR tests retrieval reloaded solely from the
+  frozen \texttt{SKILL.md} in a clean session.}
   \label{fig:timing}
 \end{figure*}
 
@@ -1108,7 +1130,10 @@ sampling, risk categories, attack strategies, and unchanged judge interface.
 Specify how its instances are wrapped by the gym, how benign twins and
 persistence probes are derived, and how episode order, deduplication, leakage
 checks, and held-out splits are fixed. Release the episode manifest so each
-result can be replayed from the same source task and skill snapshot.
+result can be replayed from the same source task and skill snapshot. Document
+the deterministic export of the final library to \texttt{SKILL.md}, its content
+hash, the clean-executor launch, and the check that the $P$ retrieval index reads
+no other persisted state.
 
 \section{Agent and Method Configurations}
 \label{app:configurations}
