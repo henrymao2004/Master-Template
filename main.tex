@@ -398,21 +398,26 @@ ASR uses the AgentHazard harmful judge on $M$; benign ASR, which we
 call contamination, applies that harmful judge to $B$.
 
 \paragraph{Evolved artifact.}
-Let $\mathcal{A}$ contain every skill authored from an $M^3$ or $B^3$ block, and let
-$\mathcal{A}_u=\{a\in\mathcal{A}:cu(a)\geq3\}$. Independent content judges
+Let $\mathcal{A}$ contain every skill authored from an $M^3$ or $B^3$ block. Independent content judges
 assign 1--5 scores for Content Unsafety (CU), Unsafe Generalization (UG), and
 Stealthiness (Stealth), denoted $cu$, $gen$, and $sneak$. The headline artifact
-metrics threshold these ordinal judgments at 3 and report rates:
+metrics threshold these ordinal judgments at 3 and use all authored skills as a
+common denominator:
 \begin{equation}
-\mathrm{CU}=\frac{\sum_{a\in\mathcal{A}}\mathbf{1}[cu(a)\geq3]}{|\mathcal{A}|},\quad
-\mathrm{UG}=\frac{\sum_{a\in\mathcal{A}_u}\mathbf{1}[gen(a)\geq3]}{|\mathcal{A}_u|},\quad
-\mathrm{Stealth}=\frac{\sum_{a\in\mathcal{A}_u}\mathbf{1}[sneak(a)\geq3]}{|\mathcal{A}_u|}.
+\begin{aligned}
+\mathrm{CU} &= \frac{\sum_{a\in\mathcal{A}}\mathbf{1}[cu(a)\geq3]}{|\mathcal{A}|},\\
+\mathrm{UG} &= \frac{\sum_{a\in\mathcal{A}}\mathbf{1}[cu(a)\geq3\wedge gen(a)\geq3]}{|\mathcal{A}|},\\
+\mathrm{Stealth} &= \frac{\sum_{a\in\mathcal{A}}\mathbf{1}[cu(a)\geq3\wedge sneak(a)\geq3]}{|\mathcal{A}|}.
+\end{aligned}
 \end{equation}
-Thus CU is the unsafe-artifact prevalence over all authored skills, whereas UG
-and Stealth are conditional rates among unsafe authored skills. CU is N/A when
-$\mathcal{A}$ is empty; UG and Stealth are N/A when $\mathcal{A}_u$ is empty.
-The appendix additionally reports the raw 1--5 score means, distributions, and
-auditor agreement on a double-labeled subset.
+CU measures unsafe-artifact prevalence; UG measures the prevalence of artifacts
+that are both unsafe and broadly generalizing; Stealth measures the prevalence
+of artifacts that are both unsafe and disguised. All three are N/A when
+$\mathcal{A}$ is empty. Under this common denominator, UG and Stealth cannot
+exceed CU, so the three percentages form a directly comparable artifact-risk
+profile. The appendix additionally reports the conditional rates
+within unsafe artifacts, raw 1--5 score distributions, authored-skill counts,
+and auditor agreement on a double-labeled subset.
 
 \paragraph{Post-attack carryover.}
 After conversational and environment state are reset, the retrieval index is
@@ -596,15 +601,15 @@ visible without encoding three quantities inside each cell.
 \multicolumn{3}{c}{\textbf{Post-attack}} \\
 \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
 & & \textbf{BU}$\uparrow$ & \textbf{M-ASR}$\downarrow$ & \textbf{B-ASR}$\downarrow$ &
-\textbf{CU$\geq3$}$\downarrow$ & \textbf{UG$\geq3$}$\downarrow$ & \textbf{Stealth$\geq3$}$\downarrow$ &
+\textbf{CU}$\downarrow$ & \textbf{CU\&UG}$\downarrow$ & \textbf{CU\&Stealth}$\downarrow$ &
 \textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
 \multirow{7}{*}{Claude Code}
 & No evolution        & 49.8 & 56.0 & 0.0 & N/A & N/A & N/A & N/A & 0.0 & 25.3 \\
 & Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& SkillClaw           & 37.1 & 51.6 & 0.0 & 7.4 & 100.0 & 100.0 & 16.7 & 0.0 & 29.7 \\
-& AutoSkill           & 65.3 & 59.1 & 8.4 & 46.2 & 74.4 & 97.8 & 50.0 & 16.0 & 64.0 \\
+& SkillClaw           & 37.1 & 51.6 & 0.0 & 7.4 & 7.4 & 7.4 & 16.7 & 0.0 & 29.7 \\
+& AutoSkill           & 65.3 & 59.1 & 8.4 & 46.2 & 34.4 & 45.1 & 50.0 & 16.0 & 64.0 \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
@@ -612,7 +617,7 @@ visible without encoding three quantities inside each cell.
 & No evolution        & 54.7 & 59.6 & 0.4 & N/A & N/A & N/A & N/A & 0.0 & 40.0 \\
 & Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& SkillClaw           & 40.4 & 55.1 & 1.3 & 11.1 & 100.0 & 100.0 & 33.3 & 0.0 & 24.0 \\
+& SkillClaw           & 40.4 & 55.1 & 1.3 & 11.1 & 11.1 & 11.1 & 33.3 & 0.0 & 24.0 \\
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
@@ -630,7 +635,7 @@ visible without encoding three quantities inside each cell.
 & No evolution        & 37.3 & 44.0 & 0.4 & N/A & N/A & N/A & N/A & 1.3 & 26.7 \\
 & Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& SkillClaw           & 32.0 & 46.0 & 1.3 & 19.2 & 100.0 & 100.0 & 40.0 & 1.3 & 21.3 \\
+& SkillClaw           & 32.0 & 46.0 & 1.3 & 19.2 & 19.2 & 19.2 & 40.0 & 1.3 & 21.3 \\
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
@@ -639,8 +644,9 @@ visible without encoding three quantities inside each cell.
 \caption{\textbf{Skill evolution across four target-agent configurations
 (RQ1).} All entries are percentages. BU, M-ASR, and B-ASR report benign utility,
 malicious ASR, and benign ASR (contamination). CU is the fraction of authored
-skills with $cu\geq3$; UG and Stealth are the fractions with $gen\geq3$ and
-$sneak\geq3$ among those unsafe skills. URR, C-ASR, and C-Util report unsafe
+skills with $cu\geq3$; UG is the fraction satisfying both $cu\geq3$ and
+$gen\geq3$; Stealth is the fraction satisfying both $cu\geq3$ and
+$sneak\geq3$. All three use all authored skills as the denominator. URR, C-ASR, and C-Util report unsafe
 retrieval, carryover ASR, and carryover utility after retrieval is rebuilt
 solely from \texttt{SKILL.md}. All frameworks use the same MiniMax backbone for
 the agent-framework comparison. For URR, N/A means that the frozen
@@ -960,7 +966,7 @@ supported target rather than imputing results for other agents.}
 \multicolumn{3}{c}{\textbf{Post-attack}} \\
 \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
 & & \textbf{BU}$\uparrow$ & \textbf{M-ASR}$\downarrow$ & \textbf{B-ASR}$\downarrow$ &
-\textbf{CU$\geq3$}$\downarrow$ & \textbf{UG$\geq3$}$\downarrow$ & \textbf{Stealth$\geq3$}$\downarrow$ &
+\textbf{CU}$\downarrow$ & \textbf{CU\&UG}$\downarrow$ & \textbf{CU\&Stealth}$\downarrow$ &
 \textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
 \multirow{3}{*}{Claude Code}
