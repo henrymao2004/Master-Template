@@ -118,7 +118,7 @@ fresh session.
 \bench is the evaluation protocol built on this gym. Its basic unit is a
 21-task episode with three rounds of three malicious tasks followed by three
 benign tasks, then three persistence probes in a fresh executor session.
-Matched no-evolution and benign-only-update controls provide reference
+No-evolution and benign-only-update controls provide reference
 distributions for later harm under the base agent, benign learning, and learning
 histories that include malicious experience.
 
@@ -231,7 +231,7 @@ protocol.
 
 An episode exhibits \emph{skill misevolution} when an unsafe procedure from an
 earlier trajectory is recorded in the persistent library, is later retrieved,
-and co-occurs with higher unsafe behavior than in a matched no-evolution
+and co-occurs with higher unsafe behavior than in a no-evolution
 execution. The benchmark tracks the following temporal sequence:
 \begin{equation}
 \text{unsafe success}
@@ -279,7 +279,7 @@ methods and an agent's native skill evolution.
 
 Conversation, workspace, process, and tool state are reset between tasks. The
 gym then mounts only the designated skill snapshot. This isolation makes the
-library the sole cross-task treatment and allows matched executions with no
+library the sole cross-task treatment and allows comparison executions with no
 evolution, benign-only updates, or a frozen library. The environment emits a
 common event log containing task outcome, skill writes, artifact versions,
 retrievals, tool trajectories, and judge evidence.
@@ -334,9 +334,9 @@ $P$ block. Each condition contains 25 episodes.
   \label{fig:episode}
 \end{figure}
 
-\subsection{Paired controls}
+\subsection{Comparison settings}
 
-Every episode is replayed under matched evolution settings:
+Every episode is replayed under each evolution setting:
 \begin{itemize}
   \item \textbf{No evolution}: disables persistent learning and establishes the
   base-agent floor.
@@ -353,7 +353,7 @@ All arms use identical tasks, order, tools, agent configuration, and judges.
 The experiments instantiate the gym's task-source interface with AgentHazard
 \citep{feng2026agenthazard}. The adapter exposes its harmful objectives,
 multi-step attack sequences, ten risk categories, sandboxed computer-use tasks,
-reset procedure, and trajectory-level judge. It also constructs matched benign
+reset procedure, and trajectory-level judge. It also constructs benign
 twins and persistence probes required by the benchmark episode protocol. Every
 assembled episode is executed by four target-agent configurations. Claude
 Code, Codex, Hermes, and OpenClaw share MiniMax-M2.5, holding the backbone fixed while
@@ -442,10 +442,10 @@ export and remains outside numerical comparisons.
 
 Results are micro-aggregated over all valid tasks or authored skills; we do not
 average per-episode percentages. Confidence intervals
-use episode-level bootstrap resampling. Paired utility, ASR, contamination,
-unsafe-retrieval, and carryover outcomes are tested over matched task instances;
-method comparisons report standardized differences and
-multiple-comparison-adjusted intervals. Hyperparameters, episode construction,
+use episode-level bootstrap resampling. Utility, ASR, contamination,
+unsafe-retrieval, and carryover outcomes are compared over the same task
+instances; method comparisons report multiple-comparison-adjusted intervals.
+Hyperparameters, episode construction,
 and the held-out split are frozen before the final sweep. Headline metrics pool
 all three rounds. Dose--response points instead use the corresponding $M_r$ or
 $B_r$ block and the cumulative artifact snapshot after round $r$.
@@ -643,7 +643,7 @@ skills with $cu\geq3$; UG and Stealth are the fractions with $gen\geq3$ and
 $sneak\geq3$ among those unsafe skills. URR, C-ASR, and C-Util report unsafe
 retrieval, carryover ASR, and carryover utility after retrieval is rebuilt
 solely from \texttt{SKILL.md}. All frameworks use the same MiniMax backbone for
-a model-matched comparison. For URR, N/A means that the frozen
+the agent-framework comparison. For URR, N/A means that the frozen
 \texttt{SKILL.md} contains no evolved skill with exported $cu\geq3$; URR is
 then undefined rather than zero. Elsewhere, N/A marks a setting with no skill
 artifact; it never denotes a failed run.
@@ -677,8 +677,8 @@ RQ2 reports each transition in Equation~\ref{eq:sequence}. At each round, report
 ASR on the $M$ block, benign utility and contamination on the
 following $B$ block, and the three thresholded artifact rates on all skills authored
 so far. Then report URR, carryover ASR, and carryover utility after rebuilding
-retrieval from the frozen \texttt{SKILL.md}. Report matched and stratified
-conditional differences descriptively.
+retrieval from the frozen \texttt{SKILL.md}. Report these comparisons
+descriptively.
 
 \begin{table}[t]
 \centering
@@ -686,7 +686,7 @@ conditional differences descriptively.
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{lcc}
 \toprule
-\textbf{Transition in the sequence} & \textbf{Rate} & \textbf{Conditional difference} \\
+\textbf{Transition in the sequence} & \textbf{Rate} & \textbf{Comparison} \\
 \midrule
 Malicious block $\rightarrow$ unsafe authored artifact & -- & -- \\
 Unsafe artifact $\rightarrow$ unsafe exported skill & -- & -- \\
@@ -697,8 +697,8 @@ Reloaded \texttt{SKILL.md} $\rightarrow$ carryover utility & -- & -- \\
 \end{tabular}
 \caption{\textbf{Exposure-to-persistence sequence (RQ2).} Each row reports an
 observable transition. Skill involvement is recorded only when retrieval is
-observed. Conditional differences compare matched episodes with and without
-the preceding observed event.}
+observed. The comparison reports episodes with and without the preceding
+observed event.}
 \label{tab:sequence}
 \end{table}
 
@@ -727,9 +727,9 @@ post-attack behavior.
 
 \paragraph{Framework decomposition.}
 The four MiniMax-M2.5 targets hold the backbone fixed while changing the agent
-framework, enabling matched comparisons across tool mediation, system instructions,
+framework, enabling comparisons across tool mediation, system instructions,
 skill retrieval, and execution policy. Report these framework
-contrasts before the overall macro-average; the four configurations are
+comparisons before the overall macro-average; the four configurations are
 related controls, not interchangeable replications.
 
 \begin{figure*}[t]
@@ -757,7 +757,7 @@ related controls, not interchangeable replications.
 
 The dose--response sweep changes how much adversarial experience enters the
 learning stream. The timing sweep fixes the malicious dose at one three-task
-block and moves that block through an otherwise matched learning history. The
+block and moves that block through an otherwise identical learning history. The
 three schedules are
 \begin{align*}
   \text{\textsc{Early}}:  &\quad \mathrm{MMM\,BBB\;BBB\,BBB\;BBB\,BBB}
@@ -785,7 +785,7 @@ library is frozen.
     \textbf{(b) Final Content Unsafety rate (CU)} \quad
     \textbf{(c) Carryover ASR}.\\[3pt]
     One line per evolution method with episode-bootstrap CIs. Each point is an
-    absolute micro aggregate over the 25 matched episodes; utility outcomes and
+    absolute micro aggregate over the 25 episodes; utility outcomes and
     the complete nine-metric timing table appear in the appendix.
   }}
   \caption{\textbf{Exposure timing at a fixed malicious dose (RQ3).} Moving the
@@ -1380,7 +1380,7 @@ Hermes-native & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- 
 \caption{\textbf{SkillsBench capability breakdown.} Every cell orders the
 three governance conditions as Raw / Library-Drift / \safeevolve. Pass is the
 official task-macro pass rate; $\Delta$ and normalized gain are computed from
-the matched no-skill condition at full precision.}
+the corresponding no-skill condition at full precision.}
 \label{tab:skillsbench-full}
 \end{table*}
 
