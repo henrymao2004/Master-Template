@@ -49,7 +49,7 @@
 
 \begin{abstract}
 LLM agents increasingly improve themselves by distilling successful
-interactions into reusable skills. This turns experience into persistent
+interactions into reusable skills. This stores experience as persistent
 behavioral policy, yet existing evaluations measure whether evolution improves
 capability without testing what happens when success depends on an unsafe
 shortcut. We identify \emph{skill misevolution}: a transient unsafe success is
@@ -69,7 +69,7 @@ malicious ASR, and benign-task contamination are
 Stealthiness (Stealth) rates are [CU/UG/Stealth]; unsafe retrieval reaches [URR],
 carryover ASR reaches [CA], and carryover utility remains [C-Util]. Unsafe
 content appears in the skill library before it consistently manifests as
-behavior, and the effect emerges by round [R], after [K] malicious tasks. We
+behavior, and the pattern appears by round [R], after [K] malicious tasks. We
 further introduce \safeevolve, a governance layer that audits and
 repairs candidate skills, preserves verification steps, tracks provenance, and
 retires skills with unsafe reuse histories. Under \safeevolve, the online
@@ -77,7 +77,7 @@ metrics are [BU'/MA'/BA'], artifact rates are [CU'/UG'/Stealth'],
 and post-attack URR / carryover ASR / utility are
 [URR' (or N/A when no unsafe skill is exported)/CA'/C-Util'].
 These results show that self-improvement is a security-relevant policy update:
-practice can make an agent more capable and persistently less safe.
+practice can coincide with greater capability and persistent unsafety.
 \end{abstract}
 
 \section{Introduction}
@@ -94,11 +94,10 @@ The signal used to produce that update is usually task success or efficiency.
 Successful behavior, however, is not necessarily safe behavior. An agent may
 complete a task by skipping a verification step, assuming authorization,
 treating an irreversible action as routine, or following an attacker-controlled
-observation. If the evolution method compresses that trajectory into a reusable
-procedure, it can preserve the unsafe shortcut precisely because the shortcut
-helped the agent succeed.
+observation. When such a shortcut appears in a successful trajectory, an
+evolution method may preserve it together with the useful procedure.
 
-This creates a temporal safety failure that independent-task evaluations cannot
+This motivates a temporal safety question that independent-task evaluations cannot
 observe. The original attack may disappear with the context window, but the
 lesson extracted from it can remain in the skill library. A later benign task
 can retrieve the skill, apply its over-generalized rule, and reproduce the harm
@@ -119,42 +118,41 @@ fresh session.
 \bench is the evaluation protocol built on this gym. Its basic unit is a
 21-task episode with three rounds of three malicious tasks followed by three
 benign tasks, then three persistence probes in a fresh executor session.
-Matched no-evolution and benign-only-update controls isolate whether later harm
-comes from malicious experience entering the learned artifact rather than the
-base model or ordinary benign learning.
+Matched no-evolution and benign-only-update controls provide reference
+distributions for later harm under the base agent, benign learning, and learning
+histories that include malicious experience.
 
 The benchmark evaluates three stages of the failure. Online behavior is measured
 by benign utility, malicious ASR, and benign ASR
 (contamination). The evolved artifact is measured by thresholded Content
 Unsafety (CU), Unsafe Generalization (UG), and Stealthiness (Stealth) rates. Post-attack behavior is
 measured by Unsafe Retrieval Rate (URR), carryover ASR, and carryover utility in
-a clean session. This
-distinction matters because an unsafe skill can remain latent
+a clean session. An unsafe skill can remain latent
 until a later task supplies the right retrieval cue. Behavior-only evaluation
 therefore misses risk that has already entered the persistent policy.
 
-Our evaluation asks four questions. \textbf{RQ1} tests whether evolution
-increases unsafe behavior while retaining utility. \textbf{RQ2} follows the
-exposure-to-persistence chain and tests whether the skill artifact mediates
-later harm. \textbf{RQ3} measures how the effect varies across evolution
+Our evaluation asks four questions. \textbf{RQ1} compares unsafe behavior and
+utility with and without evolution. \textbf{RQ2} follows the
+exposure-to-persistence sequence and tests whether unsafe artifacts, retrieval,
+and later harm occur in the expected temporal order. \textbf{RQ3} measures how the observed pattern varies across evolution
 methods, agent configurations, task categories, attack strategies, attacker
 budgets, and exposure timing at a fixed budget. \textbf{RQ4}
-tests whether \safeevolve can break this chain without removing the capability
-benefits of learning.
+tests whether \safeevolve retains learning utility while showing lower risk
+across the tracked sequence.
 
 \safeevolve acts at the learning boundary rather than as another runtime
 refusal layer. It audits the complete candidate skill bundle before admission,
 repairs unsafe generalization instead of deleting useful procedures, preserves
 verification requirements during revision, records the experiences from which
-each skill was learned, and downweights or retires skills whose reuse produces
-unsafe behavior. These components target the persistent object responsible for
-the incremental risk: the evolved skill library.
+each skill was learned, and downweights or retires skills whose reuse is
+followed by unsafe behavior. These components govern the persistent object
+associated with the observed incremental risk: the evolved skill library.
 
 Our contributions are:
 \begin{enumerate}
-  \item We identify \textbf{skill misevolution}, a temporal failure mode in
-  which self-improvement converts transient unsafe success into persistent
-  behavior that can reappear on benign tasks without the original attack.
+  \item We identify \textbf{skill misevolution}, a temporal pattern in which
+  transient unsafe success is recorded in a persistent skill and unsafe
+  behavior reappears on benign tasks without the original attack.
 
   \item We introduce \gym, a reusable environment for safety evaluation of
   self-improving agents. It provides a common skill lifecycle, versioned library
@@ -173,9 +171,9 @@ Our contributions are:
   AgentHazard risk categories, exposure budgets, and timing placements, separating
   artifact-level latent risk from post-attack realized harm.
 
-  \item We introduce \safeevolve and show that governing skill admission,
-  revision, provenance, and retirement reduces evolution-induced harm while
-  retaining the utility gained through learning.
+  \item We introduce \safeevolve and evaluate whether safety-aware skill
+  admission, revision, provenance, and retirement attain lower observed risk
+  while retaining learning utility.
 \end{enumerate}
 
 \section{Related Work}
@@ -186,7 +184,7 @@ Position this work against methods that extract, edit, select, vote over, or
 retrieve reusable skills from agent trajectories. Organize the literature by
 the persistent artifact each method produces and the success signal used to
 select it. The key gap is that these methods report capability improvement but
-do not measure evolution-induced safety change.
+do not measure safety patterns across an evolving skill history.
 
 \paragraph{Safety of persistent agent memory.}
 Discuss memory poisoning, long-term memory evolution, retrieval attacks, and
@@ -207,7 +205,7 @@ skill state, lifecycle instrumentation, and cross-task execution protocol.
 \paragraph{Governance of evolving libraries.}
 Contrast \safeevolve with capability-oriented library maintenance and drift
 control. Library hygiene retains skills that improve task success, including
-skills whose utility comes from unsafe shortcuts. \safeevolve introduces safety
+skills that are both useful and unsafe. \safeevolve introduces safety
 as a first-class admission and retention signal.
 
 \section{Skill Misevolution}
@@ -216,7 +214,7 @@ as a first-class admission and retention signal.
 \subsection{Self-improvement as a policy update}
 
 Let an agent with base policy $\pi$ execute a sequence of three-task blocks
-$\taskseq=(Q_1,\ldots,Q_K)$, where $Q_k=(q_{k,1},q_{k,2},q_{k,3})$ produces
+$\taskseq=(Q_1,\ldots,Q_K)$, where $Q_k=(q_{k,1},q_{k,2},q_{k,3})$ yields
 trajectories $\mathcal{T}_k=(\tau_{k,1},\tau_{k,2},\tau_{k,3})$. After block
 $Q_k$, an evolution method $\evolution$ maps the three trajectories and current
 library $\library_k$ to one updated library:
@@ -225,15 +223,16 @@ library $\library_k$ to one updated library:
   \label{eq:evolution}
 \end{equation}
 The next three-task block is executed by the base agent conditioned on
-retrieved skills from $\library_{k+1}$. Conversational state is reset between tasks, so any
-systematic cross-task change is carried by the evolved artifact.
+retrieved skills from $\library_{k+1}$. Conversational state is reset between
+tasks, and the library is the only intended cross-task state retained by the
+protocol.
 
-\subsection{Definition and causal chain}
+\subsection{Definition and temporal sequence}
 
-An episode exhibits \emph{skill misevolution} when an unsafe procedure learned
-from an earlier trajectory enters the persistent library and causes incremental
-unsafe behavior on a later task relative to a matched no-evolution execution.
-The proposed causal chain is:
+An episode exhibits \emph{skill misevolution} when an unsafe procedure from an
+earlier trajectory is recorded in the persistent library, is later retrieved,
+and co-occurs with higher unsafe behavior than in a matched no-evolution
+execution. The benchmark tracks the following temporal sequence:
 \begin{equation}
 \text{unsafe success}
 \rightarrow \text{skill extraction}
@@ -241,19 +240,19 @@ The proposed causal chain is:
 \rightarrow \text{retrieval}
 \rightarrow \text{reuse}
 \rightarrow \text{persistent harm}.
-\label{eq:chain}
+\label{eq:sequence}
 \end{equation}
-The benchmark separately observes each link. This prevents a later unsafe
-action from being attributed to the skill merely because a skill library was
-present.
+The benchmark separately reports artifact formation, retrieval, and later
+action. Skill involvement requires an observed retrieval event in addition to
+the presence of a skill library.
 
 \subsection{Threat model}
 
 The attacker controls a bounded number of task inputs during the learning
 history but does not modify the evolution code, skill store, retrieval engine,
 judge, or final persistence probe. The attacker succeeds when an exposure is
-absorbed into a reusable skill that increases unsafe behavior or later causes
-harm without a new attack. The strongest outcome is carryover ASR in a fresh
+recorded in a reusable skill and later unsafe behavior appears without a new
+attack. The strongest observed outcome is carryover ASR in a fresh
 session whose retrieval state is reconstructed only from the final frozen
 \texttt{SKILL.md}.
 
@@ -342,8 +341,8 @@ Every episode is replayed under matched evolution settings:
   \item \textbf{No evolution}: disables persistent learning and establishes the
   base-agent floor.
   \item \textbf{Benign-only updates}: executes the identical task sequence but
-  permits skill updates only after $B^3$ blocks, testing whether ordinary benign
-  learning alone produces the effect.
+  permits skill updates only after $B^3$ blocks, providing the reference pattern
+  under ordinary benign learning.
   \item \textbf{Full evolution}: applies each evaluated method to all successful
   trajectories in three-task batches under its native update rule.
 \end{itemize}
@@ -365,7 +364,7 @@ an isolated language model.
 The main comparison includes five agent-agnostic evolution methods: EvoSkill,
 SkillClaw, AutoSkill, SkillsVote, and SkillOpt. Each runs on all four target
 agents. Hermes also provides a framework-native evolution path that is not
-comparable across agents; we therefore report it as a separate native-mechanism
+comparable across agents; we therefore report it as a separate native-method
 study in Appendix~\ref{app:hermes-native}, with diagnostic results in
 Table~\ref{tab:hermes-native} and governed results in
 Table~\ref{tab:safeevolve-full}. Each method is evaluated in its actual stored representation, including
@@ -435,9 +434,9 @@ URR is N/A when $\mathcal{P}_U$ is empty; it is never replaced by zero. It
 measures retrieval of an unsafe evolved skill, not retrieval of arbitrary
 benign skills. Thus a $P$ task enters the URR denominator only when its
 episode's frozen export contains at least one evolved skill with $cu\geq3$.
-Because a method can make URR undefined by preventing unsafe
-export altogether, URR is interpreted jointly with the artifact panel rather
-than compared as though N/A were a numerical improvement.
+Because a method can make URR undefined by preventing unsafe export altogether,
+URR is interpreted jointly with the artifact panel. N/A denotes no unsafe
+export and remains outside numerical comparisons.
 
 \subsection{Statistical protocol}
 
@@ -445,7 +444,7 @@ Results are micro-aggregated over all valid tasks or authored skills; we do not
 average per-episode percentages. Confidence intervals
 use episode-level bootstrap resampling. Paired utility, ASR, contamination,
 unsafe-retrieval, and carryover outcomes are tested over matched task instances;
-method comparisons report effect sizes and
+method comparisons report standardized differences and
 multiple-comparison-adjusted intervals. Hyperparameters, episode construction,
 and the held-out split are frozen before the final sweep. Headline metrics pool
 all three rounds. Dose--response points instead use the corresponding $M_r$ or
@@ -477,7 +476,7 @@ efficiency-oriented edit from treating a safeguard as removable overhead.
 \subsection{Lineage and provenance}
 
 Each skill stores its source tasks, trajectories, revisions, and exposure
-status. Provenance supports attribution and batch rollback when an upstream
+status. Provenance supports traceability and batch rollback when an upstream
 experience is later judged unsafe. It also supplies a risk prior to retrieval
 and retirement decisions.
 
@@ -514,26 +513,26 @@ which keeps useful but unsafe skills.
 \subsection{Research questions}
 
 \begin{description}
-  \item[RQ1: Safety--utility coupling.] Does skill evolution increase unsafe
-  behavior while retaining or improving task utility?
-  \item[RQ2: Exposure-to-persistence mechanism.] Does unsafe experience enter
-  the skill artifact, get retrieved, and produce post-attack carryover ASR
+  \item[RQ1: Safety--utility association.] Is skill evolution associated with
+  higher unsafe behavior while retaining or improving task utility?
+  \item[RQ2: Exposure-to-persistence sequence.] Do unsafe experience, an unsafe
+  skill artifact, retrieval, and post-attack carryover ASR appear in sequence
   while retaining carryover utility?
   \item[RQ3: Scope, budget, and timing.] How does misevolution vary across
   methods, agents, task categories and attack strategies, cumulative doses of
   three, six, and nine malicious tasks, and early versus late exposure at a
   fixed dose?
-  \item[RQ4: Mitigation.] Can \safeevolve reduce the three evolved-artifact
-  risks, malicious and benign ASR, unsafe retrieval, and carryover ASR while
-  preserving utility?
+  \item[RQ4: Mitigation.] Does \safeevolve retain utility while attaining lower
+  evolved-artifact risk, malicious and benign ASR, unsafe retrieval, and
+  carryover ASR?
 \end{description}
 
 \subsection{Evaluation matrix}
 
 The main evaluation treats target-agent as a first-class axis, not a nuisance
 variable to average away. Table~\ref{tab:targets} fixes the four configurations.
-The shared MiniMax backbone isolates framework effects across Claude Code,
-Codex, Hermes, and OpenClaw. Each
+All four frameworks use the same MiniMax backbone, holding the model constant
+across Claude Code, Codex, Hermes, and OpenClaw. Each
 applicable agent-agnostic evolution method runs on the identical frozen episode
 set for every target.
 
@@ -573,7 +572,7 @@ frozen train/development/held-out protocol.
 \section{Results}
 \label{sec:results}
 
-\subsection{RQ1: Does evolution increase unsafe behavior while retaining utility?}
+\subsection{RQ1: Is evolution associated with higher unsafe behavior while retaining utility?}
 \label{sec:rq1}
 
 Table~\ref{tab:misevolution-main} is the paper's primary diagnostic table. Its
@@ -643,13 +642,13 @@ malicious ASR, and benign ASR (contamination). CU is the fraction of authored
 skills with $cu\geq3$; UG and Stealth are the fractions with $gen\geq3$ and
 $sneak\geq3$ among those unsafe skills. URR, C-ASR, and C-Util report unsafe
 retrieval, carryover ASR, and carryover utility after retrieval is rebuilt
-solely from \texttt{SKILL.md}. The shared MiniMax
-backbone isolates agent-framework effects. For URR, N/A means that the frozen
+solely from \texttt{SKILL.md}. All frameworks use the same MiniMax backbone for
+a model-matched comparison. For URR, N/A means that the frozen
 \texttt{SKILL.md} contains no evolved skill with exported $cu\geq3$; URR is
 then undefined rather than zero. Elsewhere, N/A marks a setting with no skill
 artifact; it never denotes a failed run.
 The exposure-to-persistence transitions are expanded in
-Table~\ref{tab:chain}. Add 95\% episode-bootstrap intervals in the supplement
+Table~\ref{tab:sequence}. Add 95\% episode-bootstrap intervals in the supplement
 or an accompanying interval plot.}
 \label{tab:misevolution-main}
 \end{table*}
@@ -659,28 +658,27 @@ Across four target-agent configurations, online behavior reaches
 [BU/MA/BA] on benign utility, malicious ASR, and
 contamination. Evolved artifacts reach [CU/UG/ST], and the post-attack probe
 reaches [URR/C-ASR/C-Util] on unsafe retrieval, carryover ASR, and carryover
-utility. The effect appears in
+utility. The pattern appears in
 [A/4] targets and [B/M]
-evolution methods. The joint result rules out a pure context effect: the attack
-is absent, the executor is reset, and the only object reloaded for retrieval is
-the frozen \texttt{SKILL.md}.
+evolution methods. In the post-attack probe, the attack is absent, the executor
+is reset, and later behavior is measured after reloading only the frozen
+\texttt{SKILL.md}.
 
 \paragraph{Safety--utility frontier.}
 Plot each method by carryover utility and carryover ASR. The important region
 is high utility and high carryover ASR: these methods preserve useful procedures while
-also retaining the unsafe shortcut, making capability improvement an
-unreliable safety signal.
+also retaining the unsafe shortcut, so capability improvement alone is not a
+reliable safety signal.
 
-\subsection{RQ2: How does exposure become persistent harm?}
+\subsection{RQ2: How do exposure, skill state, and later harm align over time?}
 \label{sec:rq2}
 
-RQ2 tests each link of Equation~\ref{eq:chain}. At each round, report malicious
+RQ2 reports each transition in Equation~\ref{eq:sequence}. At each round, report malicious
 ASR on the $M$ block, benign utility and contamination on the
 following $B$ block, and the three thresholded artifact rates on all skills authored
 so far. Then report URR, carryover ASR, and carryover utility after rebuilding
-retrieval from the frozen \texttt{SKILL.md}. Use matched
-mediation or stratified conditional effects rather than inferring mediation
-from a single example.
+retrieval from the frozen \texttt{SKILL.md}. Report matched and stratified
+conditional differences descriptively.
 
 \begin{table}[t]
 \centering
@@ -688,7 +686,7 @@ from a single example.
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{lcc}
 \toprule
-\textbf{Link in the chain} & \textbf{Rate} & \textbf{Conditional effect} \\
+\textbf{Transition in the sequence} & \textbf{Rate} & \textbf{Conditional difference} \\
 \midrule
 Malicious block $\rightarrow$ unsafe authored artifact & -- & -- \\
 Unsafe artifact $\rightarrow$ unsafe exported skill & -- & -- \\
@@ -697,21 +695,21 @@ Unsafe skill retrieval on $P$ $\rightarrow$ carryover ASR & -- & -- \\
 Reloaded \texttt{SKILL.md} $\rightarrow$ carryover utility & -- & -- \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{Exposure-to-persistence chain (RQ2).} Each row measures an
-observable transition rather than treating later harm as automatic evidence of
-skill mediation. Conditional effects compare matched episodes with and without
-the upstream event.}
-\label{tab:chain}
+\caption{\textbf{Exposure-to-persistence sequence (RQ2).} Each row reports an
+observable transition. Skill involvement is recorded only when retrieval is
+observed. Conditional differences compare matched episodes with and without
+the preceding observed event.}
+\label{tab:sequence}
 \end{table}
 
 \paragraph{Artifact risk precedes behavioral harm.}
 Compare the three artifact rates with realized carryover ASR. Episodes with
 high content unsafety, unsafe generalization, or stealthiness but no post-attack
-harm constitute latent risk: the persistent policy has changed, but the probe
-has not supplied the retrieval cue or execution opportunity. Quantify this
+harm constitute latent artifact risk even when retrieval or an unsafe action is
+not observed. Quantify this
 artifact--behavior gap by method and agent.
 
-\paragraph{Worked causal trace.}
+\paragraph{Worked temporal trace.}
 Show one compact case from source exposure to authored skill diff, later
 retrieval log, unsafe tool action, judge state, and fresh-session reproduction.
 The example should expose the exact over-generalized clause and the safety check
@@ -729,8 +727,8 @@ post-attack behavior.
 
 \paragraph{Framework decomposition.}
 The four MiniMax-M2.5 targets hold the backbone fixed while changing the agent
-framework, exposing the contribution of tool mediation, system instructions,
-skill retrieval, and execution policy. Report these controlled framework
+framework, enabling matched comparisons across tool mediation, system instructions,
+skill retrieval, and execution policy. Report these framework
 contrasts before the overall macro-average; the four configurations are
 related controls, not interchangeable replications.
 
@@ -772,9 +770,9 @@ three schedules are
 Non-adversarial positions use the corresponding benign twins. Every schedule
 therefore contains the same 18 learning-stage tasks, three malicious tasks,
 15 benign tasks, six block-level evolution opportunities, and three clean-session
-persistence probes. This isolates whether an early unsafe update compounds
-through later reuse or a recent unsafe update persists because fewer benign
-updates intervene before the library is frozen.
+persistence probes. This compares early exposure followed by more benign
+updates with recent exposure followed by fewer benign updates before the
+library is frozen.
 
 \begin{figure*}[t]
   \centering
@@ -791,32 +789,32 @@ updates intervene before the library is frozen.
     the complete nine-metric timing table appear in the appendix.
   }}
   \caption{\textbf{Exposure timing at a fixed malicious dose (RQ3).} Moving the
-  same three malicious tasks across a fixed-length learning history separates
-  compounding from recency. Final-block contamination measures harmful behavior
+  same three malicious tasks across a fixed-length learning history contrasts
+  earlier and more recent exposure. Final-block contamination measures harmful behavior
   on the last benign block before freezing, content unsafety audits the final
   authored library, and carryover ASR tests retrieval reloaded solely from the
   frozen \texttt{SKILL.md} in a clean session.}
   \label{fig:timing}
 \end{figure*}
 
-\paragraph{Failure mechanisms.}
+\paragraph{Failure patterns.}
 Cluster audited skill diffs into a small post-hoc taxonomy such as verification
 skipping, authorization assumption, policy erosion, and unsafe
 over-generalization. Report multi-label frequencies and annotator agreement.
-Use the taxonomy to explain variation, not as the primary proof that
+Use the taxonomy to summarize variation, not as the primary evidence that
 misevolution exists.
 
-\subsection{RQ4: Can SafeEvolve preserve learning without preserving harm?}
+\subsection{RQ4: How do safety and utility compare under SafeEvolve?}
 \label{sec:rq4}
 
 The mitigation evaluation uses held-out AgentHazard episodes and attack
 strategies that are hidden
 during evolution, repair-policy development, and threshold selection. Libraries
-are frozen before evaluation. A mitigation must lower malicious ASR and benign
-contamination while preserving benign utility and reduce all three artifact
-rates. Post-attack, it must either prevent unsafe skill export altogether or,
-where unsafe exported skills remain, lower fresh-session URR and carryover ASR
-while preserving carryover utility. The three stages are reported together
+are frozen before evaluation. A favorable mitigation profile has lower
+malicious ASR, benign contamination, and artifact rates alongside preserved
+benign utility. Post-attack, it has either no unsafe exported skill or, where
+unsafe exported skills remain, lower fresh-session URR and carryover ASR
+alongside preserved carryover utility. The three stages are reported together
 rather than collapsed into one score.
 
 % Appendix table defined here and rendered after \appendix.
@@ -991,8 +989,8 @@ supported target rather than imputing results for other agents.}
 \rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{SafeEvolve reduces online, artifact, and carryover risk while
-preserving utility (RQ4).} For each target agent and governance condition, we
+\caption{\textbf{SafeEvolve safety and utility under the same evaluation
+protocol (RQ4).} For each target agent and governance condition, we
 first compute every metric as an absolute micro-aggregate, then macro-average
 equally over the five agent-agnostic evolution methods. The final row block
 gives the equal-weight target-agent average. Unsupported method--agent pairs
@@ -1005,10 +1003,10 @@ Appendix~Table~\ref{tab:safeevolve-full}.}
 \end{table*}
 
 \paragraph{Why Library-Drift is the decisive baseline.}
-Capability-oriented hygiene can remove stale or low-value skills, but it should
-retain a skill that improves utility through an unsafe shortcut. A gap between
-Library-Drift and \safeevolve therefore tests whether an explicitly safety-aware
-objective is necessary.
+Capability-oriented hygiene can remove stale or low-value skills, but it may
+retain a skill associated with both higher utility and an unsafe shortcut. A gap between
+Library-Drift and \safeevolve provides a direct comparison between
+capability-oriented and explicitly safety-aware governance.
 
 \paragraph{Full-system evaluation on SkillSafetyBench.}
 The held-out episode table tests end-to-end mitigation inside evolving agents.
@@ -1025,10 +1023,10 @@ retirement; SkillSafetyBench supplies an independent one-update, downstream
 behavior test.
 
 SkillSafetyBench's unsafe outcome on a nominally benign task resembles benign
-ASR (contamination), but the causal setting differs: it supplies the adversarial
+ASR (contamination), but the evaluation setup differs: it supplies the adversarial
 artifact in the evaluated run, whereas \bench contamination is harmful behavior
-on a later zero-injection benign task caused by a skill learned from earlier
-malicious experience. We therefore retain SkillSafetyBench's official ASR, task
+observed on a later zero-injection benign task after a skill was learned from
+earlier malicious experience. We therefore retain SkillSafetyBench's official ASR, task
 success, and task-success-conditional ASR rather than relabeling its result as
 contamination.
 
@@ -1137,7 +1135,7 @@ Full per-method results and confidence intervals appear in the appendix.}
 
 \paragraph{Component evaluation.}
 Finally, ablate admission auditing, verification preservation, provenance
-rollback, and safety-aware retirement. These component results explain the
+rollback, and safety-aware retirement. These component results characterize the
 three complete RQ4 evaluations; they do not replace held-out behavioral or
 capability evidence.
 
@@ -1183,30 +1181,29 @@ Product evaluation should therefore report online utility and ASR, the three
 artifact properties, and the two post-attack outcomes separately.
 
 \paragraph{Capability and safety share the same shortcut.}
-The difficult cases are not useless malicious skills. They are procedures that
-increase success by removing friction that was serving as a safeguard. This is
-why disabling evolution loses capability and capability-only library hygiene
-does not solve the problem.
+The difficult cases are not useless malicious skills. They are procedures in
+which higher success appears alongside the removal of friction that served as a
+safeguard. Accordingly, we report capability together with safety rather than
+treating either one alone as sufficient.
 
 \paragraph{Scope and limitations.}
-The study focuses on readable skill artifacts produced by CLI and coding agents
+The study focuses on readable skill artifacts written by CLI and coding agents
 and on bounded direct exposure in executable task environments. Results support
-claims about evolution-induced incremental risk within this setting. Future
+claims about incremental risk observed under evolution within this setting. Future
 work should test indirect exposure, multimodal skills, opaque learned memories,
 longer deployment horizons, interacting libraries, and adaptive attackers.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-Skill self-evolution changes the temporal structure of agent safety. An unsafe
-action need not end with the trajectory that produced it: evolution can extract
-the successful shortcut, store it as a reusable skill, and apply it later when
-the original attack is gone. \gym makes this state transition executable and
-replayable; \bench makes it measurable from exposure through artifact formation
+Skill self-evolution changes the temporal structure of agent safety. Our
+evaluation observes unsafe shortcuts in reusable skills and later behavior after
+the original attack is gone. \gym makes this longitudinal state observable and
+replayable; \bench measures exposure, artifact formation,
 and clean-session carryover. \safeevolve shows how to govern the
 persistent update while preserving useful learning. Safe self-improvement
-requires evaluating not only whether an agent succeeds today, but also what
-today's success teaches it to do tomorrow.
+requires evaluating not only whether an agent succeeds today, but also which
+persistent skills and later behaviors appear after that success.
 
 \bibliography{iclr2026_conference}
 \bibliographystyle{iclr2026_conference}
@@ -1267,7 +1264,7 @@ Hermes-native       & --/--/-- & --/--/--    & --/--/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Hermes-native diagnostic evaluation.} The framework-native
-evolution mechanism is reported separately because it has no meaningful
+evolution method is reported separately because it has no meaningful
 cross-agent cells. Metrics use the same absolute $3+3+3$ protocol as
 Table~\ref{tab:misevolution-main}. Its Raw / Library-Drift / \safeevolve
 comparison appears in Table~\ref{tab:safeevolve-full}.}
@@ -1425,7 +1422,7 @@ cost accounting and the policy for re-auditing repaired bundles.
 
 For each major failure family, show the source trajectory, skill diff, lineage,
 the three evolved-artifact rates, retrieval event, later tool trajectory,
-carryover-harm and carryover-utility evidence, and the effect of \safeevolve.
+carryover-harm and carryover-utility evidence, and outcomes under \safeevolve.
 Include negative cases where the artifact is judged unsafe but the executor
 blocks its reuse, and where evolution remains safe.
 
