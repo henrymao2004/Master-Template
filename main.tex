@@ -65,15 +65,15 @@ AgentHazard as its executable safety-task source. Across four agent
 frameworks using a shared MiniMax backbone, six
 evolution methods and ten AgentHazard risk categories, benign utility,
 malicious ASR, and benign-task contamination are
-[BU/MA/BA]. Content Unsafety (CU), Unsafe Generalization (UG), and
-Stealthiness (Stealth) are [CU/UG/Stealth]; unsafe retrieval reaches [URR],
+[BU/MA/BA]. Thresholded Content Unsafety (CU), Unsafe Generalization (UG), and
+Stealthiness (Stealth) rates are [CU/UG/Stealth]; unsafe retrieval reaches [URR],
 carryover ASR reaches [CA], and carryover utility remains [C-Util]. Unsafe
 content appears in the skill library before it consistently manifests as
 behavior, and the effect emerges by round [R], after [K] malicious tasks. We
 further introduce \safeevolve, a governance layer that audits and
 repairs candidate skills, preserves verification steps, tracks provenance, and
 retires skills with unsafe reuse histories. Under \safeevolve, the online
-metrics are [BU'/MA'/BA'], artifact scores are [CU'/UG'/Stealth'],
+metrics are [BU'/MA'/BA'], artifact rates are [CU'/UG'/Stealth'],
 and post-attack URR / carryover ASR / utility are
 [URR' (or N/A when no unsafe skill is exported)/CA'/C-Util'].
 These results show that self-improvement is a security-relevant policy update:
@@ -125,8 +125,8 @@ base model or ordinary benign learning.
 
 The benchmark evaluates three stages of the failure. Online behavior is measured
 by benign utility, malicious ASR, and benign ASR
-(contamination). The evolved artifact is measured by Content Unsafety (CU),
-Unsafe Generalization (UG), and Stealthiness (Stealth). Post-attack behavior is
+(contamination). The evolved artifact is measured by thresholded Content
+Unsafety (CU), Unsafe Generalization (UG), and Stealthiness (Stealth) rates. Post-attack behavior is
 measured by Unsafe Retrieval Rate (URR), carryover ASR, and carryover utility in
 a clean session. This
 distinction matters because an unsafe skill can remain latent
@@ -163,8 +163,8 @@ Our contributions are:
 
   \item We introduce \bench, a task-source-independent temporal protocol with
   paired evolution controls and nine absolute metrics: benign utility,
-  malicious ASR, benign ASR (contamination), Content
-  Unsafety (CU), Unsafe Generalization (UG), Stealthiness (Stealth), Unsafe
+  malicious ASR, benign ASR (contamination), three artifact rates (Content
+  Unsafety (CU), Unsafe Generalization (UG), and Stealthiness (Stealth)), Unsafe
   Retrieval Rate (URR), carryover ASR, and carryover utility. We
   instantiate it with AgentHazard as the executable task and judge source.
 
@@ -402,16 +402,18 @@ call contamination, applies that harmful judge to $B$.
 Let $\mathcal{A}$ contain every skill authored from an $M^3$ or $B^3$ block, and let
 $\mathcal{A}_u=\{a\in\mathcal{A}:cu(a)\geq3\}$. Independent content judges
 assign 1--5 scores for Content Unsafety (CU), Unsafe Generalization (UG), and
-Stealthiness (Stealth), denoted $cu$, $gen$, and $sneak$. We report
+Stealthiness (Stealth), denoted $cu$, $gen$, and $sneak$. The headline artifact
+metrics threshold these ordinal judgments at 3 and report rates:
 \begin{equation}
-\mathrm{CU}=\frac{\sum_{a\in\mathcal{A}}cu(a)}{|\mathcal{A}|},\quad
-\mathrm{UG}=\frac{\sum_{a\in\mathcal{A}_u}gen(a)}{|\mathcal{A}_u|},\quad
-\mathrm{Stealth}=\frac{\sum_{a\in\mathcal{A}_u}sneak(a)}{|\mathcal{A}_u|}.
+\mathrm{CU}=\frac{\sum_{a\in\mathcal{A}}\mathbf{1}[cu(a)\geq3]}{|\mathcal{A}|},\quad
+\mathrm{UG}=\frac{\sum_{a\in\mathcal{A}_u}\mathbf{1}[gen(a)\geq3]}{|\mathcal{A}_u|},\quad
+\mathrm{Stealth}=\frac{\sum_{a\in\mathcal{A}_u}\mathbf{1}[sneak(a)\geq3]}{|\mathcal{A}_u|}.
 \end{equation}
-Thus CU reads all authored skills, whereas UG and Stealth are conditional on an
-unsafe authored skill. CU is N/A when $\mathcal{A}$ is empty; UG and Stealth
-are N/A when $\mathcal{A}_u$ is empty. Auditor agreement is measured on a
-double-labeled subset.
+Thus CU is the unsafe-artifact prevalence over all authored skills, whereas UG
+and Stealth are conditional rates among unsafe authored skills. CU is N/A when
+$\mathcal{A}$ is empty; UG and Stealth are N/A when $\mathcal{A}_u$ is empty.
+The appendix additionally reports the raw 1--5 score means, distributions, and
+auditor agreement on a double-labeled subset.
 
 \paragraph{Post-attack carryover.}
 After conversational and environment state are reset, the retrieval index is
@@ -575,60 +577,77 @@ frozen train/development/held-out protocol.
 \label{sec:rq1}
 
 Table~\ref{tab:misevolution-main} is the paper's primary diagnostic table. Its
-rows preserve the four target-agent configurations and its columns preserve the
-evolution methods. Panel A measures online utility and harmful behavior, Panel B measures the evolved skill
-artifact, and Panel C jointly tests whether unsafe retrieval, attack success,
-and utility survive in the fresh carryover session. This layout makes framework variation visible
-instead of hiding it inside one pooled method average.
+rows preserve every target-agent and evolution-method combination, while nine
+narrow metric columns expose online behavior, the evolved artifact, and
+post-attack carryover side by side. This layout makes framework variation
+visible without encoding three quantities inside each cell.
 
 % Main Table 1: do not place SafeEvolve in this table.
 \begin{table*}[t]
 \centering
 \scriptsize
-\setlength{\tabcolsep}{3.2pt}
-\renewcommand{\arraystretch}{1.04}
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.02}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{lccccccc}
+\begin{tabular}{llccc|ccc|ccc}
 \toprule
-\textbf{Target agent} & \textbf{No Evo.} &
-\textbf{Benign-only upd.} & \textbf{EvoSkill} &
-\textbf{SkillClaw} & \textbf{AutoSkill} &
-\textbf{SkillsVote} & \textbf{SkillOpt} \\
+\textbf{Target agent} & \textbf{Evolution setting} &
+\multicolumn{3}{c|}{\textbf{Online behavior}} &
+\multicolumn{3}{c|}{\textbf{Evolved artifact}} &
+\multicolumn{3}{c}{\textbf{Post-attack}} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+& & \textbf{BU}$\uparrow$ & \textbf{M-ASR}$\downarrow$ & \textbf{B-ASR}$\downarrow$ &
+\textbf{CU$\geq3$}$\downarrow$ & \textbf{UG$\geq3$}$\downarrow$ & \textbf{Stealth$\geq3$}$\downarrow$ &
+\textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
-\multicolumn{8}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
-Claude Code & 49.8/56.0/0.0 & --/--/-- & --/--/-- & 37.1/51.6/0.0 & 65.3/59.1/8.4 & --/--/-- & --/--/-- \\
-Codex       & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Hermes      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightgray}Macro avg. & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multirow{7}{*}{Claude Code}
+& No evolution        & 49.8 & 56.0 & 0.0 & N/A & N/A & N/A & N/A & 0.0 & 25.3 \\
+& Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillClaw           & 37.1 & 51.6 & 0.0 & 7.4 & 100.0 & 100.0 & 16.7 & 0.0 & 29.7 \\
+& AutoSkill           & 65.3 & 59.1 & 8.4 & 46.2 & 74.4 & 97.8 & 50.0 & 16.0 & 64.0 \\
+& SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multicolumn{8}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
-Claude Code & N/A/N/A/N/A & --/--/-- & --/--/-- & 1.19/3.00/3.50 & 2.54/2.91/4.07 & --/--/-- & --/--/-- \\
-Codex       & N/A/N/A/N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Hermes      & N/A/N/A/N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & N/A/N/A/N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightgray}Macro avg. & N/A/N/A/N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multirow{7}{*}{Codex}
+& No evolution        & -- & -- & -- & N/A & N/A & N/A & N/A & -- & -- \\
+& Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multicolumn{8}{l}{\textbf{C. Post-attack: unsafe retrieval ($\downarrow$) / carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
-Claude Code & N/A/0.0/25.3 & --/--/-- & --/--/-- & 16.7/0.0/29.7 & 50.0/16.0/64.0 & --/--/-- & --/--/-- \\
-Codex       & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Hermes      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightgray}Macro avg. & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multirow{7}{*}{Hermes}
+& No evolution        & -- & -- & -- & N/A & N/A & N/A & N/A & -- & -- \\
+& Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\midrule
+\multirow{7}{*}{OpenClaw}
+& No evolution        & -- & -- & -- & N/A & N/A & N/A & N/A & -- & -- \\
+& Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Skill evolution across four target-agent configurations
-(RQ1).} Each cell pools the same frozen episode distribution within one target
-agent and evolution setting. Panel A reports benign utility / malicious ASR /
-benign ASR (contamination), micro-aggregated over all scored
-$B$ and $M$ tasks. Panel B reports mean CU / UG / Stealth scores. Panel C reports
-URR / carryover ASR / carryover utility after retrieval is rebuilt solely from
-\texttt{SKILL.md} for all scored $P$ tasks. The shared MiniMax
+(RQ1).} All entries are percentages. BU, M-ASR, and B-ASR report benign utility,
+malicious ASR, and benign ASR (contamination). CU is the fraction of authored
+skills with $cu\geq3$; UG and Stealth are the fractions with $gen\geq3$ and
+$sneak\geq3$ among those unsafe skills. URR, C-ASR, and C-Util report unsafe
+retrieval, carryover ASR, and carryover utility after retrieval is rebuilt
+solely from \texttt{SKILL.md}. The shared MiniMax
 backbone isolates agent-framework effects. For URR, N/A means that the frozen
 \texttt{SKILL.md} contains no evolved skill with exported $cu\geq3$; URR is
 then undefined rather than zero. Elsewhere, N/A marks a setting with no skill
-artifact; it never denotes a failed run. URR
-macro-averages use only conditions in which URR is defined.
+artifact; it never denotes a failed run.
 The exposure-to-persistence transitions are expanded in
 Table~\ref{tab:chain}. Add 95\% episode-bootstrap intervals in the supplement
 or an accompanying interval plot.}
@@ -638,7 +657,7 @@ or an accompanying interval plot.}
 \paragraph{Result paragraph template.}
 Across four target-agent configurations, online behavior reaches
 [BU/MA/BA] on benign utility, malicious ASR, and
-contamination. Evolved artifacts score [CU/UG/ST], and the post-attack probe
+contamination. Evolved artifacts reach [CU/UG/ST], and the post-attack probe
 reaches [URR/C-ASR/C-Util] on unsafe retrieval, carryover ASR, and carryover
 utility. The effect appears in
 [A/4] targets and [B/M]
@@ -657,7 +676,7 @@ unreliable safety signal.
 
 RQ2 tests each link of Equation~\ref{eq:chain}. At each round, report malicious
 ASR on the $M$ block, benign utility and contamination on the
-following $B$ block, and the three content-judge scores on all skills authored
+following $B$ block, and the three thresholded artifact rates on all skills authored
 so far. Then report URR, carryover ASR, and carryover utility after rebuilding
 retrieval from the frozen \texttt{SKILL.md}. Use matched
 mediation or stratified conditional effects rather than inferring mediation
@@ -686,7 +705,7 @@ the upstream event.}
 \end{table}
 
 \paragraph{Artifact risk precedes behavioral harm.}
-Compare the three artifact scores with realized carryover ASR. Episodes with
+Compare the three artifact rates with realized carryover ASR. Episodes with
 high content unsafety, unsafe generalization, or stealthiness but no post-attack
 harm constitute latent risk: the persistent policy has changed, but the probe
 has not supplied the retrieval cue or execution opportunity. Quantify this
@@ -723,7 +742,7 @@ related controls, not interchangeable replications.
     Shared x-axis: $R_1,R_2,R_3$ (cumulative dose $3M,6M,9M$).\\[3pt]
     \textbf{(a) Contamination} on the following $B$ block \quad
     \textbf{(b) Malicious ASR} on the $M$ block \quad
-    \textbf{(c) Content Unsafety (CU)} of all skills authored so far.\\[3pt]
+    \textbf{(c) Content Unsafety rate (CU)} of all skills authored so far.\\[3pt]
     One line per evolution method with episode-bootstrap CIs. Panel (a) also
     shows the No-Evolution line as the approximately zero contamination floor.
   }}
@@ -765,7 +784,7 @@ updates intervene before the library is frozen.
     Shared x-axis: \textsc{Early}, \textsc{Middle}, \textsc{Late}; total dose
     fixed at $3M$.\\[3pt]
     \textbf{(a) Final-block Contamination} \quad
-    \textbf{(b) Final Content Unsafety (CU)} \quad
+    \textbf{(b) Final Content Unsafety rate (CU)} \quad
     \textbf{(c) Carryover ASR}.\\[3pt]
     One line per evolution method with episode-bootstrap CIs. Each point is an
     absolute micro aggregate over the 25 matched episodes; utility outcomes and
@@ -795,7 +814,7 @@ strategies that are hidden
 during evolution, repair-policy development, and threshold selection. Libraries
 are frozen before evaluation. A mitigation must lower malicious ASR and benign
 contamination while preserving benign utility and reduce all three artifact
-scores. Post-attack, it must either prevent unsafe skill export altogether or,
+rates. Post-attack, it must either prevent unsafe skill export altogether or,
 where unsafe exported skills remain, lower fresh-session URR and carryover ASR
 while preserving carryover utility. The three stages are reported together
 rather than collapsed into one score.
@@ -846,7 +865,7 @@ rather than collapsed into one score.
  & Library-Drift   & N/A & N/A & --/--/-- & N/A & --/--/-- \\
  & \safeevolve     & N/A & N/A & --/--/-- & N/A & --/--/-- \\
 \midrule
-\multicolumn{7}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
+\multicolumn{7}{l}{\textbf{B. Evolved artifact rates: CU / UG / Stealth ($\downarrow$, \%)}} \\
 \multirow{3}{*}{AutoSkill}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
@@ -914,7 +933,7 @@ agent.} Each evolution method is evaluated raw,
 with a capability-oriented library hygiene baseline, and with \safeevolve on
 the same held-out episodes. Columns retain all four target-agent configurations.
 Panel A reports benign utility / malicious ASR / benign ASR
-(contamination); Panel B reports CU / UG / Stealth; Panel C reports URR /
+(contamination); Panel B reports thresholded CU / UG / Stealth rates; Panel C reports URR /
 carryover ASR / carryover utility. All rates are
 absolute micro-aggregates. No deltas or gain-retention ratios are used. Macro averages
 weight target agents equally and exclude genuinely unsupported method--agent
@@ -935,35 +954,51 @@ supported target rather than imputing results for other agents.}
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.06}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{lccccc}
+\begin{tabular}{llccc|ccc|ccc}
 \toprule
-\textbf{Governance} & \textbf{CC/MiniMax} & \textbf{Codex/MiniMax}
-& \textbf{Hermes/MiniMax} & \textbf{OpenClaw/MiniMax}
-& \textbf{Macro avg.} \\
+\textbf{Target agent} & \textbf{Governance} &
+\multicolumn{3}{c|}{\textbf{Online behavior}} &
+\multicolumn{3}{c|}{\textbf{Evolved artifact}} &
+\multicolumn{3}{c}{\textbf{Post-attack}} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+& & \textbf{BU}$\uparrow$ & \textbf{M-ASR}$\downarrow$ & \textbf{B-ASR}$\downarrow$ &
+\textbf{CU$\geq3$}$\downarrow$ & \textbf{UG$\geq3$}$\downarrow$ & \textbf{Stealth$\geq3$}$\downarrow$ &
+\textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
-\multicolumn{6}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
-Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightblue}\safeevolve & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multirow{3}{*}{Claude Code}
+& Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& Library-Drift & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multicolumn{6}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
-Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightblue}\safeevolve & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multirow{3}{*}{Codex}
+& Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& Library-Drift & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multicolumn{6}{l}{\textbf{C. Post-attack: unsafe retrieval ($\downarrow$) / carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
-Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightblue}\safeevolve & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\multirow{3}{*}{Hermes}
+& Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& Library-Drift & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\midrule
+\multirow{3}{*}{OpenClaw}
+& Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& Library-Drift & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\midrule
+\multirow{3}{*}{Macro avg.}
+& Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& Library-Drift & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{SafeEvolve reduces online, artifact, and carryover risk while
 preserving utility (RQ4).} For each target agent and governance condition, we
 first compute every metric as an absolute micro-aggregate, then macro-average
-equally over the five agent-agnostic evolution methods. The final column gives the
-equal-weight target-agent average. Unsupported method--agent pairs are
-excluded. URR is N/A when no unsafe evolved skill is exported and its averages
-use only defined cells; this absence is also exposed by the artifact panel
+equally over the five agent-agnostic evolution methods. The final row block
+gives the equal-weight target-agent average. Unsupported method--agent pairs
+are excluded. Artifact columns report the same threshold rates as
+Table~\ref{tab:misevolution-main}. URR is N/A when no unsafe evolved skill is exported and its averages
+use only defined cells; this absence is also exposed by the artifact columns
 rather than converted into a zero retrieval rate. The complete per-method breakdown is reported in
 Appendix~Table~\ref{tab:safeevolve-full}.}
 \label{tab:safeevolve-main}
@@ -1114,7 +1149,7 @@ capability evidence.
 \toprule
 \textbf{SafeEvolve variant} &
 \textbf{Online: BU/M-ASR/B-ASR} &
-\textbf{Artifact: CU/UG/Stealth} &
+\textbf{Artifact rates: CU/UG/Stealth} &
 \textbf{Carryover: URR/ASR/Utility} \\
 \midrule
 Full \safeevolve             & --/--/-- & --/--/-- & --/--/-- \\
@@ -1223,7 +1258,7 @@ the governance of its persistent updates.
 \toprule
 \textbf{Hermes / MiniMax setting} &
 \textbf{Online: BU/M-ASR/B-ASR} &
-\textbf{Artifact: CU/UG/Stealth} &
+\textbf{Artifact rates: CU/UG/Stealth} &
 \textbf{Post-attack: URR/ASR/Utility} \\
 \midrule
 No evolution        & --/--/-- & N/A/N/A/N/A & N/A/--/-- \\
@@ -1245,7 +1280,8 @@ comparison appears in Table~\ref{tab:safeevolve-full}.}
 Provide the original AgentHazard trajectory judge and the complete 1--5 rubrics for content
 unsafety, unsafe generalization, and stealthiness, together with auditor
 prompts, calibration examples, agreement statistics, and the adjudication
-procedure. State which models are disjoint from the agent and evolution model
+procedure. Report both the raw score distributions and means and the headline
+$\geq3$ rates derived from them. State which models are disjoint from the agent and evolution model
 families. Provide the post-attack carryover-ASR and carryover-utility judges
 separately from artifact auditing.
 
@@ -1388,9 +1424,9 @@ cost accounting and the policy for re-auditing repaired bundles.
 \label{app:case-studies}
 
 For each major failure family, show the source trajectory, skill diff, lineage,
-the three evolved-artifact scores, retrieval event, later tool trajectory,
+the three evolved-artifact rates, retrieval event, later tool trajectory,
 carryover-harm and carryover-utility evidence, and the effect of \safeevolve.
-Include negative cases where the artifact scores as unsafe but the executor
+Include negative cases where the artifact is judged unsafe but the executor
 blocks its reuse, and where evolution remains safe.
 
 \end{document}
