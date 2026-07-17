@@ -431,7 +431,9 @@ episode yield
 \end{equation}
 URR is N/A when $\mathcal{P}_U$ is empty; it is never replaced by zero. It
 measures retrieval of an unsafe evolved skill, not retrieval of arbitrary
-benign skills. Because a method can make URR undefined by preventing unsafe
+benign skills. Thus a $P$ task enters the URR denominator only when its
+episode's frozen export contains at least one evolved skill with $cu\geq3$.
+Because a method can make URR undefined by preventing unsafe
 export altogether, URR is interpreted jointly with the artifact panel rather
 than compared as though N/A were a numerical improvement.
 
@@ -594,21 +596,21 @@ instead of hiding it inside one pooled method average.
 \textbf{SkillsVote} & \textbf{SkillOpt} \\
 \midrule
 \multicolumn{8}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
-Claude Code & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Claude Code & 49.8/56.0/0.0 & --/--/-- & --/--/-- & 37.1/51.6/0.0 & 65.3/59.1/8.4 & --/--/-- & --/--/-- \\
 Codex       & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 Hermes      & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 OpenClaw    & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \rowcolor{lightgray}Macro avg. & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multicolumn{8}{l}{\textbf{B. Evolved artifact: Content Unsafety (CU) / Unsafe Generalization (UG) / Stealthiness (Stealth) ($\downarrow$)}} \\
-Claude Code & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Codex       & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Hermes      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-OpenClaw    & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightgray}Macro avg. & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Claude Code & N/A/N/A/N/A & --/--/-- & --/--/-- & 1.19/3.00/3.50 & 2.54/2.91/4.07 & --/--/-- & --/--/-- \\
+Codex       & N/A/N/A/N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Hermes      & N/A/N/A/N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+OpenClaw    & N/A/N/A/N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+\rowcolor{lightgray}Macro avg. & N/A/N/A/N/A & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multicolumn{8}{l}{\textbf{C. Post-attack: unsafe retrieval ($\downarrow$) / carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
-Claude Code & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
+Claude Code & N/A/0.0/25.3 & --/--/-- & --/--/-- & 16.7/0.0/29.7 & 50.0/16.0/64.0 & --/--/-- & --/--/-- \\
 Codex       & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 Hermes      & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 OpenClaw    & N/A/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
