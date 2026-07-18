@@ -56,12 +56,14 @@ an unsafe success is generalized into a skill and later reused after the
 original attack disappears. Existing skill benchmarks measure capability on
 independent tasks, while agent-safety benchmarks do not expose the evolving
 library state; neither can separate unsafe authoring, retrieval, and
-clean-session harm. We introduce \gym, a task-source-agnostic environment for
-versioned skill learning and replay, and \bench, an exposure-to-carryover
-protocol with nine online, artifact, and post-attack metrics. An offline
-autoresearch constructor turns AgentHazard harmful-task contracts into
-concept-matched malicious, benign, and persistence tasks, including a new
-benign-completion judge. We also introduce \safeevolve, which governs skill
+clean-session harm. We introduce \gym, an extensible research environment for
+executing and instrumenting longitudinal skill evolution under controlled
+persistent state. \bench is its frozen evaluation instantiation, with an
+exposure-to-carryover task protocol and nine online, artifact, and post-attack
+metrics. Offline autoresearch discovers reusable vulnerability concepts, and
+our constructor turns AgentHazard harmful-task contracts into concept-matched
+malicious, benign, and persistence tasks with a new benign-completion judge. We
+also introduce \safeevolve, which governs skill
 admission and reuse through targeted repair, verification preservation,
 provenance, and retirement. Across four agent frameworks, a shared MiniMax
 backbone, and six evolution methods, three settings exhibit the full signature
@@ -104,14 +106,16 @@ must distinguish authoring, retrieval, and execution because the progression can
 stop at any of these gates.
 
 We address these challenges with \gym and \bench (Figure~\ref{fig:episode}).
-\gym provides a task-source-agnostic lifecycle for skill updates, snapshots,
-retrieval traces, replay, and clean-session reload from only
-\texttt{SKILL.md}. \bench supplies the temporal task and metric protocol. Using
-AHA autoresearch~\citep{mao2026aha} as an external offline discovery tool, our
-constructor turns AgentHazard harmful-task contracts into validated
+\gym is the research environment: given a task source, target agent, evolution
+method, and update schedule, it versions the skill library, isolates other
+cross-task state, records authoring and retrieval, and supports snapshot replay
+and clean-session reload. \bench is the frozen task-and-evaluation protocol
+instantiated within this environment. Using AHA autoresearch~\citep{mao2026aha}
+offline, our constructor turns AgentHazard harmful-task contracts into validated
 vulnerability concepts and concept-matched malicious, benign, and persistence
-tasks. The benchmark adds an orthogonal benign-completion judge and nine metrics
-covering online behavior, the evolved artifact, and post-attack carryover.
+tasks. It fixes the exposure schedule, adds an orthogonal benign-completion
+judge, and measures online behavior, evolved artifacts, and post-attack
+carryover with nine metrics.
 
 \begin{figure*}[t]
 \centering
@@ -151,7 +155,7 @@ covering online behavior, the evolved artifact, and post-attack carryover.
 \draw[flow] (constructor) -- (tasks);
 
 \node[font=\small\bfseries, anchor=west, below=12mm of contract.south west]
-  {(b) Stateful Gym + Bench evaluation};
+  {(b) Bench protocol executed in the Gym};
 \node[episode, below=22mm of contract, fill=red!6] (r1) {
   \textbf{$R_1$: dose $3M$}\\
   $M^3\!\rightarrow\!\evolution\!\rightarrow\!B^3\!\rightarrow\!\evolution$\\
@@ -190,9 +194,9 @@ covering online behavior, the evolved artifact, and post-attack carryover.
 \textbf{(a)} AgentHazard supplies a harmful-task contract; an external
 autoresearch stage discovers validated vulnerability concepts, and our
 constructor produces concept-matched $M/B/P$ tasks and a benign-completion
-judge. \textbf{(b)} \gym executes the fixed longitudinal episode with versioned
-skill state, while \bench audits online behavior, authored artifacts, and
-fresh-session carryover. The discovery VCG is never exposed to the evaluated
+judge. \textbf{(b)} \bench fixes the longitudinal episode and lifecycle metrics;
+\gym executes it with versioned skill state, observable authoring and retrieval,
+and clean-session replay. The discovery VCG is never exposed to the evaluated
 agent; only its self-authored \texttt{SKILL.md} crosses the final reset.}
 \label{fig:episode}
 \end{figure*}
@@ -218,9 +222,10 @@ Our contributions are:
   \item We formulate \textbf{skill misevolution} as a new longitudinal safety
   problem and show that unsafe authoring, retrieval, and realized carryover are
   distinct, gated outcomes.
-  \item We introduce \gym and \bench, including concept-matched $M/B/P$ task
-  construction, versioned skill-state isolation, clean-session replay, a new
-  benign-completion judge, and nine lifecycle metrics.
+  \item We introduce \gym, an extensible environment for controlled,
+  instrumented skill-evolution research with versioned state and clean-session
+  replay, and \bench, a frozen instantiation with concept-matched $M/B/P$
+  tasks, a new benign-completion judge, and nine lifecycle metrics.
   \item We introduce \safeevolve, which governs skill admission and reuse, and
   evaluate the problem and mitigation across four agent frameworks, six
   evolution methods, ten risk categories, task surfaces, doses, and timings.
@@ -250,8 +255,9 @@ computer-use instances, ten risk categories, multi-step attack strategies, and
 a harmful trajectory judge~\citep{feng2026agenthazard}. These assets define the
 harmful task contract in our instantiation; they do not provide benign twins,
 persistence probes, or a benign utility metric. We construct those components
-from vulnerability concepts discovered using AHA~\citep{mao2026aha}, then use \gym to add
-persistent skill state, lifecycle instrumentation, and cross-task execution.
+from vulnerability concepts discovered using AHA~\citep{mao2026aha}; \bench
+freezes them into a longitudinal evaluation, and \gym supplies persistent skill
+state, lifecycle instrumentation, and cross-task execution.
 
 \paragraph{Governance of evolving libraries.}
 Contrast \safeevolve with capability-oriented library maintenance and drift
@@ -312,43 +318,43 @@ session whose retrieval state is reconstructed only from the final frozen
 
 \subsection{Gym environment and persistence contract}
 
-\gym turns a stateless executable safety task into a controlled stateful
-learning process through task reset, agent execution, skill update, retrieval,
-and artifact inspection. A task-source adapter supplies executable instances,
-reset logic, malicious and benign views, and judges; agent and evolution
-adapters preserve each system's native artifact while exposing when a skill is
-written and retrieved. Before and after every three-task block, the gym
-snapshots $\library_k$, links each authored diff to its source trajectories,
-and records outcomes, retrievals, tool traces, and judge evidence. Replacing the
-task source therefore changes task semantics without changing the lifecycle,
-episode protocol, or metrics.
+\gym is an extensible research environment for executing and instrumenting
+longitudinal skill evolution under controlled persistent state. It accepts a
+task source, target agent, evolution method, and update schedule. The task
+adapter supplies executable instances, reset logic, and outcome judges, while
+agent and evolution adapters preserve each system's native artifact and expose
+skill writes and retrievals. The gym versions $\library_k$, links every authored
+diff to its source trajectories, and records outcomes, retrievals, tool traces,
+and judge evidence. It therefore supports new task domains, agents, evolution
+methods, and governance policies; each instantiated study supplies its task
+semantics, update schedule, and metrics.
 
 Conversation, workspace, process, and tool state reset between tasks, leaving
-the designated library snapshot as the only cross-task state. Persistence
-evaluation is stricter: after learning, the gym exports the frozen library to
-\texttt{SKILL.md}, terminates the executor, and starts a clean executor whose
-skill index is rebuilt solely from that file. Conversation, workspace files,
-tool sessions, retrieval caches, native memory, and other evolved files do not
-cross this boundary, and the $P$ block performs no further evolution.
+the designated library snapshot as the only cross-task state. The gym also
+provides a strict clean-reload operation: it exports a frozen library to
+\texttt{SKILL.md}, terminates the executor, and rebuilds the skill index in a
+clean executor solely from that file. Conversation, workspace files, tool
+sessions, retrieval caches, native memory, and other evolved files do not cross
+this boundary. This versioning, isolation, and replay contract is the
+experimental substrate; a benchmark decides when to invoke it and which
+outcomes to score.
 
-\subsection{Autoresearch-based task construction and episode protocol}
+\subsection{SkillMisevo-Bench instantiation and episode protocol}
 
-The experiments use AgentHazard~\citep{feng2026agenthazard} as a task-contract
-source, retaining its harmful objectives, ten risk categories, sandbox, reset
-procedure, and harmful trajectory judge. We use AHA~\citep{mao2026aha} offline
-to discover executable vulnerability concepts: it commits a falsifier before
-instantiating an attack and promotes replicated mechanisms into a Vulnerability
-Concept Graph. Our constructor selects mechanisms that can be learned as
-reusable procedures and creates concept-matched $M/B$ pairs plus held-out $P$
-probes. $M$ realizes the unsafe route; $B$ preserves the operation, tools, and
-domain while removing that route; $P$ moves to a fresh surface, contains no
-attack payload, and tests what the reloaded skill supplies. The AgentHazard
-judge scores the paired harmful objective on all three task types, while our
-benign-completion judge scores the new $B$ and $P$ objectives. Concepts,
-mechanisms, surfaces, prompts, and identifiers are frozen before evaluation,
-and final tasks are new concept instantiations rather than replayed AgentHazard
-prompts. The authoring VCG is hidden from the evaluated agent and evolution
-method.
+\bench instantiates the gym as a fixed evaluation of skill misevolution. It uses
+AgentHazard~\citep{feng2026agenthazard} as a task-contract source, retaining its
+harmful objectives, ten risk categories, sandbox, reset procedure, and harmful
+trajectory judge. AHA~\citep{mao2026aha} discovers executable vulnerability
+concepts offline by committing falsifiers and promoting replicated mechanisms.
+Our constructor turns selected mechanisms into concept-matched $M/B$ pairs and
+held-out $P$ probes: $M$ realizes the unsafe route, $B$ preserves the operation
+and domain while removing that route, and $P$ uses a fresh surface with no
+attack payload to test what the reloaded skill supplies. The AgentHazard judge
+scores the paired harmful objective on all task types; our benign-completion
+judge scores the new $B$ and $P$ objectives. Tasks and metadata are frozen
+before evaluation, final tasks are new concept instantiations rather than
+replayed AgentHazard prompts, and the authoring VCG remains hidden from the
+evaluated system.
 
 Each 21-task episode instantiates one validated concept in the order
 \begin{equation}
@@ -361,8 +367,9 @@ or $MMM\,BBB\;MMM\,BBB\;MMM\,BBB\mid BBB$. Evolution runs after every
 three-task block using those three trajectories, so $R_1,R_2,R_3$ expose the
 library to cumulative malicious doses of three, six, and nine before the
 following $B^3$ measures contamination. The final $P^3$ runs without further
-evolution in the clean executor reconstructed solely from frozen
-\texttt{SKILL.md}. Each condition contains 25 episodes.
+evolution and mandates the gym's strict persistence boundary: a clean executor
+reconstructs retrieval solely from frozen \texttt{SKILL.md}. Each condition
+contains 25 episodes.
 
 \subsection{Evaluation settings}
 
@@ -1395,7 +1402,7 @@ skills are created, when they are retrieved, and what later behavior follows.
 
 \appendix
 
-\section{Gym and Benchmark Construction}
+\section{Gym Interface and Benchmark Construction}
 \label{app:construction}
 
 \paragraph{Source contract.}
