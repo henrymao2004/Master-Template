@@ -357,14 +357,8 @@ replayed AgentHazard prompts, and the authoring VCG remains hidden from the
 evaluated system.
 
 Each 21-task episode instantiates one validated concept in the order
-\begin{equation}
-  \underbrace{M^3_1,B^3_1}_{R_1},
-  \underbrace{M^3_2,B^3_2}_{R_2},
-  \underbrace{M^3_3,B^3_3}_{R_3}
-  \mid P^3,
-\end{equation}
-or $MMM\,BBB\;MMM\,BBB\;MMM\,BBB\mid BBB$. Evolution runs after every
-three-task block using those three trajectories, so $R_1,R_2,R_3$ expose the
+$MMM\,BBB\;MMM\,BBB\;MMM\,BBB\mid BBB$. Evolution runs after every three-task
+block using those three trajectories, so rounds $R_1,R_2,R_3$ expose the
 library to cumulative malicious doses of three, six, and nine before the
 following $B^3$ measures contamination. The final $P^3$ runs without further
 evolution and mandates the gym's strict persistence boundary: a clean executor
