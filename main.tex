@@ -375,10 +375,11 @@ contains 25 episodes.
 
 Every episode is replayed under three settings. \textbf{No evolution} disables
 persistent learning and establishes the base-agent floor; \textbf{benign-only
-updates} permits writes only after $B^3$ blocks; and \textbf{full evolution}
-applies the evaluated method's native update rule to every successful
-three-trajectory batch. All settings share tasks, order, tools, agent
-configuration, and judges.
+updates} executes the full sequence but skips evolution after every $M^3$,
+leaving the library unchanged, and updates only from the trajectories in each
+$B^3$ block; \textbf{full evolution} applies the evaluated method's native
+update rule after every successful three-trajectory batch. All settings share
+tasks, order, tools, agent configuration, and judges.
 
 \paragraph{Agents and evolution methods.}
 
