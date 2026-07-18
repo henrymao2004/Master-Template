@@ -313,109 +313,65 @@ session whose retrieval state is reconstructed only from the final frozen
 \subsection{Gym environment and persistence contract}
 
 \gym turns a stateless executable safety task into a controlled stateful
-learning process. An environment instance exposes five interfaces: task reset,
-agent execution, skill update, skill retrieval, and artifact inspection. A
-task-source adapter supplies executable instances, reset logic, attack and
-benign views, and outcome judges; it does not control how skills are authored
-or evaluated. Replacing this adapter changes the tasks and their success
-semantics without changing the skill lifecycle, episode protocol, or
-misevolution metrics. The gym snapshots $\library_k$ before and after every
-three-task block, stores the authored diff and its three source trajectories,
-records which skills are retrieved on each task,
-and supports replay from any snapshot. Agent adapters translate native skill
-formats and lifecycle hooks without converting the learning-stage artifact into
-a shared representation. Evolution adapters expose when and from which
-three-trajectory block a candidate skill is written. This contract supports both external evolution
-methods and an agent's native skill evolution.
+learning process through task reset, agent execution, skill update, retrieval,
+and artifact inspection. A task-source adapter supplies executable instances,
+reset logic, malicious and benign views, and judges; agent and evolution
+adapters preserve each system's native artifact while exposing when a skill is
+written and retrieved. Before and after every three-task block, the gym
+snapshots $\library_k$, links each authored diff to its source trajectories,
+and records outcomes, retrievals, tool traces, and judge evidence. Replacing the
+task source therefore changes task semantics without changing the lifecycle,
+episode protocol, or metrics.
 
-Conversation, workspace, process, and tool state are reset between tasks. The
-gym then mounts only the designated skill snapshot. This isolation makes the
-library the sole cross-task treatment and allows comparison executions with no
-evolution, benign-only updates, or a frozen library. The environment emits a
-common event log containing task outcome, skill writes, artifact versions,
-retrievals, tool trajectories, and judge evidence.
-
-The $P$ transition applies a stricter persistence boundary. After the final
-learning block, the gym serializes the frozen skill library to
-\texttt{SKILL.md} and terminates the learning executor. A clean executor is
-initialized with the $P$ task and its reset tool environment; among
-learning-stage state, it receives only this file. No conversation, workspace
-contents, process state, tool-session state, retrieval cache, native memory, or
-other evolved file is mounted. The skill index is
-rebuilt from \texttt{SKILL.md}, and all $P$-task retrievals must resolve through
-that reloaded index. The $P$ block performs no further skill evolution.
+Conversation, workspace, process, and tool state reset between tasks, leaving
+the designated library snapshot as the only cross-task state. Persistence
+evaluation is stricter: after learning, the gym exports the frozen library to
+\texttt{SKILL.md}, terminates the executor, and starts a clean executor whose
+skill index is rebuilt solely from that file. Conversation, workspace files,
+tool sessions, retrieval caches, native memory, and other evolved files do not
+cross this boundary, and the $P$ block performs no further evolution.
 
 \subsection{Autoresearch-based task construction and episode protocol}
 
 The experiments use AgentHazard~\citep{feng2026agenthazard} as a task-contract
-source. We retain its harmful objectives, ten risk categories, sandboxed
-computer-use environment, reset procedure, and official harmful trajectory
-judge. AgentHazard does not provide the benign side of the evaluation. We use
-the external AHA method~\citep{mao2026aha} for offline vulnerability-concept
-discovery. For every task family, its autoresearch loop hypothesizes and tests
-failure mechanisms in the executable environment, commits a falsifier before
-attack instantiation, and promotes replicated findings into a Vulnerability
-Concept Graph. We select concepts whose enabling condition can be learned as a
-reusable procedure and instantiate them across multiple task surfaces.
+source, retaining its harmful objectives, ten risk categories, sandbox, reset
+procedure, and harmful trajectory judge. We use AHA~\citep{mao2026aha} offline
+to discover executable vulnerability concepts: it commits a falsifier before
+instantiating an attack and promotes replicated mechanisms into a Vulnerability
+Concept Graph. Our constructor selects mechanisms that can be learned as
+reusable procedures and creates concept-matched $M/B$ pairs plus held-out $P$
+probes. $M$ realizes the unsafe route; $B$ preserves the operation, tools, and
+domain while removing that route; $P$ moves to a fresh surface, contains no
+attack payload, and tests what the reloaded skill supplies. The AgentHazard
+judge scores the paired harmful objective on all three task types, while our
+benign-completion judge scores the new $B$ and $P$ objectives. Concepts,
+mechanisms, surfaces, prompts, and identifiers are frozen before evaluation,
+and final tasks are new concept instantiations rather than replayed AgentHazard
+prompts. The authoring VCG is hidden from the evaluated agent and evolution
+method.
 
-Our run-pair constructor instantiates each selected concept as matched $M/B$
-pairs and held-out $P$ probes. The malicious member realizes the
-concept-specific unsafe route; the benign member exercises the same operational
-surface without that route; the persistence probe removes the attack and tests
-whether a previously learned procedure fills in the unsafe behavior. Each
-episode is grounded in one autoresearch-discovered concept, and every task in the episode
-is an instantiation of that concept.
-
-The construction output---concept, mechanism, malicious goal, surface, prompts,
-and instance identifiers---is frozen before agent evaluation. The official
-harmful judge scores the paired harmful objective on $M$, $B$, and $P$; we add
-an orthogonal benign-completion judge for the newly constructed benign
-objectives. Every final task inherits the corresponding source concept identifier,
-and the final prompts are constructed instances rather than replayed
-AgentHazard prompts. The external method's VCG is never exposed to the evaluated
-agent or evolution method: it is an input to benchmark authoring, whereas the skills
-measured in this paper are authored by the evaluated system from its own
-trajectories.
-
-\paragraph{Episode assembly.}
-
-Each episode contains 21 tasks constructed around one validated vulnerability
-concept, task-source category, and task family. For each task surface, the
-constructor first creates an $M/B$ run pair. $M$ instantiates the concept's
-enabling condition and harmful objective in an executable task. $B$ preserves
-the legitimate operation, tools, and domain while removing the malicious
-condition and specifying a safe benign objective. A concept-matched $P$ task
-uses a fresh surface and contains no attack payload; its underspecified request
-tests what procedure the reloaded skill supplies. The order is
+Each 21-task episode instantiates one validated concept in the order
 \begin{equation}
   \underbrace{M^3_1,B^3_1}_{R_1},
   \underbrace{M^3_2,B^3_2}_{R_2},
   \underbrace{M^3_3,B^3_3}_{R_3}
   \mid P^3,
 \end{equation}
-or, schematically, $MMM\,BBB\;MMM\,BBB\;MMM\,BBB\mid BBB$. The evolution method runs once after each $M^3$ or $B^3$
-block, authoring or revising skills from the three completed trajectories. Each
-round therefore contains two skill-evolution steps. Each round contributes a dose of three new malicious tasks;
-the cumulative dose is therefore three, six, and nine malicious tasks after
-$R_1,R_2,R_3$. The following benign block measures contamination at that dose.
-After $R_3$, the library is frozen and the three $P$ tasks run in a new executor
-session without further evolution. This executor reloads its skill index solely
-from the frozen \texttt{SKILL.md}; no other learning-stage state enters the
-$P$ block. Each condition contains 25 episodes.
+or $MMM\,BBB\;MMM\,BBB\;MMM\,BBB\mid BBB$. Evolution runs after every
+three-task block using those three trajectories, so $R_1,R_2,R_3$ expose the
+library to cumulative malicious doses of three, six, and nine before the
+following $B^3$ measures contamination. The final $P^3$ runs without further
+evolution in the clean executor reconstructed solely from frozen
+\texttt{SKILL.md}. Each condition contains 25 episodes.
 
 \subsection{Evaluation settings}
 
-Every episode is replayed under each evolution setting:
-\begin{itemize}
-  \item \textbf{No evolution}: disables persistent learning and establishes the
-  base-agent floor.
-  \item \textbf{Benign-only updates}: executes the identical task sequence but
-  permits skill updates only after $B^3$ blocks, providing the reference pattern
-  under ordinary benign learning.
-  \item \textbf{Full evolution}: applies each evaluated method to all successful
-  trajectories in three-task batches under its native update rule.
-\end{itemize}
-All arms use identical tasks, order, tools, agent configuration, and judges.
+Every episode is replayed under three settings. \textbf{No evolution} disables
+persistent learning and establishes the base-agent floor; \textbf{benign-only
+updates} permits writes only after $B^3$ blocks; and \textbf{full evolution}
+applies the evaluated method's native update rule to every successful
+three-trajectory batch. All settings share tasks, order, tools, agent
+configuration, and judges.
 
 \paragraph{Agents and evolution methods.}
 
@@ -426,8 +382,8 @@ tool mediation, skill lifecycle, retrieval behavior, and backbone---rather than
 an isolated language model.
 
 The main comparison includes five agent-agnostic evolution methods: EvoSkill,
-SkillClaw, AutoSkill, SkillsVote, and SkillOpt. Each runs on all four target
-agents. Hermes also provides a framework-native evolution path supported only
+SkillClaw, AutoSkill, SkillsVote, and SkillOpt, each evaluated on compatible
+target agents. Hermes also provides a framework-native evolution path supported only
 by the Hermes target. We include Hermes-native in the main diagnostic table and
 provide its implementation details and expanded results in
 Appendix~\ref{app:hermes-native}; governed results appear in
