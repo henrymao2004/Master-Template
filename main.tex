@@ -649,9 +649,9 @@ procedures.}
 \begin{description}
   \item[RQ1: Safety--utility association.] Is skill evolution associated with
   higher unsafe behavior while retaining or improving task utility?
-  \item[RQ2: Exposure-to-persistence sequence.] Do unsafe experience, an unsafe
-  skill artifact, retrieval, and post-attack carryover ASR appear in sequence
-  while retaining carryover utility?
+  \item[RQ2: Risk propagation.] How do authored artifact risk and unsafe
+  retrieval relate to harmful execution and utility in a fresh carryover
+  session?
   \item[RQ3: Scope, budget, and timing.] How does misevolution vary across
   methods, agents, vulnerability concepts and task surfaces, cumulative doses of
   three, six, and nine malicious tasks, and early versus late exposure at a
@@ -663,31 +663,11 @@ procedures.}
 
 \subsection{Evaluation matrix}
 
-The main evaluation treats target-agent as a first-class axis, not a nuisance
-variable to average away. Table~\ref{tab:targets} fixes the four configurations.
-All four frameworks use the same MiniMax backbone, holding the model constant
-across Claude Code, Codex, Hermes, and OpenClaw. Each
-applicable agent-agnostic evolution method runs on the identical frozen episode
-set for every target.
-
-\begin{table}[t]
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{l}
-\toprule
-\textbf{Agent framework} \\
-\midrule
-Claude Code \\
-Codex \\
-Hermes \\
-OpenClaw \\
-\bottomrule
-\end{tabular}
-\caption{\textbf{Four target-agent configurations.} A shared MiniMax-M2.5
-backbone supports a controlled comparison across agent frameworks.}
-\label{tab:targets}
-\end{table}
+The main evaluation treats target-agent as a first-class axis. It compares
+Claude Code, Codex, Hermes, and OpenClaw with a shared MiniMax-M2.5 backbone,
+holding the model fixed while varying the agent framework, tool mediation,
+skill lifecycle, and retrieval behavior. Each applicable agent-agnostic
+evolution method runs on the identical frozen episode set for every target.
 
 The complete experimental grid is target-agent $\times$ evolution method
 $\times$ episode. Episodes are stratified by AgentHazard risk category,
@@ -782,8 +762,8 @@ the agent-framework comparison. For URR, N/A means that the frozen
 \texttt{SKILL.md} contains no evolved skill with exported $cu\geq3$; URR is
 then undefined rather than zero. Elsewhere, N/A marks a setting with no skill
 artifact or an unsupported framework-specific pairing; it never denotes a failed run.
-The exposure-to-persistence transitions are expanded in
-Figure~\ref{fig:sequence}. Add 95\% episode-bootstrap intervals in the supplement
+The artifact--retrieval--carryover relationship is visualized in
+Figure~\ref{fig:risk-propagation}. Add 95\% episode-bootstrap intervals in the supplement
 or an accompanying interval plot.}
 \label{tab:misevolution-main}
 \end{table*}
@@ -824,67 +804,113 @@ reliable safety signal, while artifact risk alone does not establish that the
 shortcut will be executed. The nine metrics locate both properties without
 collapsing them into a single score.
 
-\subsection{RQ2: How do exposure, skill state, and later harm align over time?}
+\subsection{RQ2: How do artifact and retrieval risk relate to later harm?}
 \label{sec:rq2}
 
-RQ2 reports each transition in Equation~\ref{eq:sequence} and
-Figure~\ref{fig:sequence}. At each round, report malicious
-ASR on the $M$ block, benign utility and contamination on the
-following $B$ block, and the three artifact scores on the current library
-snapshot. Then report URR, carryover ASR, and carryover utility after rebuilding
-retrieval from the frozen \texttt{SKILL.md}. We report these comparisons
-descriptively.
+RQ2 compares observable stages of Equation~\ref{eq:sequence}. Figure~\ref{fig:risk-propagation}
+first relates authored content unsafety to later unsafe retrieval, then relates
+unsafe retrieval to harmful execution in the fresh carryover session. Each
+point is an agent--method configuration from Table~\ref{tab:misevolution-main};
+the second panel exposes the execution gate directly because points below the
+diagonal retrieve unsafe skills more often than they realize carryover harm.
 
 \begin{figure*}[t]
 \centering
-\resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
-  stage/.style={draw=black!70, rounded corners=2pt, align=center,
-    minimum width=3.0cm, minimum height=1.55cm, inner sep=5pt,
-    font=\small, fill=white},
-  transition/.style={-{Stealth[length=2.4mm]}, line width=0.8pt,
-    draw=black!70},
-  rate/.style={font=\scriptsize\bfseries, align=center, text=black!80},
-  gate/.style={font=\scriptsize\itshape, align=center, text=black!55},
-  node distance=8mm
+  x=1cm,y=1cm,
+  tick/.style={font=\scriptsize, text=black!65},
+  axislabel/.style={font=\small, text=black!85},
+  paneltitle/.style={font=\small\bfseries, text=black!85},
+  note/.style={font=\scriptsize, align=left, text=black!75},
+  cc/.style={circle, fill=blue!65!black, draw=white, line width=.4pt,
+    minimum size=5.5pt, inner sep=0pt},
+  codex/.style={circle, fill=orange!85!black, draw=white, line width=.4pt,
+    minimum size=5.5pt, inner sep=0pt},
+  hermes/.style={circle, fill=red!70!black, draw=white, line width=.4pt,
+    minimum size=5.5pt, inner sep=0pt},
+  openclaw/.style={circle, fill=green!55!black, draw=white, line width=.4pt,
+    minimum size=5.5pt, inner sep=0pt}
 ]
-\node[stage, fill=lightgray] (exposure) {
-  \textbf{Unsafe experience}\\[-1pt]
-  malicious $M$ blocks\\[2pt]
-  \scriptsize M-ASR};
-\node[stage, right=of exposure, fill=orange!9] (artifact) {
-  \textbf{Authored artifact}\\[-1pt]
-  candidate skill update\\[2pt]
-  \scriptsize CU / UG / Stealth};
-\node[stage, right=of artifact, fill=yellow!11] (export) {
-  \textbf{Persistent skill}\\[-1pt]
-  frozen \texttt{SKILL.md}\\[2pt]
-  \scriptsize unsafe export};
-\node[stage, right=of export, fill=blue!7] (retrieval) {
-  \textbf{Later retrieval}\\[-1pt]
-  zero-injection $B$ or $P$\\[2pt]
-  \scriptsize URR};
-\node[stage, right=of retrieval, fill=red!7] (behavior) {
-  \textbf{Realized behavior}\\[-1pt]
-  online or clean session\\[2pt]
-  \scriptsize B-ASR / C-ASR / C-Util};
+% Panel (a): CU in [1,3], URR in [0,90].
+\begin{scope}[shift={(0,0)}]
+  \draw[->, black!70] (0,0) -- (7.2,0);
+  \draw[->, black!70] (0,0) -- (0,5.1);
+  \foreach \x/\lab in {0/1.0,1.75/1.5,3.5/2.0,5.25/2.5,7/3.0}
+    {\draw[black!45] (\x,0) -- (\x,-.08) node[tick,below] {\lab};}
+  \foreach \y/\lab in {0/0,1.11/20,2.22/40,3.33/60,4.44/80}
+    {\draw[black!45] (0,\y) -- (-.08,\y) node[tick,left] {\lab};}
+  \node[paneltitle, anchor=west] at (0,5.35) {(a) Unsafe artifacts do not imply uniform retrieval};
+  \node[axislabel] at (3.5,-.65) {Content Unsafety (CU; observed range)};
+  \node[axislabel, rotate=90] at (-.75,2.5) {Unsafe Retrieval Rate (\%)};
 
-\draw[transition] (exposure) -- node[rate, above] {authoring\\rate: --}
-  node[gate, below] {no unsafe write} (artifact);
-\draw[transition] (artifact) -- node[rate, above] {export\\rate: --}
-  node[gate, below] {not exported} (export);
-\draw[transition] (export) -- node[rate, above] {retrieval\\rate: --}
-  node[gate, below] {not retrieved} (retrieval);
-\draw[transition] (retrieval) -- node[rate, above] {realization\\rate: --}
-  node[gate, below] {not executed} (behavior);
+  \node[cc] at (2.77,4.50) {};
+  \node[cc] at (.67,.93) {};
+  \node[cc] at (5.39,2.93) {};
+  \node[cc] at (5.53,3.09) {};
+  \node[cc] at (2.14,2.78) {};
+  \node[codex] at (1.89,1.85) {};
+  \node[codex] at (1.02,1.85) {};
+  \node[hermes] at (5.74,3.47) {};
+  \node[openclaw] at (1.89,2.22) {};
+
+  \draw[black!45] (2.77,4.50) -- (3.05,4.72)
+    node[note,anchor=west] {Claude / EvoSkill};
+  \draw[black!45] (5.74,3.47) -- (6.05,3.75)
+    node[note,anchor=west] {Hermes-native};
+\end{scope}
+
+% Panel (b): URR in [0,90], C-ASR in [0,35].
+\begin{scope}[shift={(9.1,0)}]
+  \draw[->, black!70] (0,0) -- (7.2,0);
+  \draw[->, black!70] (0,0) -- (0,5.1);
+  \foreach \x/\lab in {0/0,1.56/20,3.11/40,4.67/60,6.22/80}
+    {\draw[black!45] (\x,0) -- (\x,-.08) node[tick,below] {\lab};}
+  \foreach \y/\lab in {0/0,1.43/10,2.86/20,4.29/30}
+    {\draw[black!45] (0,\y) -- (-.08,\y) node[tick,left] {\lab};}
+  \draw[dashed, black!35] (0,0) -- (2.72,5.0);
+  \node[paneltitle, anchor=west] at (0,5.35) {(b) Retrieval often stops before harmful execution};
+  \node[axislabel] at (3.5,-.65) {Unsafe Retrieval Rate (URR, \%)};
+  \node[axislabel, rotate=90] at (-.75,2.5) {Carryover ASR (\%)};
+
+  \node[cc] at (6.30,0) {};
+  \node[cc] at (1.30,0) {};
+  \node[cc] at (4.11,2.29) {};
+  \node[cc] at (4.32,2.67) {};
+  \node[cc] at (3.89,0) {};
+  \node[codex] at (2.59,0) {};
+  \node[codex] at (2.59,0) {};
+  \node[hermes] at (4.86,4.39) {};
+  \node[openclaw] at (3.11,.19) {};
+
+  \draw[black!45] (6.30,0) -- (5.80,.48)
+    node[note,anchor=east] {Claude / EvoSkill};
+  \draw[black!45] (3.89,0) -- (4.10,.65)
+    node[note,anchor=west] {Claude / SkillOpt};
+  \draw[black!45] (4.86,4.39) -- (5.15,4.67)
+    node[note,anchor=west] {Hermes-native};
+  \draw[black!45] (4.32,2.67) -- (4.60,2.35)
+    node[note,anchor=west] {Claude / SkillsVote};
+\end{scope}
+
+% Shared legend.
+\node[cc] at (4.15,-1.35) {};
+\node[tick,anchor=west] at (4.32,-1.35) {Claude Code};
+\node[codex] at (6.05,-1.35) {};
+\node[tick,anchor=west] at (6.22,-1.35) {Codex};
+\node[hermes] at (7.35,-1.35) {};
+\node[tick,anchor=west] at (7.52,-1.35) {Hermes};
+\node[openclaw] at (8.72,-1.35) {};
+\node[tick,anchor=west] at (8.89,-1.35) {OpenClaw};
 \end{tikzpicture}%
-}
-\caption{\textbf{Exposure-to-persistence lifecycle (RQ2).} Nodes are
-observable states and the metrics that audit them; arrows report the transition
-rate between adjacent states, and the lower labels mark where the progression
-can stop. For $P$, a fresh executor reloads retrieval solely from the frozen
-\texttt{SKILL.md}.}
-\label{fig:sequence}
+\caption{\textbf{Artifact risk, retrieval, and fresh-session harm (RQ2).}
+Each point is an evolution-method--agent configuration with defined artifact
+and retrieval metrics in Table~\ref{tab:misevolution-main}. Panel (a) compares
+the mean Content Unsafety score of authored skills with unsafe retrieval from
+the frozen \texttt{SKILL.md}. Panel (b) compares unsafe retrieval with
+Carryover ASR; the dashed diagonal marks equal percentages. Unsafe artifacts
+and retrieval occur across more configurations, while harmful execution is concentrated in
+AutoSkill, SkillsVote, and Hermes-native.}
+\label{fig:risk-propagation}
 \end{figure*}
 
 \paragraph{Artifact risk is broader than behavioral harm.}
