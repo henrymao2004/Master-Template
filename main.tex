@@ -50,142 +50,180 @@
 \maketitle
 
 \begin{abstract}
-LLM agents increasingly improve themselves by distilling successful
-interactions into reusable skills. This stores experience as persistent
-behavioral policy, yet existing evaluations measure whether evolution improves
-capability without testing what happens when success depends on an unsafe
-shortcut. We identify \emph{skill misevolution}: a transient unsafe success is
-extracted into an apparently legitimate skill and later reused on benign tasks
-after the original attack has disappeared. We introduce \gym, a
-task-source-agnostic environment that turns executable agent tasks into stateful
-skill-learning episodes. It standardizes skill writing, versioned library
-state, retrieval, replay, and fresh-session evaluation across agent frameworks
-and evolution methods. On top of this environment, \bench defines an
-exposure-to-carryover protocol, evolution comparison settings, and nine metrics for
-online behavior, the evolved artifact, and post-attack behavior. We instantiate the benchmark with
-AgentHazard as a source of harmful objectives, executable environments, and its
-harmful judge. Using the AHA autoresearch technique~\citep{mao2026aha} as an
-external offline discovery tool, we obtain vulnerability concepts suited to
-skill misevolution; our constructor instantiates them into matched malicious,
-benign, and persistence tasks and adds a benign-completion judge.
-Across four agent
-frameworks using a shared MiniMax backbone, six
-evolution methods and ten AgentHazard risk categories, benign utility,
-malicious ASR, and benign-task contamination are
-[BU/MA/BA]. Content Unsafety (CU), Unsafe Generalization (UG), and
-Stealthiness (Stealth) scores are [CU/UG/Stealth]; unsafe retrieval reaches [URR],
-carryover ASR reaches [CA], and carryover utility remains [C-Util]. Unsafe
-content appears in the skill library before it consistently manifests as
-behavior, and the pattern appears by round [R], after [K] malicious tasks. We
-further introduce \safeevolve, a governance layer that audits and
-repairs candidate skills, preserves verification steps, tracks provenance, and
-retires skills with unsafe reuse histories. Under \safeevolve, the online
-metrics are [BU'/MA'/BA'], artifact scores are [CU'/UG'/Stealth'],
-and post-attack URR / carryover ASR / utility are
-[URR' (or N/A when no unsafe skill is exported)/CA'/C-Util'].
-These results show that self-improvement is a security-relevant policy update:
-practice can coincide with greater capability and persistent unsafety.
+Self-improving agents distill successful trajectories into reusable skills,
+turning experience into persistent policy. We study \emph{skill misevolution}:
+an unsafe success is generalized into a skill and later reused after the
+original attack disappears. Existing skill benchmarks measure capability on
+independent tasks, while agent-safety benchmarks do not expose the evolving
+library state; neither can separate unsafe authoring, retrieval, and
+clean-session harm. We introduce \gym, a task-source-agnostic environment for
+versioned skill learning and replay, and \bench, an exposure-to-carryover
+protocol with nine online, artifact, and post-attack metrics. An offline
+autoresearch constructor turns AgentHazard harmful-task contracts into
+concept-matched malicious, benign, and persistence tasks, including a new
+benign-completion judge. We also introduce \safeevolve, which governs skill
+admission and reuse through targeted repair, verification preservation,
+provenance, and retirement. Across four agent frameworks, a shared MiniMax
+backbone, and six evolution methods, three settings exhibit the full signature
+of benign contamination and fresh-session carryover; Hermes-native reaches
+30.7\% carryover ASR while retaining 64.0\% carryover utility. Other settings
+retrieve unsafe skills at rates up to 81.0\% yet produce zero carryover ASR.
+This separation reveals the central insight: misevolution is a gated lifecycle,
+and safety evaluation must locate whether risk stops at authoring, retrieval, or
+execution. \safeevolve targets both the write and reuse gates while preserving
+useful procedures.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:introduction}
 
-LLM agents are beginning to improve through use. Modern CLI and coding agents
-can summarize successful trajectories, write or revise reusable skills, and
-retrieve those skills when related tasks appear. This capability changes an
-agent from a fixed policy with transient context into a system whose behavior is
-partly rewritten by its own experience. Skill evolution is therefore more than
-memory: it is a persistent policy update expressed as an editable artifact.
+Self-improving agents convert successful trajectories into reusable skills for
+software engineering, tool use, and recurring operational workflows. This paper
+studies the safety of that update: given a stream of executable tasks and an
+evolving skill library, determine whether an unsafe success is authored as a
+general procedure and later reused without the original attack. We call this
+failure \emph{skill misevolution}. It turns a transient interaction into a
+persistent policy change.
 
-The signal used to produce that update is usually task success or efficiency.
-Successful behavior, however, is not necessarily safe behavior. An agent may
-complete a task by skipping a verification step, assuming authorization,
-treating an irreversible action as routine, or following an attacker-controlled
-observation. When such a shortcut appears in a successful trajectory, an
-evolution method may preserve it together with the useful procedure.
+Existing evaluations do not resolve this problem. Skill benchmarks measure
+whether learned skills improve independent-task performance
+\citep{li2026skillsbench,zhong2026skilllearnbench}; agent-safety benchmarks
+measure harmful behavior under a supplied prompt or artifact
+\citep{feng2026agenthazard,jin2026skillsafetybench}. Both end at the current
+execution. They cannot determine whether an unsafe trajectory changed the skill
+library, whether that artifact was later retrieved, or whether a fresh executor
+reproduced the harm. The technical gap is longitudinal state attribution, not
+another attack-success score.
 
-This motivates a temporal safety question that independent-task evaluations cannot
-observe. The original attack may disappear with the context window, but the
-lesson extracted from it can remain in the skill library. A later benign task
-can retrieve the skill, apply its over-generalized rule, and reproduce the harm
-without a malicious instruction. A fresh session can inherit the same behavior
-by loading the evolved library alone. We call this process \emph{skill
-misevolution}: transient unsafe success becomes persistent, retrievable, and
-generalizable policy.
+Solving it requires three capabilities. First, the task set must pair an unsafe
+mechanism with benign and persistence tasks on related surfaces; harmful prompts
+alone provide no test of later contamination. Second, skill state must be
+versioned and isolated from conversation, workspace, cache, and native memory so
+later behavior can be attributed to the exported artifact. Third, measurement
+must distinguish authoring, retrieval, and execution because the progression can
+stop at any of these gates.
 
-Measuring misevolution requires an environment that exposes persistent learning
-as experimental state. We introduce \gym, which wraps executable agent tasks
-with a standardized skill lifecycle: it snapshots the
-library before and after each three-task block, resets conversational and
-workspace state between tasks, and records skill writes and retrievals. For the
-final persistence probe, it reloads retrieval in a new executor using only the
-frozen \texttt{SKILL.md}. Only this serialized skill artifact crosses into the
-fresh session.
+We address these challenges with \gym and \bench (Figure~\ref{fig:episode}).
+\gym provides a task-source-agnostic lifecycle for skill updates, snapshots,
+retrieval traces, replay, and clean-session reload from only
+\texttt{SKILL.md}. \bench supplies the temporal task and metric protocol. Using
+AHA autoresearch~\citep{mao2026aha} as an external offline discovery tool, our
+constructor turns AgentHazard harmful-task contracts into validated
+vulnerability concepts and concept-matched malicious, benign, and persistence
+tasks. The benchmark adds an orthogonal benign-completion judge and nine metrics
+covering online behavior, the evolved artifact, and post-attack carryover.
 
-\bench is the evaluation protocol built on this gym. Its basic unit is a
-21-task episode with three rounds of three malicious tasks followed by three
-benign tasks, then three persistence probes in a fresh executor session.
-No-evolution and benign-only-update controls provide reference
-distributions for later harm under the base agent, benign learning, and learning
-histories that include malicious experience.
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  design/.style={draw=black!65, rounded corners=2pt, align=center,
+    minimum width=3.25cm, minimum height=1.45cm, inner sep=5pt,
+    font=\small, fill=white},
+  episode/.style={draw=black!65, rounded corners=2pt, align=center,
+    minimum width=3.05cm, minimum height=1.55cm, inner sep=5pt,
+    font=\small, fill=white},
+  flow/.style={-{Stealth[length=2.4mm]}, line width=0.8pt,
+    draw=black!70},
+  note/.style={font=\scriptsize, align=center, text=black!65},
+  node distance=7mm
+]
+\node[font=\small\bfseries, anchor=west] at (-1.9,1.35)
+  {(a) Offline benchmark construction};
+\node[design, fill=lightgray] (contract) {
+  \textbf{AgentHazard contract}\\
+  harmful objective + sandbox\\
+  \scriptsize harmful trajectory judge};
+\node[design, right=of contract, fill=orange!9] (concept) {
+  \textbf{Autoresearch discovery}\\
+  falsifiable vulnerability concept\\
+  \scriptsize enabling condition + evidence};
+\node[design, right=of concept, fill=yellow!12] (constructor) {
+  \textbf{Our run-pair constructor}\\
+  matched task surfaces\\
+  \scriptsize new benign-completion judge};
+\node[design, right=of constructor, fill=blue!7] (tasks) {
+  \textbf{Frozen benchmark tasks}\\
+  $M$: unsafe condition \quad $B$: benign\\
+  \scriptsize $P$: zero-injection persistence cue};
+\draw[flow] (contract) -- (concept);
+\draw[flow] (concept) -- (constructor);
+\draw[flow] (constructor) -- (tasks);
 
-The benchmark evaluates three stages of the failure. Online behavior is measured
-by benign utility, malicious ASR, and benign ASR
-(contamination). The evolved artifact is measured by 1--5 Content
-Unsafety (CU), Unsafe Generalization (UG), and Stealthiness (Stealth) scores. Post-attack behavior is
-measured by Unsafe Retrieval Rate (URR), carryover ASR, and carryover utility in
-a clean session. An unsafe skill can remain latent
-until a later task supplies the right retrieval cue. Behavior-only evaluation
-therefore misses risk that has already entered the persistent policy.
+\node[font=\small\bfseries, anchor=west, below=12mm of contract.south west]
+  {(b) Stateful Gym + Bench evaluation};
+\node[episode, below=22mm of contract, fill=red!6] (r1) {
+  \textbf{$R_1$: dose $3M$}\\
+  $M^3\!\rightarrow\!\evolution\!\rightarrow\!B^3\!\rightarrow\!\evolution$\\
+  \scriptsize online behavior + artifact audit};
+\node[episode, right=5mm of r1, fill=red!8] (r2) {
+  \textbf{$R_2$: dose $6M$}\\
+  $M^3\!\rightarrow\!\evolution\!\rightarrow\!B^3\!\rightarrow\!\evolution$\\
+  \scriptsize online behavior + artifact audit};
+\node[episode, right=5mm of r2, fill=red!10] (r3) {
+  \textbf{$R_3$: dose $9M$}\\
+  $M^3\!\rightarrow\!\evolution\!\rightarrow\!B^3\!\rightarrow\!\evolution$\\
+  \scriptsize online behavior + artifact audit};
+\node[episode, right=5mm of r3, fill=yellow!12] (freeze) {
+  \textbf{Freeze library}\\
+  export \texttt{SKILL.md}\\
+  \scriptsize reset executor and all other state};
+\node[episode, right=5mm of freeze, fill=blue!8] (probe) {
+  \textbf{Fresh-session $P^3$}\\
+  reload only \texttt{SKILL.md}\\
+  \scriptsize URR / C-ASR / C-Util};
+\draw[flow] (r1) -- (r2);
+\draw[flow] (r2) -- (r3);
+\draw[flow] (r3) -- (freeze);
+\draw[flow] (freeze) -- (probe);
+\draw[flow, dashed] (tasks.south) -- ++(0,-3mm) -|
+  node[note, pos=0.28, below] {assemble fixed episodes} (r1.north);
 
-Constructing this evaluation requires more than replaying harmful benchmark
-prompts. We use the AHA autoresearch technique of Mao et
-al.~\citep{mao2026aha} as an external offline tool to discover falsifiable
-vulnerability concepts whose enabling conditions can be expressed as reusable
-procedures. Our run-pair constructor then constructs a
-run pair on a shared task surface: an $M$ task exercises the unsafe mechanism,
-while a $B$ task preserves the legitimate objective but removes the malicious
-condition. Concept-matched $P$ tasks probe later reuse without a new attack.
-AgentHazard supplies the harmful objective, executable environment, and harmful
-trajectory judge; this work contributes the paired benign and persistence
-tasks, the benign-completion judge, and the longitudinal episode assembly.
+\node[note, below=3mm of r2.south, text width=9.4cm] {
+  \textbf{Online:} BU / M-ASR / B-ASR \qquad
+  \textbf{Artifact:} CU / UG / Stealth};
+\node[note, below=3mm of probe.south, text width=4.3cm] {
+  \textbf{Post-attack:} URR / C-ASR / C-Util};
+\end{tikzpicture}%
+}
+\caption{\textbf{SkillMisevo-Gym and SkillMisevo-Bench.}
+\textbf{(a)} AgentHazard supplies a harmful-task contract; an external
+autoresearch stage discovers validated vulnerability concepts, and our
+constructor produces concept-matched $M/B/P$ tasks and a benign-completion
+judge. \textbf{(b)} \gym executes the fixed longitudinal episode with versioned
+skill state, while \bench audits online behavior, authored artifacts, and
+fresh-session carryover. The discovery VCG is never exposed to the evaluated
+agent; only its self-authored \texttt{SKILL.md} crosses the final reset.}
+\label{fig:episode}
+\end{figure*}
 
-Our evaluation asks four questions. \textbf{RQ1} compares unsafe behavior and
-utility with and without evolution. \textbf{RQ2} follows the
-exposure-to-persistence sequence and tests whether unsafe artifacts, retrieval,
-and later harm occur in the expected temporal order. \textbf{RQ3} measures how the observed pattern varies across evolution
-methods, agent configurations, vulnerability concepts, task surfaces, exposure
-budgets, and exposure timing at a fixed budget. \textbf{RQ4}
-tests whether \safeevolve retains learning utility while showing lower risk
-across the tracked sequence.
+We further introduce \safeevolve, a governance layer at the persistent update
+boundary (Figure~\ref{fig:safeevolve}). At write time it audits and repairs
+candidate skills while preserving verification requirements and provenance; at
+reuse time it uses lineage and observed outcomes for selection, rollback, and
+retirement. This targets the state that carries risk across tasks while
+retaining the useful procedure.
 
-\safeevolve acts at the learning boundary rather than as another runtime
-refusal layer. It audits the complete candidate skill bundle before admission,
-repairs unsafe generalization instead of deleting useful procedures, preserves
-verification requirements during revision, records the experiences from which
-each skill was learned, and downweights or retires skills whose reuse is
-followed by unsafe behavior. These components govern the persistent object
-associated with the observed incremental risk: the evolved skill library.
+Across four agent frameworks with a shared MiniMax backbone and six evolution
+methods, the benchmark reveals a gated lifecycle. AutoSkill, SkillsVote, and
+Hermes-native exhibit benign contamination and fresh-session carryover;
+Hermes-native reaches 30.7\% carryover ASR with 64.0\% carryover utility. Other
+settings retrieve unsafe skills at rates up to 81.0\% but produce zero
+carryover ASR. The resulting insight is operational: artifact risk is broader
+than realized harm, and the layer where progression stops determines what must
+be governed.
 
 Our contributions are:
 \begin{enumerate}
-  \item We identify \textbf{skill misevolution}, a temporal pattern in which
-  transient unsafe success is recorded in a persistent skill and unsafe
-  behavior reappears on benign tasks without the original attack. This framing
-  separates latent artifact risk, unsafe retrieval, and realized carryover.
-
-  \item We introduce \gym and \bench: a task-source-independent environment and
-  temporal protocol with versioned skill state, replay, retrieval traces,
-  clean-session persistence tests, and nine online, artifact, and carryover
-  metrics. Using vulnerability concepts discovered with the external AHA
-  technique, we construct concept-matched malicious, benign, and persistence
-  tasks from AgentHazard harmful-task contracts and add a benign-completion
-  judge. We evaluate four agent frameworks, six evolution methods, ten risk
-  categories, multiple task surfaces, exposure budgets, and timing placements.
-
-  \item We introduce \safeevolve and evaluate whether safety-aware skill
-  admission, revision, provenance, and retirement attain lower observed risk
-  while retaining learning utility.
+  \item We formulate \textbf{skill misevolution} as a new longitudinal safety
+  problem and show that unsafe authoring, retrieval, and realized carryover are
+  distinct, gated outcomes.
+  \item We introduce \gym and \bench, including concept-matched $M/B/P$ task
+  construction, versioned skill-state isolation, clean-session replay, a new
+  benign-completion judge, and nine lifecycle metrics.
+  \item We introduce \safeevolve, which governs skill admission and reuse, and
+  evaluate the problem and mitigation across four agent frameworks, six
+  evolution methods, ten risk categories, task surfaces, doses, and timings.
 \end{enumerate}
 
 \section{Related Work}
@@ -365,31 +403,6 @@ session without further evolution. This executor reloads its skill index solely
 from the frozen \texttt{SKILL.md}; no other learning-stage state enters the
 $P$ block. Each condition contains 25 episodes.
 
-\begin{figure}[t]
-  \centering
-  \fbox{\parbox[c][5.0cm][c]{0.94\linewidth}{
-    \centering
-    \textbf{Figure 1 placeholder: construction and evaluation.}\\[4pt]
-    \textbf{Offline construction:} AgentHazard harmful-task contract
-    $\rightarrow$ external autoresearch discovery $\rightarrow$ validated vulnerability concept
-    $\rightarrow$ concept-matched $M/B/P$ tasks + benign-completion judge.\\[5pt]
-    \textbf{Episode evaluation:} $MMM\rightarrow BBB\rightarrow MMM\rightarrow BBB\rightarrow
-    MMM\rightarrow BBB\mid BBB$, one skill-evolution step and snapshot after
-    each three-task block, cumulative doses $3M/6M/9M$, retrieval logs,
-    artifact audits, and the final transition
-    $\text{\texttt{SKILL.md}}\rightarrow\text{reload index}\rightarrow P^3$. Highlight
-    that only \texttt{SKILL.md} crosses into the clean persistence session.
-  }}
-  \caption{\textbf{From vulnerability concept to skill-misevolution episode.}
-  An external autoresearch method is used offline to discover vulnerability
-  concepts; our constructor creates matched malicious, benign, and persistence
-  tasks from an AgentHazard harmful-task contract. The evaluated
-  agent then encounters the frozen episode: adversarial exposures can alter its
-  skill library, and later zero-injection tasks test retrieval and reuse after
-  the attack disappears.}
-  \label{fig:episode}
-\end{figure}
-
 \subsection{Evaluation settings}
 
 Every episode is replayed under each evolution setting:
@@ -555,20 +568,78 @@ downweighted, quarantined, repaired, or retired even when it improves task
 success. This distinguishes \safeevolve from capability-only library hygiene,
 which keeps useful but unsafe skills.
 
-\begin{figure}[t]
-  \centering
-  \fbox{\parbox[c][3.6cm][c]{0.94\linewidth}{
-    \centering
-    \textbf{Figure 2 placeholder: SafeEvolve architecture.}\\[4pt]
-    Trajectory $\rightarrow$ candidate skill $\rightarrow$ provenance and
-    verification-preserving edit $\rightarrow$ admission critic/repair
-    $\rightarrow$ library $\rightarrow$ safety-aware retrieval and retirement.
-  }}
-  \caption{\textbf{SafeEvolve governs persistent learning.} Components act at
-  skill writing and reuse, the two points at which transient experience becomes
-  persistent policy and later affects behavior.}
-  \label{fig:safeevolve}
-\end{figure}
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  core/.style={draw=black!65, rounded corners=2pt, align=center,
+    minimum width=2.75cm, minimum height=1.45cm, inner sep=5pt,
+    font=\small, fill=white},
+  guard/.style={draw=blue!55!black, rounded corners=2pt, align=center,
+    minimum width=3.25cm, minimum height=1.85cm, inner sep=5pt,
+    font=\small, fill=blue!7},
+  flow/.style={-{Stealth[length=2.4mm]}, line width=0.85pt,
+    draw=black!70},
+  feedback/.style={-{Stealth[length=2.4mm]}, line width=0.8pt,
+    draw=red!60!black, dashed},
+  label/.style={font=\scriptsize\bfseries, align=center, text=black!70},
+  node distance=7mm
+]
+\node[core, fill=lightgray] (traj) {
+  \textbf{Trajectory batch}\\
+  tasks + tool traces\\
+  \scriptsize observed success};
+\node[core, right=of traj, fill=yellow!10] (candidate) {
+  \textbf{Candidate skill}\\
+  procedure + resources\\
+  \scriptsize native method output};
+\node[guard, right=of candidate] (writegate) {
+  \textbf{Write-time governance}\\
+  admission audit + targeted repair\\
+  verification preservation\\
+  \scriptsize reject / repair / admit};
+\node[core, right=of writegate, fill=green!8] (library) {
+  \textbf{Governed library}\\
+  accepted skill + lineage\\
+  \scriptsize source and revision provenance};
+\node[guard, right=of library] (reusegate) {
+  \textbf{Reuse-time governance}\\
+  safety-aware selection\\
+  risk prior + retrieval evidence\\
+  \scriptsize suppress / retrieve};
+\node[core, right=of reusegate, fill=orange!9] (reuse) {
+  \textbf{Later task reuse}\\
+  agent action + outcome\\
+  \scriptsize utility and safety feedback};
+
+\draw[flow] (traj) -- (candidate);
+\draw[flow] (candidate) -- (writegate);
+\draw[flow] (writegate) -- (library);
+\draw[flow] (library) -- (reusegate);
+\draw[flow] (reusegate) -- (reuse);
+
+\node[label, below=5mm of writegate] (writecaption) {
+  prevents unsafe generalization\\from entering persistent state};
+\node[label, below=5mm of reusegate] (reusecaption) {
+  prevents retained risk\\from reaching execution};
+\node[core, below=11mm of library, fill=red!6,
+  minimum width=3.25cm, minimum height=1.2cm] (retire) {
+  \textbf{Rollback / repair / retirement}\\
+  \scriptsize update the governed library};
+\draw[feedback] (reuse.south) |- node[label, near start, below]
+  {observed reuse outcome} (retire.east);
+\draw[feedback] (retire.north) -- (library.south);
+\end{tikzpicture}%
+}
+\caption{\textbf{SafeEvolve governs the persistent update at writing and
+reuse.} Write-time governance audits the complete candidate bundle, repairs
+unsafe generalization, and preserves verification requirements before
+admission. The library records lineage and revision provenance. Reuse-time
+governance combines that provenance with retrieval and outcome evidence, then
+suppresses, repairs, rolls back, or retires risky skills while retaining useful
+procedures.}
+\label{fig:safeevolve}
+\end{figure*}
 
 \section{Experimental Setup}
 \label{sec:setup}
