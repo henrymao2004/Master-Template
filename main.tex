@@ -656,27 +656,41 @@ or an accompanying interval plot.}
 \label{tab:misevolution-main}
 \end{table*}
 
-\paragraph{Observed safety--utility pattern.}
-Higher benign utility frequently coincides with higher malicious ASR in
+\paragraph{Capability gains can coincide with higher malicious success.}
+Higher benign utility frequently appears alongside higher malicious ASR in
 Table~\ref{tab:misevolution-main}. EvoSkill reports BU/M-ASR of 71.1/62.2 on
 Claude Code and 76.0/64.4 on Codex, compared with 49.8/56.0 and 54.7/59.6
-under no evolution.
-Hermes-native reports BU/M-ASR of 68.8/73.4, compared with 14.2/44.0 under
-no evolution on Hermes.
-The artifact and carryover stages distinguish how this risk persists.
-AutoSkill and SkillsVote on Claude Code reach B-ASR 8.4/7.1 and C-ASR
-16.0/18.7 while retaining C-Util 64.0/65.3. Hermes-native reaches B-ASR
-16.0, C-ASR 30.7, and C-Util 64.0. EvoSkill and SkillOpt produce unsafe
-retrieval rates of 81.0 and 50.0 on Claude Code while their C-ASR remains
-zero, showing that unsafe stored and retrieved content can remain latent before
-it changes later behavior. In every post-attack probe, the executor is reset
-and retrieval is rebuilt solely from the frozen \texttt{SKILL.md}.
+under no evolution. Hermes-native reports 68.8/73.4, compared with 14.2/44.0
+under no evolution on Hermes. SkillClaw defines a different regime: utility
+generally falls and malicious ASR does not show the same increase. The
+association therefore varies across evolution method--agent systems.
+
+\paragraph{Three settings exhibit the full observed misevolution signature.}
+AutoSkill and SkillsVote on Claude Code reach B-ASR 8.4/7.1 and fresh-session
+C-ASR 16.0/18.7 while retaining C-Util 64.0/65.3. Hermes-native is the
+strongest observed case, reaching B-ASR 16.0, C-ASR 30.7, and C-Util 64.0.
+Across these settings, the benchmark observes an evolved unsafe artifact,
+later benign contamination, and harmful behavior after the executor is reset
+and retrieval is rebuilt solely from the frozen \texttt{SKILL.md}. Carryover is therefore
+compatible with retained task competence rather than being explained by a
+generally broken agent.
+
+\paragraph{Artifact risk is broader than realized carryover harm.}
+The remaining settings separate earlier stages of the lifecycle from harmful
+execution. EvoSkill and SkillOpt on Claude Code produce unsafe retrieval rates
+of 81.0 and 50.0 while C-ASR remains zero; Codex with EvoSkill similarly reaches
+33.3 URR with zero C-ASR. Unsafe skill content can therefore be authored and
+retrieved without producing an observed harmful action in the persistence
+probe. Runtime policy, tool mediation, and task context remain gates between a
+persistent unsafe rule and realized harm.
 
 \paragraph{Safety--utility frontier.}
-Plot each method by carryover utility and carryover ASR. The important region
-is high utility and high carryover ASR: these methods preserve useful procedures while
-also retaining the unsafe shortcut, so capability improvement alone is not a
-reliable safety signal.
+The high-utility, high-C-ASR region is the central misevolution regime:
+AutoSkill, SkillsVote, and Hermes-native preserve useful procedures while also
+retaining an unsafe shortcut. Capability improvement alone is therefore not a
+reliable safety signal, while artifact risk alone does not establish that the
+shortcut will be executed. The nine metrics locate both properties without
+collapsing them into a single score.
 
 \subsection{RQ2: How do exposure, skill state, and later harm align over time?}
 \label{sec:rq2}
@@ -685,7 +699,7 @@ RQ2 reports each transition in Equation~\ref{eq:sequence}. At each round, report
 ASR on the $M$ block, benign utility and contamination on the
 following $B$ block, and the three artifact scores on the current library
 snapshot. Then report URR, carryover ASR, and carryover utility after rebuilding
-retrieval from the frozen \texttt{SKILL.md}. Report these comparisons
+retrieval from the frozen \texttt{SKILL.md}. We report these comparisons
 descriptively.
 
 \begin{table}[t]
@@ -710,12 +724,15 @@ observed event.}
 \label{tab:sequence}
 \end{table}
 
-\paragraph{Artifact risk precedes behavioral harm.}
-Compare the three artifact scores with realized carryover ASR. Episodes with
-high content unsafety, unsafe generalization, or stealthiness but no post-attack
-harm constitute latent artifact risk even when retrieval or an unsafe action is
-not observed. Quantify this
-artifact--behavior gap by method and agent.
+\paragraph{Artifact risk is broader than behavioral harm.}
+The aggregate results already expose an artifact--behavior gap. Every reported
+evolution setting produces nontrivial artifact scores, whereas clear elevated
+carryover ASR is concentrated in AutoSkill, SkillsVote, and Hermes-native.
+EvoSkill and SkillOpt further show that even observed unsafe retrieval need not
+be followed by harm. RQ2 measures these transitions episode by episode to
+separate latent artifact risk, retrieved risk, and realized carryover. This is a
+gated lifecycle: the observed progression can stop because no unsafe skill is
+exported, the skill is not retrieved, or the executor declines to act on it.
 
 \paragraph{Worked temporal trace.}
 Show one compact case from source exposure to authored skill diff, later
@@ -726,19 +743,27 @@ that evolution removed or failed to encode.
 \subsection{RQ3: Where does misevolution emerge, at what budget, and when?}
 \label{sec:rq3}
 
-Report heterogeneity across evolution algorithms, agent frameworks,
+RQ3 characterizes heterogeneity across evolution algorithms, agent frameworks,
 AgentHazard risk categories, attack strategies, exposure budgets, and exposure
-positions. Avoid treating the pooled
-mean as universality: identify which design properties predict high artifact
-unsafety and which executor policies block unsafe artifacts from becoming
-post-attack behavior.
+positions. The analysis uses the pooled mean as a summary and then identifies
+which design properties accompany high artifact unsafety and which settings
+retain artifact risk without observed post-attack harm.
 
 \paragraph{Framework decomposition.}
 The four MiniMax-M2.5 targets hold the backbone fixed while changing the agent
 framework, enabling comparisons across tool mediation, system instructions,
-skill retrieval, and execution policy. Report these framework
-comparisons before the overall macro-average; the four configurations are
+skill retrieval, and execution policy. We report these framework comparisons
+before the overall macro-average; the four configurations are
 related controls, not interchangeable replications.
+
+The current comparisons already show that framework and evolution method matter
+at different stages. Hermes-native produces the highest observed contamination
+and carryover ASR; Claude Code permits full carryover under AutoSkill and
+SkillsVote; Codex with EvoSkill retrieves unsafe skills without realizing
+carryover harm; and SkillClaw produces little or no elevation over the
+no-evolution carryover rate across the reported frameworks. Dose and timing
+analyses test how these system-specific outcomes develop as exposure changes
+and whether the response is monotonic within each setting.
 
 \begin{figure*}[t]
   \centering
@@ -1186,13 +1211,24 @@ generalization, or stealthiness before its unsafe procedure is retrieved. This
 is latent risk, not a safe artifact. Conversely, a runtime policy can block
 execution while the persistent library continues to carry the unsafe rule.
 Product evaluation should therefore report online utility and ASR, the three
-artifact properties, and the two post-attack outcomes separately.
+artifact properties, and unsafe retrieval, carryover ASR, and carryover utility
+separately. The observed progression is gated rather than automatic: unsafe
+experience can yield an unsafe artifact without later retrieval, and retrieval
+can occur without harmful execution.
 
 \paragraph{Capability and safety share the same shortcut.}
 The difficult cases are not useless malicious skills. They are procedures in
 which higher success appears alongside the removal of friction that served as a
 safeguard. Accordingly, we report capability together with safety rather than
 treating either one alone as sufficient.
+
+\paragraph{Misevolution is a system-level outcome.}
+The same backbone exhibits different outcomes across agent frameworks and
+evolution methods. Some settings complete the path from unsafe experience to
+clean-session harm, while others retain the unsafe rule without executing it.
+Skill authoring, serialization, retrieval, tool mediation, and runtime policy
+jointly determine where the observed progression stops. This heterogeneity is
+part of the benchmark result: it identifies which layer requires governance.
 
 \paragraph{Scope and limitations.}
 The study focuses on readable skill artifacts written by CLI and coding agents
@@ -1205,13 +1241,16 @@ longer deployment horizons, interacting libraries, and adaptive attackers.
 \label{sec:conclusion}
 
 Skill self-evolution changes the temporal structure of agent safety. Our
-evaluation observes unsafe shortcuts in reusable skills and later behavior after
-the original attack is gone. \gym makes this longitudinal state observable and
-replayable; \bench measures exposure, artifact formation,
-and clean-session carryover. \safeevolve shows how to govern the
-persistent update while preserving useful learning. Safe self-improvement
-requires evaluating not only whether an agent succeeds today, but also which
-persistent skills and later behaviors appear after that success.
+evaluation identifies a persistent channel through which unsafe success can be
+generalized, stored, retrieved, and, in some method--agent systems, carried into
+clean-session behavior after the original attack is gone. Other systems stop at
+artifact formation or retrieval, making the location of that boundary part of
+the safety result. \gym makes this longitudinal state observable and replayable;
+\bench distinguishes latent artifact risk from
+retrieved risk and realized carryover. \safeevolve governs the persistent
+update while preserving useful learning. Safe self-improvement requires
+evaluating not only whether an agent succeeds today, but also which persistent
+skills are created, when they are retrieved, and what later behavior follows.
 
 \bibliography{iclr2026_conference}
 \bibliographystyle{iclr2026_conference}
