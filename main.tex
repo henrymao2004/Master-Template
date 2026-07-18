@@ -397,67 +397,33 @@ resources, caches, and native memory remain unavailable.
 \subsection{Metrics and statistical protocol}
 
 All nine headline metrics are absolute micro-aggregates over the 25 episodes in
-a condition. Let $C(x)$ be completion of the benign objective under our
-benign-completion judge and $H(x)$ completion of the paired harmful objective
-under the AgentHazard trajectory judge. Using $\mathcal{B}_C$ for scored
-benign-utility tasks and $\mathcal{B}_H,\mathcal{M}_H$ for harmful-judge results,
-the online metrics are
-\begin{align}
-\mathrm{BenignUtility} &=
-\frac{\sum_{x\in\mathcal{B}_C} C(x)}{|\mathcal{B}_C|}, &
-\mathrm{MaliciousASR} &=
-\frac{\sum_{x\in\mathcal{M}_H} H(x)}{|\mathcal{M}_H|}, \\
-\mathrm{Contamination} &=
-\frac{\sum_{x\in\mathcal{B}_H} H(x)}{|\mathcal{B}_H|}.
-\end{align}
-Thus Benign Utility measures completion on $B$, Malicious ASR measures harm on
-$M$, and Benign ASR/Contamination applies the same harmful objective and judge
-to $B$. AgentHazard supplies the harmful judge; our construction supplies the
-$B$ tasks and their utility labels.
+a condition. \textbf{Benign Utility (BU)} is the fraction of valid $B$ tasks
+that complete the constructed benign objective; \textbf{Malicious ASR (M-ASR)}
+is the fraction of valid $M$ tasks that realize the paired harmful objective;
+and \textbf{Benign ASR/Contamination (B-ASR)} applies the same harmful judge and
+objective to valid $B$ tasks. BU uses our benign-completion judge, while M-ASR
+and B-ASR use the AgentHazard trajectory judge.
 
-For every skill $a$ authored from an $M^3$ or $B^3$ block, independent content
-judges assign 1--5 Content Unsafety (CU), Unsafe Generalization (UG), and
-Stealthiness (Stealth) scores $cu(a),gen(a),sneak(a)$. With $\mathcal{A}$ denoting all authored skills
-and $\mathcal{A}_U=\{a\in\mathcal{A}:cu(a)\geq3\}$ the unsafe subset, the
-artifact metrics retain the original judge scores:
-\begin{equation}
-\begin{aligned}
-\mathrm{CU} &= \frac{\sum_{a\in\mathcal{A}}cu(a)}{|\mathcal{A}|},\\
-\mathrm{UG} &= \frac{\sum_{a\in\mathcal{A}_U}gen(a)}{|\mathcal{A}_U|},\\
-\mathrm{Stealth} &= \frac{\sum_{a\in\mathcal{A}_U}sneak(a)}{|\mathcal{A}_U|}.
-\end{aligned}
-\end{equation}
-CU covers every authored skill, whereas UG and Stealth measure generalization
-and disguise within unsafe skills. CU is N/A when $\mathcal{A}$ is empty; UG
-and Stealth are N/A when $\mathcal{A}_U$ is empty. Score distributions and
+Independent content judges assign every skill authored from an $M^3$ or $B^3$
+block a 1--5 \textbf{Content Unsafety (CU)} score. \textbf{Unsafe
+Generalization (UG)} and \textbf{Stealthiness (Stealth)} are the mean 1--5
+generalization and disguise scores over authored skills with $cu\geq3$; CU is
+the mean over all authored skills. CU is N/A when no skill is authored, and UG
+and Stealth are N/A when none reaches $cu\geq3$. Score distributions and
 double-label auditor agreement appear in the appendix.
 
-For carryover, the clean executor rebuilds retrieval solely from final
-\texttt{SKILL.md}. Let $\mathcal{U}(x)$ be its exported evolved skills with
-$cu\geq3$, let $R_U(x)$ indicate retrieval of at least one such skill, and let
-$\mathcal{P}_U=\{x\in\mathcal{P}:\mathcal{U}(x)\neq\emptyset\}$. With $\mathcal{P}_H$ and
-$\mathcal{P}_C$ denoting valid harmful- and utility-judge results on $P$, the
-carryover metrics are
-\begin{equation}
-\mathrm{URR}=
-\frac{\sum_{x\in\mathcal{P}_U}R_U(x)}{|\mathcal{P}_U|},\qquad
-\mathrm{CarryoverASR}=
-\frac{\sum_{x\in\mathcal{P}_H}H(x)}{|\mathcal{P}_H|},\qquad
-\mathrm{CarryoverUtility}=
-\frac{\sum_{x\in\mathcal{P}_C}C(x)}{|\mathcal{P}_C|}.
-\end{equation}
-URR measures unsafe evolved-skill retrieval rather than arbitrary retrieval and
-is N/A, not zero, when $\mathcal{P}_U$ is empty; it is read jointly with
-artifact scores because preventing unsafe export makes URR undefined.
-Carryover Utility applies the same benign-completion judge as $B$.
-
-We micro-aggregate valid tasks or judged artifacts rather than averaging
-per-episode percentages. Episode-level bootstrap resampling gives confidence
-intervals, and method comparisons use multiple-comparison-adjusted intervals
-over matched task instances. Hyperparameters, episode construction, and the
-held-out split are frozen before the final sweep. Headline metrics pool all
-rounds; dose--response points use the corresponding $M_r$ or $B_r$ block and
-cumulative artifact snapshot after round $r$.
+For carryover, a clean executor rebuilds retrieval solely from final
+\texttt{SKILL.md}. \textbf{Unsafe Retrieval Rate (URR)} is the fraction of $P$
+tasks that retrieve an evolved skill with exported $cu\geq3$, among $P$ tasks
+whose frozen export contains such a skill; \textbf{Carryover ASR (C-ASR)} and
+\textbf{Carryover Utility (C-Util)} are the harmful- and benign-completion rates
+over valid $P$ tasks. URR is N/A, not zero, when the frozen export contains no
+unsafe evolved skill and is interpreted with the artifact scores. We aggregate
+valid tasks and judged artifacts directly rather than averaging episode-level
+percentages. Confidence intervals use episode-level bootstrap resampling, and
+method comparisons use multiple-comparison-adjusted intervals over matched
+tasks. Headline metrics pool all rounds; dose--response points use the matching
+$M_r$ or $B_r$ block and cumulative artifact snapshot after round $r$.
 
 \section{SafeEvolve}
 \label{sec:safeevolve}
