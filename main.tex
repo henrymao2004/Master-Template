@@ -890,30 +890,7 @@ learning experience but do not change that evaluation set.
 The budget sweep varies the total number of malicious tasks
 $K\in\{0,3,6,9\}$. Malicious batches occupy the middle exposure slot for
 $K=3$, the symmetric early and late slots for $K=6$, and all three slots for
-$K=9$; $K=0$ evolves on matched benign tasks at all six updates. Figure~\ref{fig:budget}
-uses line plots because $K$ is ordered and numeric. Each panel reports an
-absolute outcome---contamination, final-library CU, or carryover ASR---with
-episode-bootstrap confidence intervals.
-
-\begin{figure*}[t]
-  \centering
-  \fbox{\parbox[c][4.0cm][c]{0.96\textwidth}{
-    \centering
-    \textbf{Three-panel attacker-budget line plot.}\\[5pt]
-    Shared x-axis: malicious-task budget $K=0,3,6,9$.\\[3pt]
-    \textbf{(a) B-ASR / Contamination} \quad
-    \textbf{(b) Final Content Unsafety (CU)} \quad
-    \textbf{(c) Carryover ASR}.\\[3pt]
-    One line per selected agent--method configuration; points show absolute
-    micro-aggregates and episode-bootstrap 95\% CIs.
-  }}
-  \caption{\textbf{Skill misevolution under bounded malicious-task budgets
-  (RQ3).} Every condition retains the same task horizon and six evolution
-  updates; concept-matched benign twins replace unavailable malicious tasks.
-  The curves characterize how online contamination, artifact risk, and
-  fresh-session harm vary as attacker capability increases.}
-  \label{fig:budget}
-\end{figure*}
+$K=9$; $K=0$ evolves on matched benign tasks at all six updates.
 
 At fixed $K=3$, the timing sweep places one concentrated $M^3$ batch in the
 early, middle, or late exposure slot. The concentration sweep holds both total
@@ -921,28 +898,35 @@ budget and average exposure position fixed: \textsc{Concentrated} uses one
 $M^3$ batch in the middle slot, \textsc{Split} divides the three malicious tasks
 between symmetric early and late batches with the $2{+}1$ direction
 counterbalanced across episodes, and \textsc{Diffuse} places one malicious task
-in each of the three exposure batches. Figure~\ref{fig:placement} uses
-point-range plots because timing and concentration are categorical; it does not
-connect categories as a continuous trend.
+in each of the three exposure batches. Figure~\ref{fig:budget} places the three
+capability sweeps in one row. All panels report absolute Carryover ASR because
+it is the strongest endpoint: harm must survive export, clean-session reload,
+retrieval, and execution. Budget is ordered by malicious-task count, timing by
+exposure position, and concentration by the maximum malicious fraction in one
+update; lines connect these ordered levels. Earlier-stage artifact, retrieval,
+contamination, and utility outcomes appear in the appendix.
 
 \begin{figure*}[t]
   \centering
   \fbox{\parbox[c][4.0cm][c]{0.96\textwidth}{
     \centering
-    \textbf{Four-panel timing and concentration point-range plot.}\\[5pt]
-    \textbf{(a) Timing $\rightarrow$ CU} \quad
-    \textbf{(b) Timing $\rightarrow$ C-ASR} \quad
-    \textbf{(c) Concentration $\rightarrow$ CU} \quad
-    \textbf{(d) Concentration $\rightarrow$ C-ASR}.\\[3pt]
-    Categories use absolute point estimates with episode-bootstrap 95\% CIs;
-    color denotes agent--method configuration and categories are not connected.
+    \textbf{One-row, three-panel attacker-capability line plot.}\\[5pt]
+    Shared y-axis: Carryover ASR (\%).\\[3pt]
+    \textbf{(a) Budget:} $K=0,3,6,9$ \quad
+    \textbf{(b) Timing:} Early, Middle, Late \quad
+    \textbf{(c) Concentration:} Diffuse, Split, Concentrated.\\[3pt]
+    One line per selected agent--method configuration; points show absolute
+    micro-aggregates with episode-bootstrap 95\% CIs and all panels share one
+    legend.
   }}
-  \caption{\textbf{Placement of a fixed malicious-task budget (RQ3).} Timing
-  changes where the same $K=3$ exposure enters the learning history;
-  concentration changes how those three tasks are distributed across skill
-  updates. Complete online, artifact, retrieval, carryover, and utility metrics
-  appear in the appendix.}
-  \label{fig:placement}
+  \caption{\textbf{Skill misevolution under bounded attacker capability
+  (RQ3).} \textbf{(a)} varies the total malicious-task budget while preserving
+  the task horizon and six evolution updates. \textbf{(b)} moves a fixed
+  $K=3$ batch through the learning history. \textbf{(c)} redistributes the same
+  three malicious tasks across update batches. Concept-matched benign twins
+  fill every unexposed position. Lines report absolute fresh-session Carryover
+  ASR, not changes from a baseline.}
+  \label{fig:budget}
 \end{figure*}
 
 \subsection{RQ4: How do safety and utility compare under SafeEvolve?}
