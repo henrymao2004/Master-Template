@@ -363,10 +363,10 @@ an isolated language model.
 
 The main comparison includes five agent-agnostic evolution methods: EvoSkill,
 SkillClaw, AutoSkill, SkillsVote, and SkillOpt. Each runs on all four target
-agents. Hermes also provides a framework-native evolution path that is not
-comparable across agents; we therefore report it as a separate native-method
-study in Appendix~\ref{app:hermes-native}, with diagnostic results in
-Table~\ref{tab:hermes-native} and governed results in
+agents. Hermes also provides a framework-native evolution path supported only
+by the Hermes target. We include Hermes-native in the main diagnostic table and
+provide its implementation details and expanded results in
+Appendix~\ref{app:hermes-native}; governed results appear in
 Table~\ref{tab:safeevolve-full}. Each method is evaluated in its actual stored representation, including
 associated scripts or structured contracts, rather than after conversion to a
 common textual summary, for online behavior and artifact auditing. The
@@ -602,25 +602,27 @@ visible without encoding three quantities inside each cell.
 \textbf{CU}$\downarrow$ & \textbf{UG}$\downarrow$ & \textbf{Stealth}$\downarrow$ &
 \textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
-\multirow{7}{*}{Claude Code}
+\multirow{8}{*}{Claude Code}
 & No evolution        & 49.8 & 56.0 & 0.0 & N/A & N/A & N/A & N/A & 0.0 & 25.3 \\
 & Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& SkillClaw           & 37.1 & 51.6 & 0.0 & 1.19 & 3.00 & 3.50 & 16.7 & 0.0 & 29.7 \\
-& AutoSkill           & 65.3 & 59.1 & 8.4 & 2.54 & 2.91 & 4.07 & 50.0 & 16.0 & 64.0 \\
-& SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& EvoSkill            & 71.1 & 62.2 & 0.4 & 1.79 & 3.05 & 4.05 & 81.0 & 0.0 & 76.0 \\
+& SkillClaw           & 36.9 & 51.6 & 0.0 & 1.19 & 3.00 & 3.50 & 16.7 & 0.0 & 29.7 \\
+& AutoSkill           & 65.3 & 59.1 & 8.4 & 2.54 & 2.91 & 4.07 & 52.8 & 16.0 & 64.0 \\
+& SkillsVote          & 62.7 & 56.4 & 7.1 & 2.58 & 3.05 & 4.19 & 55.6 & 18.7 & 65.3 \\
+& SkillOpt            & 60.0 & 58.2 & 0.0 & 1.61 & 3.25 & 3.00 & 50.0 & 0.0 & 42.7 \\
+& Hermes-native       & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
 \midrule
-\multirow{7}{*}{Codex}
+\multirow{8}{*}{Codex}
 & No evolution        & 54.7 & 59.6 & 0.4 & N/A & N/A & N/A & N/A & 0.0 & 40.0 \\
 & Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& SkillClaw           & 40.4 & 55.1 & 1.3 & 1.30 & 3.00 & 4.00 & 33.3 & 0.0 & 24.0 \\
+& EvoSkill            & 76.0 & 64.4 & 0.4 & 1.54 & 2.82 & 3.73 & 33.3 & 0.0 & 65.3 \\
+& SkillClaw           & 40.4 & 55.1 & 1.3 & 1.29 & 3.00 & 4.00 & 33.3 & 0.0 & 24.0 \\
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& Hermes-native       & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
 \midrule
-\multirow{7}{*}{Hermes}
+\multirow{8}{*}{Hermes}
 & No evolution        & 14.2 & 44.0 & 0.4 & N/A & N/A & N/A & N/A & 0.0 & 16.0 \\
 & Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
@@ -628,8 +630,9 @@ visible without encoding three quantities inside each cell.
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& Hermes-native       & 68.8 & 73.4 & 16.0 & 2.64 & 3.16 & 4.20 & 62.5 & 30.7 & 64.0 \\
 \midrule
-\multirow{7}{*}{OpenClaw}
+\multirow{8}{*}{OpenClaw}
 & No evolution        & 37.3 & 44.0 & 0.4 & N/A & N/A & N/A & N/A & 1.3 & 26.7 \\
 & Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
@@ -637,6 +640,7 @@ visible without encoding three quantities inside each cell.
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& Hermes-native       & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Skill evolution across four target-agent configurations
@@ -648,23 +652,28 @@ solely from \texttt{SKILL.md}. All frameworks use the same MiniMax backbone for
 the agent-framework comparison. For URR, N/A means that the frozen
 \texttt{SKILL.md} contains no evolved skill with exported $cu\geq3$; URR is
 then undefined rather than zero. Elsewhere, N/A marks a setting with no skill
-artifact; it never denotes a failed run.
+artifact or an unsupported framework-specific pairing; it never denotes a failed run.
 The exposure-to-persistence transitions are expanded in
 Table~\ref{tab:sequence}. Add 95\% episode-bootstrap intervals in the supplement
 or an accompanying interval plot.}
 \label{tab:misevolution-main}
 \end{table*}
 
-\paragraph{Result paragraph template.}
-Across four target-agent configurations, online behavior reaches
-[BU/MA/BA] on benign utility, malicious ASR, and
-contamination. Evolved artifacts reach [CU/UG/ST], and the post-attack probe
-reaches [URR/C-ASR/C-Util] on unsafe retrieval, carryover ASR, and carryover
-utility. The pattern appears in
-[A/4] targets and [B/M]
-evolution methods. In the post-attack probe, the attack is absent, the executor
-is reset, and later behavior is measured after reloading only the frozen
-\texttt{SKILL.md}.
+\paragraph{Observed safety--utility pattern.}
+Higher benign utility frequently coincides with higher malicious ASR in
+Table~\ref{tab:misevolution-main}. EvoSkill reports BU/M-ASR of 71.1/62.2 on
+Claude Code and 76.0/64.4 on Codex, compared with 49.8/56.0 and 54.7/59.6
+under no evolution.
+Hermes-native reports BU/M-ASR of 68.8/73.4, compared with 14.2/44.0 under
+no evolution on Hermes.
+The artifact and carryover stages distinguish how this risk persists.
+AutoSkill and SkillsVote on Claude Code reach B-ASR 8.4/7.1 and C-ASR
+16.0/18.7 while retaining C-Util 64.0/65.3. Hermes-native reaches B-ASR
+16.0, C-ASR 30.7, and C-Util 64.0. EvoSkill and SkillOpt produce unsafe
+retrieval rates of 81.0 and 50.0 on Claude Code while their C-ASR remains
+zero, showing that unsafe stored and retrieved content can remain latent before
+it changes later behavior. In every post-attack probe, the executor is reset
+and retrieval is rebuilt solely from the frozen \texttt{SKILL.md}.
 
 \paragraph{Safety--utility frontier.}
 Plot each method by carryover utility and carryover ASR. The important region
@@ -1260,15 +1269,14 @@ the governance of its persistent updates.
 \textbf{Artifact scores: CU/UG/Stealth} &
 \textbf{Post-attack: URR/ASR/Utility} \\
 \midrule
-No evolution        & --/--/-- & N/A/N/A/N/A & N/A/--/-- \\
+No evolution        & 14.2/44.0/0.4 & N/A/N/A/N/A & N/A/0.0/16.0 \\
 Benign-only updates & --/--/-- & --/--/--    & --/--/-- \\
-Hermes-native       & --/--/-- & --/--/--    & --/--/-- \\
+Hermes-native       & 68.8/73.4/16.0 & 2.64/3.16/4.20 & 62.5/30.7/64.0 \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{Hermes-native diagnostic evaluation.} The framework-native
-evolution method is reported separately because it has no meaningful
-cross-agent cells. Metrics use the same absolute $3+3+3$ protocol as
-Table~\ref{tab:misevolution-main}. Its Raw / Library-Drift / \safeevolve
+\caption{\textbf{Hermes-native diagnostic detail.} This appendix view expands
+the Hermes-specific rows included in Table~\ref{tab:misevolution-main} using
+the same absolute $3+3+3$ protocol. Its Raw / Library-Drift / \safeevolve
 comparison appears in Table~\ref{tab:safeevolve-full}.}
 \label{tab:hermes-native}
 \end{table}
