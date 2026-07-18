@@ -11,6 +11,8 @@
 \usepackage{array}
 \usepackage{xcolor}
 \usepackage{colortbl}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{xspace}
@@ -651,7 +653,7 @@ the agent-framework comparison. For URR, N/A means that the frozen
 then undefined rather than zero. Elsewhere, N/A marks a setting with no skill
 artifact or an unsupported framework-specific pairing; it never denotes a failed run.
 The exposure-to-persistence transitions are expanded in
-Table~\ref{tab:sequence}. Add 95\% episode-bootstrap intervals in the supplement
+Figure~\ref{fig:sequence}. Add 95\% episode-bootstrap intervals in the supplement
 or an accompanying interval plot.}
 \label{tab:misevolution-main}
 \end{table*}
@@ -695,34 +697,65 @@ collapsing them into a single score.
 \subsection{RQ2: How do exposure, skill state, and later harm align over time?}
 \label{sec:rq2}
 
-RQ2 reports each transition in Equation~\ref{eq:sequence}. At each round, report malicious
+RQ2 reports each transition in Equation~\ref{eq:sequence} and
+Figure~\ref{fig:sequence}. At each round, report malicious
 ASR on the $M$ block, benign utility and contamination on the
 following $B$ block, and the three artifact scores on the current library
 snapshot. Then report URR, carryover ASR, and carryover utility after rebuilding
 retrieval from the frozen \texttt{SKILL.md}. We report these comparisons
 descriptively.
 
-\begin{table}[t]
+\begin{figure*}[t]
 \centering
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{lcc}
-\toprule
-\textbf{Transition in the sequence} & \textbf{Rate} & \textbf{Comparison} \\
-\midrule
-Malicious block $\rightarrow$ unsafe authored artifact & -- & -- \\
-Unsafe artifact $\rightarrow$ unsafe exported skill & -- & -- \\
-Unsafe skill retrieval on $B$ $\rightarrow$ benign contamination & -- & -- \\
-Unsafe skill retrieval on $P$ $\rightarrow$ carryover ASR & -- & -- \\
-Reloaded \texttt{SKILL.md} $\rightarrow$ carryover utility & -- & -- \\
-\bottomrule
-\end{tabular}
-\caption{\textbf{Exposure-to-persistence sequence (RQ2).} Each row reports an
-observable transition. Skill involvement is recorded only when retrieval is
-observed. The comparison reports episodes with and without the preceding
-observed event.}
-\label{tab:sequence}
-\end{table}
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  stage/.style={draw=black!70, rounded corners=2pt, align=center,
+    minimum width=3.0cm, minimum height=1.55cm, inner sep=5pt,
+    font=\small, fill=white},
+  transition/.style={-{Stealth[length=2.4mm]}, line width=0.8pt,
+    draw=black!70},
+  rate/.style={font=\scriptsize\bfseries, align=center, text=black!80},
+  gate/.style={font=\scriptsize\itshape, align=center, text=black!55},
+  node distance=8mm
+]
+\node[stage, fill=lightgray] (exposure) {
+  \textbf{Unsafe experience}\\[-1pt]
+  malicious $M$ blocks\\[2pt]
+  \scriptsize M-ASR};
+\node[stage, right=of exposure, fill=orange!9] (artifact) {
+  \textbf{Authored artifact}\\[-1pt]
+  candidate skill update\\[2pt]
+  \scriptsize CU / UG / Stealth};
+\node[stage, right=of artifact, fill=yellow!11] (export) {
+  \textbf{Persistent skill}\\[-1pt]
+  frozen \texttt{SKILL.md}\\[2pt]
+  \scriptsize unsafe export};
+\node[stage, right=of export, fill=blue!7] (retrieval) {
+  \textbf{Later retrieval}\\[-1pt]
+  zero-injection $B$ or $P$\\[2pt]
+  \scriptsize URR};
+\node[stage, right=of retrieval, fill=red!7] (behavior) {
+  \textbf{Realized behavior}\\[-1pt]
+  online or clean session\\[2pt]
+  \scriptsize B-ASR / C-ASR / C-Util};
+
+\draw[transition] (exposure) -- node[rate, above] {authoring\\rate: --}
+  node[gate, below] {no unsafe write} (artifact);
+\draw[transition] (artifact) -- node[rate, above] {export\\rate: --}
+  node[gate, below] {not exported} (export);
+\draw[transition] (export) -- node[rate, above] {retrieval\\rate: --}
+  node[gate, below] {not retrieved} (retrieval);
+\draw[transition] (retrieval) -- node[rate, above] {realization\\rate: --}
+  node[gate, below] {not executed} (behavior);
+\end{tikzpicture}%
+}
+\caption{\textbf{Exposure-to-persistence lifecycle (RQ2).} Nodes are
+observable states and the metrics that audit them; arrows report the transition
+rate between adjacent states, and the lower labels mark where the progression
+can stop. For $P$, a fresh executor reloads retrieval solely from the frozen
+\texttt{SKILL.md}.}
+\label{fig:sequence}
+\end{figure*}
 
 \paragraph{Artifact risk is broader than behavioral harm.}
 The aggregate results already expose an artifact--behavior gap. Every reported
