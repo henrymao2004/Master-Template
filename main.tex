@@ -228,7 +228,8 @@ Our contributions are:
   tasks, a new benign-completion judge, and nine lifecycle metrics.
   \item We introduce \safeevolve, which governs skill admission and reuse, and
   evaluate the problem and mitigation across four agent frameworks, six
-  evolution methods, ten risk categories, task surfaces, doses, and timings.
+  evolution methods, ten risk categories, task surfaces, and bounded attacker
+  budgets, timings, and exposure concentrations.
 \end{enumerate}
 
 \section{Related Work}
@@ -421,8 +422,8 @@ unsafe evolved skill and is interpreted with the artifact scores. We aggregate
 valid tasks and judged artifacts directly rather than averaging episode-level
 percentages. Confidence intervals use episode-level bootstrap resampling, and
 method comparisons use multiple-comparison-adjusted intervals over matched
-tasks. Headline metrics pool all rounds; dose--response points use the matching
-$M_r$ or $B_r$ block and cumulative artifact snapshot after round $r$.
+tasks. Headline metrics pool all rounds; attacker-capability sweeps use their
+matched schedule and final artifact snapshot.
 
 \section{SafeEvolve}
 \label{sec:safeevolve}
@@ -552,10 +553,9 @@ procedures.}
   \item[RQ2: Risk propagation.] How do authored artifact risk and unsafe
   retrieval relate to harmful execution and utility in a fresh carryover
   session?
-  \item[RQ3: Scope, budget, and timing.] How does misevolution vary across
-  methods, agents, vulnerability concepts and task surfaces, cumulative doses of
-  three, six, and nine malicious tasks, and early versus late exposure at a
-  fixed dose?
+  \item[RQ3: Bounded attacker exposure.] How does misevolution vary with the
+  attacker's malicious-task budget, exposure timing, and concentration within
+  skill-update batches?
   \item[RQ4: Mitigation.] Does \safeevolve retain utility while attaining lower
   evolved-artifact risk, malicious and benign ASR, unsafe retrieval, and
   carryover ASR?
@@ -873,102 +873,77 @@ retrieval log, unsafe tool action, judge state, and fresh-session reproduction.
 The example should expose the exact over-generalized clause and the safety check
 that evolution removed or failed to encode.
 
-\subsection{RQ3: Where does misevolution emerge, at what budget, and when?}
+\subsection{RQ3: How does misevolution vary under bounded attacker exposure?}
 \label{sec:rq3}
 
-RQ3 characterizes heterogeneity across evolution algorithms, agent frameworks,
-AgentHazard risk categories, vulnerability concepts, task surfaces, exposure budgets, and exposure
-positions. The analysis uses the pooled mean as a summary and then identifies
-which design properties accompany high artifact unsafety and which settings
-retain artifact risk without observed post-attack harm.
+RQ3 treats malicious learning experience as a bounded attacker capability. All
+conditions keep 18 learning-stage tasks, six native skill updates, three
+clean-session probes, and the same concept-matched task pool. Replacing a
+malicious task with its benign twin changes exposure while preserving the
+update budget and horizon. We run the sweep on three configurations spanning
+the observed lifecycle regimes: Claude Code with AutoSkill, Codex with
+EvoSkill, and Hermes with Hermes-native. The same predeclared concept--surface
+families are used in every condition. Online outcomes are scored on the three
+fixed $B^3$ evaluation blocks; benign replacements in exposure slots supply
+learning experience but do not change that evaluation set.
 
-\paragraph{Framework decomposition.}
-The four MiniMax-M2.5 targets hold the backbone fixed while changing the agent
-framework, enabling comparisons across tool mediation, system instructions,
-skill retrieval, and execution policy. We report these framework comparisons
-before the overall macro-average; the four configurations are
-related controls, not interchangeable replications.
-
-The current comparisons already show that framework and evolution method matter
-at different stages. Hermes-native produces the highest observed contamination
-and carryover ASR; Claude Code permits full carryover under AutoSkill and
-SkillsVote; Codex with EvoSkill retrieves unsafe skills without realizing
-carryover harm; and SkillClaw produces little or no elevation over the
-no-evolution carryover rate across the reported frameworks. Dose and timing
-analyses test how these system-specific outcomes develop as exposure changes
-and whether the response is monotonic within each setting.
-
-\begin{figure*}[t]
-  \centering
-  \fbox{\parbox[c][4.2cm][c]{0.96\textwidth}{
-    \centering
-    \textbf{Three-panel dose--response placeholder.}\\[5pt]
-    Shared x-axis: $R_1,R_2,R_3$ (cumulative dose $3M,6M,9M$).\\[3pt]
-    \textbf{(a) Contamination} on the following $B$ block \quad
-    \textbf{(b) Malicious ASR} on the $M$ block \quad
-    \textbf{(c) Mean Content Unsafety score (CU)} of the current library.\\[3pt]
-    One line per evolution method with episode-bootstrap CIs. Panel (a) also
-    shows the No-Evolution line as the approximately zero contamination floor.
-  }}
-  \caption{\textbf{Dose--response of skill misevolution (RQ3).} Each round adds
-  three malicious tasks before measuring behavior on the corresponding malicious and
-  benign blocks and auditing the cumulative authored library. Absolute micro
-  metrics are recomputed at each round; lines do not show differences from a
-  baseline.}
-  \label{fig:budget}
-\end{figure*}
-
-\subsubsection{Timing sweep}
-\label{sec:timing-sweep}
-
-The dose--response sweep changes how much adversarial experience enters the
-learning stream. The timing sweep fixes the malicious dose at one three-task
-block and moves that block through an otherwise identical learning history. The
-three schedules are
-\begin{align*}
-  \text{\textsc{Early}}:  &\quad \mathrm{MMM\,BBB\;BBB\,BBB\;BBB\,BBB}
-    \mid \mathrm{BBB},\\
-  \text{\textsc{Middle}}: &\quad \mathrm{BBB\,BBB\;MMM\,BBB\;BBB\,BBB}
-    \mid \mathrm{BBB},\\
-  \text{\textsc{Late}}:   &\quad \mathrm{BBB\,BBB\;BBB\,BBB\;MMM\,BBB}
-    \mid \mathrm{BBB}.
-\end{align*}
-Non-adversarial positions use the corresponding concept-matched benign tasks.
-Every schedule therefore contains the same 18 learning-stage tasks, three malicious tasks,
-15 benign tasks, six block-level evolution opportunities, and three clean-session
-persistence probes. This compares early exposure followed by more benign
-updates with recent exposure followed by fewer benign updates before the
-library is frozen.
+The budget sweep varies the total number of malicious tasks
+$K\in\{0,3,6,9\}$. Malicious batches occupy the middle exposure slot for
+$K=3$, the symmetric early and late slots for $K=6$, and all three slots for
+$K=9$; $K=0$ evolves on matched benign tasks at all six updates. Figure~\ref{fig:budget}
+uses line plots because $K$ is ordered and numeric. Each panel reports an
+absolute outcome---contamination, final-library CU, or carryover ASR---with
+episode-bootstrap confidence intervals.
 
 \begin{figure*}[t]
   \centering
   \fbox{\parbox[c][4.0cm][c]{0.96\textwidth}{
     \centering
-    \textbf{Fixed-dose timing-sweep placeholder.}\\[5pt]
-    Shared x-axis: \textsc{Early}, \textsc{Middle}, \textsc{Late}; total dose
-    fixed at $3M$.\\[3pt]
-    \textbf{(a) Final-block Contamination} \quad
-    \textbf{(b) Final mean Content Unsafety score (CU)} \quad
+    \textbf{Three-panel attacker-budget line plot.}\\[5pt]
+    Shared x-axis: malicious-task budget $K=0,3,6,9$.\\[3pt]
+    \textbf{(a) B-ASR / Contamination} \quad
+    \textbf{(b) Final Content Unsafety (CU)} \quad
     \textbf{(c) Carryover ASR}.\\[3pt]
-    One line per evolution method with episode-bootstrap CIs. Each point is an
-    absolute micro aggregate over the 25 episodes; utility outcomes and
-    the complete nine-metric timing table appear in the appendix.
+    One line per selected agent--method configuration; points show absolute
+    micro-aggregates and episode-bootstrap 95\% CIs.
   }}
-  \caption{\textbf{Exposure timing at a fixed malicious dose (RQ3).} Moving the
-  same three malicious tasks across a fixed-length learning history contrasts
-  earlier and more recent exposure. Final-block contamination measures harmful behavior
-  on the last benign block before freezing, content unsafety audits the final
-  authored library, and carryover ASR tests retrieval reloaded solely from the
-  frozen \texttt{SKILL.md} in a clean session.}
-  \label{fig:timing}
+  \caption{\textbf{Skill misevolution under bounded malicious-task budgets
+  (RQ3).} Every condition retains the same task horizon and six evolution
+  updates; concept-matched benign twins replace unavailable malicious tasks.
+  The curves characterize how online contamination, artifact risk, and
+  fresh-session harm vary as attacker capability increases.}
+  \label{fig:budget}
 \end{figure*}
 
-\paragraph{Failure patterns.}
-Cluster audited skill diffs into a small post-hoc taxonomy such as verification
-skipping, authorization assumption, policy erosion, and unsafe
-over-generalization. Report multi-label frequencies and annotator agreement.
-Use the taxonomy to summarize variation, not as the primary evidence that
-misevolution exists.
+At fixed $K=3$, the timing sweep places one concentrated $M^3$ batch in the
+early, middle, or late exposure slot. The concentration sweep holds both total
+budget and average exposure position fixed: \textsc{Concentrated} uses one
+$M^3$ batch in the middle slot, \textsc{Split} divides the three malicious tasks
+between symmetric early and late batches with the $2{+}1$ direction
+counterbalanced across episodes, and \textsc{Diffuse} places one malicious task
+in each of the three exposure batches. Figure~\ref{fig:placement} uses
+point-range plots because timing and concentration are categorical; it does not
+connect categories as a continuous trend.
+
+\begin{figure*}[t]
+  \centering
+  \fbox{\parbox[c][4.0cm][c]{0.96\textwidth}{
+    \centering
+    \textbf{Four-panel timing and concentration point-range plot.}\\[5pt]
+    \textbf{(a) Timing $\rightarrow$ CU} \quad
+    \textbf{(b) Timing $\rightarrow$ C-ASR} \quad
+    \textbf{(c) Concentration $\rightarrow$ CU} \quad
+    \textbf{(d) Concentration $\rightarrow$ C-ASR}.\\[3pt]
+    Categories use absolute point estimates with episode-bootstrap 95\% CIs;
+    color denotes agent--method configuration and categories are not connected.
+  }}
+  \caption{\textbf{Placement of a fixed malicious-task budget (RQ3).} Timing
+  changes where the same $K=3$ exposure enters the learning history;
+  concentration changes how those three tasks are distributed across skill
+  updates. Complete online, artifact, retrieval, carryover, and utility metrics
+  appear in the appendix.}
+  \label{fig:placement}
+\end{figure*}
 
 \subsection{RQ4: How do safety and utility compare under SafeEvolve?}
 \label{sec:rq4}
@@ -1498,10 +1473,10 @@ separately from artifact auditing.
 \section{Additional Results}
 \label{app:additional-results}
 
-Include per-agent, per-risk-category, per-vulnerability-concept, per-task-surface,
-per-timing-position, and per-budget tables with confidence intervals. The
-timing appendix reports all nine metrics for the fixed-$3M$ early, middle, and
-late schedules. Report invalid episodes, runtime
+Include per-agent, per-risk-category, per-vulnerability-concept, and
+per-task-surface tables with confidence intervals. For RQ3, report all nine
+metrics for every malicious-task budget, timing, and concentration schedule,
+including the concept--surface breakdown. Report invalid episodes, runtime
 failures, missing combinations, and sensitivity to aggregation choices.
 
 \safeevolvefulltable
