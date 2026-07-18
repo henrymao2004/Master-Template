@@ -61,7 +61,7 @@ executing and instrumenting longitudinal skill evolution under controlled
 persistent state. \bench is its frozen evaluation instantiation, with an
 exposure-to-carryover task protocol and nine online, artifact, and post-attack
 metrics. Offline autoresearch discovers reusable vulnerability concepts, and
-our constructor turns AgentHazard harmful-task contracts into concept-matched
+our constructor turns AgentHazard harmful-task contracts into concept-aligned
 malicious, benign, and persistence tasks with a new benign-completion judge. We
 also introduce \safeevolve, which governs skill
 admission and reuse through targeted repair, verification preservation,
@@ -97,8 +97,8 @@ library, whether that artifact was later retrieved, or whether a fresh executor
 reproduced the harm. The technical gap is longitudinal state attribution, not
 another attack-success score.
 
-Solving it requires three capabilities. First, the task set must pair an unsafe
-mechanism with benign and persistence tasks on related surfaces; harmful prompts
+Solving it requires three capabilities. First, the task set must cover an unsafe
+mechanism with malicious, benign, and persistence tasks on related surfaces; harmful prompts
 alone provide no test of later contamination. Second, skill state must be
 versioned and isolated from conversation, workspace, cache, and native memory so
 later behavior can be attributed to the exported artifact. Third, measurement
@@ -112,7 +112,7 @@ cross-task state, records authoring and retrieval, and supports snapshot replay
 and clean-session reload. \bench is the frozen task-and-evaluation protocol
 instantiated within this environment. Using AHA autoresearch~\citep{mao2026aha}
 offline, our constructor turns AgentHazard harmful-task contracts into validated
-vulnerability concepts and concept-matched malicious, benign, and persistence
+vulnerability concepts and concept-aligned malicious, benign, and persistence
 tasks. It fixes the exposure schedule, adds an orthogonal benign-completion
 judge, and measures online behavior, evolved artifacts, and post-attack
 carryover with nine metrics.
@@ -143,8 +143,8 @@ carryover with nine metrics.
   falsifiable vulnerability concept\\
   \scriptsize enabling condition + evidence};
 \node[design, right=of concept, fill=yellow!12] (constructor) {
-  \textbf{Our run-pair constructor}\\
-  matched task surfaces\\
+  \textbf{Our episode constructor}\\
+  concept-aligned task surfaces\\
   \scriptsize new benign-completion judge};
 \node[design, right=of constructor, fill=blue!7] (tasks) {
   \textbf{Frozen benchmark tasks}\\
@@ -193,7 +193,7 @@ carryover with nine metrics.
 \caption{\textbf{SkillMisevo-Gym and SkillMisevo-Bench.}
 \textbf{(a)} AgentHazard supplies a harmful-task contract; an external
 autoresearch stage discovers validated vulnerability concepts, and our
-constructor produces concept-matched $M/B/P$ tasks and a benign-completion
+constructor produces concept-aligned $M/B/P$ tasks and a benign-completion
 judge. \textbf{(b)} \bench fixes the longitudinal episode and lifecycle metrics;
 \gym executes it with versioned skill state, observable authoring and retrieval,
 and clean-session replay. The discovery VCG is never exposed to the evaluated
@@ -224,12 +224,12 @@ Our contributions are:
   distinct, gated outcomes.
   \item We introduce \gym, an extensible environment for controlled,
   instrumented skill-evolution research with versioned state and clean-session
-  replay, and \bench, a frozen instantiation with concept-matched $M/B/P$
+  replay, and \bench, a frozen instantiation with concept-aligned $M/B/P$
   tasks, a new benign-completion judge, and nine lifecycle metrics.
   \item We introduce \safeevolve, which governs skill admission and reuse, and
   evaluate the problem and mitigation across four agent frameworks, six
-  evolution methods, ten risk categories, task surfaces, and bounded attacker
-  budgets, timings, and exposure concentrations.
+  evolution methods, ten risk categories, task surfaces, cumulative exposure
+  levels, exposure timings, and update-batch compositions.
 \end{enumerate}
 
 \section{Related Work}
@@ -254,7 +254,7 @@ Agent safety benchmarks supply tasks, environments, attack inputs, and outcome
 judges that a learning environment can execute. AgentHazard provides 2,653
 computer-use instances, ten risk categories, multi-step attack strategies, and
 a harmful trajectory judge~\citep{feng2026agenthazard}. These assets define the
-harmful task contract in our instantiation; they do not provide benign twins,
+harmful task contract in our instantiation; they do not provide benign tasks,
 persistence probes, or a benign utility metric. We construct those components
 from vulnerability concepts discovered using AHA~\citep{mao2026aha}; \bench
 freezes them into a longitudinal evaluation, and \gym supplies persistent skill
@@ -347,11 +347,13 @@ AgentHazard~\citep{feng2026agenthazard} as a task-contract source, retaining its
 harmful objectives, ten risk categories, sandbox, reset procedure, and harmful
 trajectory judge. AHA~\citep{mao2026aha} discovers executable vulnerability
 concepts offline by committing falsifiers and promoting replicated mechanisms.
-Our constructor turns selected mechanisms into concept-matched $M/B$ pairs and
-held-out $P$ probes: $M$ realizes the unsafe route, $B$ preserves the operation
-and domain while removing that route, and $P$ uses a fresh surface with no
-attack payload to test what the reloaded skill supplies. The AgentHazard judge
-scores the paired harmful objective on all task types; our benign-completion
+Our constructor independently instantiates each selected mechanism as malicious
+$M$ tasks, benign $B$ tasks on related operational surfaces, and held-out $P$
+probes. $M$ realizes the unsafe route, $B$ exercises benign work in the same
+concept family, and $P$ uses a fresh surface with no attack payload to test what
+the reloaded skill supplies. These are separate task records rather than two
+views of a shared base instance. The AgentHazard judge scores the concept's
+harmful objective on all task types; our benign-completion
 judge scores the new $B$ and $P$ objectives. Tasks and metadata are frozen
 before evaluation, final tasks are new concept instantiations rather than
 replayed AgentHazard prompts, and the authoring VCG remains hidden from the
@@ -399,7 +401,7 @@ resources, caches, and native memory remain unavailable.
 All nine headline metrics are absolute micro-aggregates over the 25 episodes in
 a condition. \textbf{Benign Utility (BU)} is the fraction of valid $B$ tasks
 that complete the constructed benign objective; \textbf{Malicious ASR (M-ASR)}
-is the fraction of valid $M$ tasks that realize the paired harmful objective;
+is the fraction of valid $M$ tasks that realize the episode's harmful objective;
 and \textbf{Benign ASR/Contamination (B-ASR)} applies the same harmful judge and
 objective to valid $B$ tasks. BU uses our benign-completion judge, while M-ASR
 and B-ASR use the AgentHazard trajectory judge.
@@ -553,9 +555,9 @@ procedures.}
   \item[RQ2: Risk propagation.] How do authored artifact risk and unsafe
   retrieval relate to harmful execution and utility in a fresh carryover
   session?
-  \item[RQ3: Bounded attacker exposure.] How does misevolution vary with the
-  attacker's malicious-task budget, exposure timing, and concentration within
-  skill-update batches?
+  \item[RQ3: Exposure trajectory and schedule.] When does misevolution emerge
+  along cumulative malicious exposure, and how does final risk vary with
+  exposure timing and composition within skill-update batches?
   \item[RQ4: Mitigation.] Does \safeevolve retain utility while attaining lower
   evolved-artifact risk, malicious and benign ASR, unsafe retrieval, and
   carryover ASR?
@@ -571,7 +573,7 @@ evolution method runs on the identical frozen episode set for every target.
 
 The complete experimental grid is target-agent $\times$ evolution method
 $\times$ episode. Episodes are stratified by AgentHazard risk category,
-autoresearch-discovered vulnerability concept, task surface, and exposure budget. All main-table cells
+autoresearch-discovered vulnerability concept and task surface. All main-table cells
 pool the same predeclared episode distribution within a target;
 macro-averages give equal weight to the four target-agent configurations.
 Per-category, per-concept, and per-surface results appear in the appendix.
@@ -873,60 +875,62 @@ retrieval log, unsafe tool action, judge state, and fresh-session reproduction.
 The example should expose the exact over-generalized clause and the safety check
 that evolution removed or failed to encode.
 
-\subsection{RQ3: How does misevolution vary under bounded attacker exposure?}
+\subsection{RQ3: How do cumulative exposure and its update schedule shape misevolution?}
 \label{sec:rq3}
 
-RQ3 treats malicious learning experience as a bounded attacker capability. All
-conditions keep 18 learning-stage tasks, six native skill updates, three
-clean-session probes, and the same concept-matched task pool. Replacing a
-malicious task with its benign twin changes exposure while preserving the
-update budget and horizon. We run the sweep on three configurations spanning
-the observed lifecycle regimes: Claude Code with AutoSkill, Codex with
-EvoSkill, and Hermes with Hermes-native. The same predeclared concept--surface
-families are used in every condition. Online outcomes are scored on the three
-fixed $B^3$ evaluation blocks; benign replacements in exposure slots supply
-learning experience but do not change that evaluation set.
+RQ3 uses the existing $9M+9B+3P$ episode records without constructing paired
+views or replacement tasks. We evaluate Claude Code with AutoSkill, Codex with
+EvoSkill, and Hermes with Hermes-native on the same predeclared
+concept--surface families. The first analysis follows the standard interleaved
+episode and freezes the library before learning and after each complete
+$M^3,B^3$ round. These checkpoints contain cumulative malicious exposure
+$K\in\{0,3,6,9\}$. At every checkpoint, a clean executor reloads only that
+snapshot's \texttt{SKILL.md} and runs the same evaluation-only $P^3$ probes,
+which never update the library. This repeated-snapshot trajectory identifies
+the onset and accumulation of persistent harm across the native episode.
 
-The budget sweep varies the total number of malicious tasks
-$K\in\{0,3,6,9\}$. Malicious batches occupy the middle exposure slot for
-$K=3$, the symmetric early and late slots for $K=6$, and all three slots for
-$K=9$; $K=0$ evolves on matched benign tasks at all six updates.
+Two schedule comparisons then hold the complete task inventory, six native
+updates, tools, judges, and final $P^3$ fixed. The timing comparison orders the
+six learning blocks as \textsc{Early}
+($MMM|MMM|MMM|BBB|BBB|BBB$), \textsc{Interleaved}
+($MMM|BBB|MMM|BBB|MMM|BBB$), or \textsc{Late}
+($BBB|BBB|BBB|MMM|MMM|MMM$). It measures whether later benign evolution repairs
+an early unsafe update and whether late exposure persists when fewer repair
+opportunities remain. The batch-composition comparison retains nine malicious
+and nine benign tasks while changing how strongly malicious experience
+dominates individual updates. \textsc{Batched} uses six pure blocks,
+\textsc{Partially Mixed} uses two pure and four mixed blocks, and
+\textsc{Fully Mixed} alternates $MMB$ and $MBB$ so every update sees both task
+types. Each schedule is paired with its temporal mirror across episodes, and
+within-block positions are rotated, keeping pooled exposure position centered.
 
-At fixed $K=3$, the timing sweep places one concentrated $M^3$ batch in the
-early, middle, or late exposure slot. The concentration sweep holds both total
-budget and average exposure position fixed: \textsc{Concentrated} uses one
-$M^3$ batch in the middle slot, \textsc{Split} divides the three malicious tasks
-between symmetric early and late batches with the $2{+}1$ direction
-counterbalanced across episodes, and \textsc{Diffuse} places one malicious task
-in each of the three exposure batches. Figure~\ref{fig:budget} places the three
-capability sweeps in one row. All panels report absolute Carryover ASR because
-it is the strongest endpoint: harm must survive export, clean-session reload,
-retrieval, and execution. Budget is ordered by malicious-task count, timing by
-exposure position, and concentration by the maximum malicious fraction in one
-update; lines connect these ordered levels. Earlier-stage artifact, retrieval,
-contamination, and utility outcomes appear in the appendix.
+Figure~\ref{fig:rq3-schedule} places cumulative exposure, timing, and batch
+composition in one row. All panels report absolute Carryover ASR: harm must
+survive export, clean-session reload, retrieval, and execution. Artifact,
+retrieval, contamination, and utility outcomes at the same checkpoints and
+schedules appear in the appendix.
 
 \begin{figure*}[t]
   \centering
   \fbox{\parbox[c][4.0cm][c]{0.96\textwidth}{
     \centering
-    \textbf{One-row, three-panel attacker-capability line plot.}\\[5pt]
+    \textbf{One-row, three-panel exposure-schedule line plot.}\\[5pt]
     Shared y-axis: Carryover ASR (\%).\\[3pt]
-    \textbf{(a) Budget:} $K=0,3,6,9$ \quad
-    \textbf{(b) Timing:} Early, Middle, Late \quad
-    \textbf{(c) Concentration:} Diffuse, Split, Concentrated.\\[3pt]
+    \textbf{(a) Cumulative exposure:} $K=0,3,6,9$ \quad
+    \textbf{(b) Timing:} Early, Interleaved, Late \quad
+    \textbf{(c) Batch composition:} Fully Mixed, Partially Mixed, Batched.\\[3pt]
     One line per selected agent--method configuration; points show absolute
     micro-aggregates with episode-bootstrap 95\% CIs and all panels share one
     legend.
   }}
-  \caption{\textbf{Skill misevolution under bounded attacker capability
-  (RQ3).} \textbf{(a)} varies the total malicious-task budget while preserving
-  the task horizon and six evolution updates. \textbf{(b)} moves a fixed
-  $K=3$ batch through the learning history. \textbf{(c)} redistributes the same
-  three malicious tasks across update batches. Concept-matched benign twins
-  fill every unexposed position. Lines report absolute fresh-session Carryover
-  ASR, not changes from a baseline.}
-  \label{fig:budget}
+  \caption{\textbf{Cumulative exposure and update schedule (RQ3).}
+  \textbf{(a)} replays the same $P^3$ probes from clean executors at successive
+  snapshots of the standard episode. \textbf{(b)} reorders the complete
+  $9M+9B$ inventory to compare early, interleaved, and late exposure.
+  \textbf{(c)} redistributes that fixed inventory across pure and mixed update
+  batches. Timing and composition conditions preserve all task identities and
+  six evolution updates. Lines report absolute fresh-session Carryover ASR.}
+  \label{fig:rq3-schedule}
 \end{figure*}
 
 \subsection{RQ4: How do safety and utility compare under SafeEvolve?}
@@ -1371,24 +1375,26 @@ mechanism, enabling condition, attack template, failure outcome, transfer
 prediction, and discovery provenance. This stage determines what failure
 mechanism a task tests, not what skill the evaluated agent should write.
 
-\paragraph{Run-pair instantiation.}
-For each retained concept and task surface, our constructor emits a malicious
-task $M$ and a zero-injection benign task $B$. The pair shares the operational
-domain, tool affordances, and legitimate task family. $M$ instantiates the
-concept's enabling condition and paired harmful goal. $B$ removes that
-condition, preserves a useful neighboring objective, and makes the safe
-boundary executable and judgeable. Additional surface instantiations produce
-$P$ probes whose prompts contain neither the malicious payload nor its explicit
-unsafe instruction. These probes retain enough semantic overlap to retrieve a
-generalized skill and test what the skill contributes in a clean session.
+\paragraph{Concept-guided episode instantiation.}
+For each retained concept, our constructor emits independent malicious $M$ and
+benign $B$ task records across a related family of operational surfaces. $M$
+instantiates the concept's enabling condition and episode-level harmful goal.
+$B$ exercises legitimate work in the same concept and tool-use family while
+removing the unsafe route. An $M$ and a $B$ may share a surface, but the
+benchmark does not encode them as two views of one base task. Additional
+surface instantiations produce $P$ probes whose prompts contain neither the
+malicious payload nor its explicit unsafe instruction. These probes retain
+enough semantic overlap to retrieve a generalized skill and test what the skill
+contributes in a clean session.
 
 \paragraph{Judging and validation.}
-The AgentHazard harmful judge evaluates the paired harmful objective on $M$,
+The AgentHazard harmful judge evaluates the episode-level harmful objective on $M$,
 $B$, and $P$. We add a separate benign-completion judge for the constructed
 benign objective; its decision is independent of whether an additional harmful
 action occurred. Construction validation checks executability, reset behavior,
-surface matching within each run pair, removal of the malicious condition from
-$B/P$, prompt and instance deduplication, and judge coverage. Concepts, prompts,
+concept-family and surface coverage across each episode, removal of the
+malicious condition from $B/P$, prompt and instance deduplication, and judge
+coverage. Concepts, prompts,
 judges, and splits are frozen before the evolution-method evaluation.
 
 \paragraph{Episode manifest and replay.}
@@ -1459,8 +1465,8 @@ separately from artifact auditing.
 
 Include per-agent, per-risk-category, per-vulnerability-concept, and
 per-task-surface tables with confidence intervals. For RQ3, report all nine
-metrics for every malicious-task budget, timing, and concentration schedule,
-including the concept--surface breakdown. Report invalid episodes, runtime
+metrics at every cumulative-exposure checkpoint and for every timing and
+batch-composition schedule, including the concept--surface breakdown. Report invalid episodes, runtime
 failures, missing combinations, and sensitivity to aggregation choices.
 
 \safeevolvefulltable
