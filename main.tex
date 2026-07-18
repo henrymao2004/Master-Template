@@ -367,13 +367,10 @@ contains 25 episodes.
 
 \subsection{Evaluation settings}
 
-Every episode is replayed under three settings. \textbf{No evolution} disables
-persistent learning and establishes the base-agent floor; \textbf{benign-only
-updates} executes the full sequence but skips evolution after every $M^3$,
-leaving the library unchanged, and updates only from the trajectories in each
-$B^3$ block; \textbf{full evolution} applies the evaluated method's native
-update rule after every successful three-trajectory batch. All settings share
-tasks, order, tools, agent configuration, and judges.
+The main evaluation compares \textbf{No Evolution}, which disables persistent
+learning, with each method's native \textbf{Full Evolution}, which updates after
+every successful three-trajectory batch. Both conditions share tasks, order,
+tools, agent configuration, and judges.
 
 \paragraph{Agents and evolution methods.}
 
@@ -581,8 +578,8 @@ Per-category, per-concept, and per-surface results appear in the appendix.
 
 \subsection{Baselines}
 
-The diagnostic comparison includes no evolution, benign-only updates, and the
-selected skill-evolution methods. The mitigation comparison
+The diagnostic comparison includes no evolution and the selected
+skill-evolution methods under their native update schedules. The mitigation comparison
 adds Library-Drift as a capability-oriented governance baseline. Each evolution
 method is evaluated raw, with Library-Drift, and with \safeevolve under the same
 frozen train/development/held-out protocol.
@@ -617,27 +614,24 @@ visible without encoding three quantities inside each cell.
 \textbf{CU}$\downarrow$ & \textbf{UG}$\downarrow$ & \textbf{Stealth}$\downarrow$ &
 \textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
-\multirow{7}{*}{Claude Code}
+\multirow{6}{*}{Claude Code}
 & No evolution        & 49.8 & 56.0 & 0.0 & N/A & N/A & N/A & N/A & 0.0 & 25.3 \\
-& Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & EvoSkill            & 71.1 & 62.2 & 0.4 & 1.79 & 3.05 & 4.05 & 81.0 & 0.0 & 76.0 \\
 & SkillClaw           & 36.9 & 51.6 & 0.0 & 1.19 & 3.00 & 3.50 & 16.7 & 0.0 & 29.7 \\
 & AutoSkill           & 65.3 & 59.1 & 8.4 & 2.54 & 2.91 & 4.07 & 52.8 & 16.0 & 64.0 \\
 & SkillsVote          & 62.7 & 56.4 & 7.1 & 2.58 & 3.05 & 4.19 & 55.6 & 18.7 & 65.3 \\
 & SkillOpt            & 60.0 & 58.2 & 0.0 & 1.61 & 3.25 & 3.00 & 50.0 & 0.0 & 42.7 \\
 \midrule
-\multirow{7}{*}{Codex}
+\multirow{6}{*}{Codex}
 & No evolution        & 54.7 & 59.6 & 0.4 & N/A & N/A & N/A & N/A & 0.0 & 40.0 \\
-& Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & EvoSkill            & 76.0 & 64.4 & 0.4 & 1.54 & 2.82 & 3.73 & 33.3 & 0.0 & 65.3 \\
 & SkillClaw           & 40.4 & 55.1 & 1.3 & 1.29 & 3.00 & 4.00 & 33.3 & 0.0 & 24.0 \\
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multirow{8}{*}{Hermes}
+\multirow{7}{*}{Hermes}
 & No evolution        & 14.2 & 44.0 & 0.4 & N/A & N/A & N/A & N/A & 0.0 & 16.0 \\
-& Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
@@ -645,9 +639,8 @@ visible without encoding three quantities inside each cell.
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & Hermes-native       & 68.8 & 73.4 & 16.0 & 2.64 & 3.16 & 4.20 & 62.5 & 30.7 & 64.0 \\
 \midrule
-\multirow{7}{*}{OpenClaw}
+\multirow{6}{*}{OpenClaw}
 & No evolution        & 37.3 & 44.0 & 0.4 & N/A & N/A & N/A & N/A & 1.3 & 26.7 \\
-& Benign-only updates & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillClaw           & 32.0 & 46.0 & 1.3 & 1.54 & 3.20 & 3.80 & 40.0 & 1.3 & 21.3 \\
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
@@ -1482,7 +1475,6 @@ the governance of its persistent updates.
 \textbf{Post-attack: URR/ASR/Utility} \\
 \midrule
 No evolution        & 14.2/44.0/0.4 & N/A/N/A/N/A & N/A/0.0/16.0 \\
-Benign-only updates & --/--/-- & --/--/--    & --/--/-- \\
 Hermes-native       & 68.8/73.4/16.0 & 2.64/3.16/4.20 & 62.5/30.7/64.0 \\
 \bottomrule
 \end{tabular}}
