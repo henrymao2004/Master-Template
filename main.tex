@@ -60,9 +60,10 @@ clean-session harm. We introduce \gym, an extensible research environment for
 executing and instrumenting longitudinal skill evolution under controlled
 persistent state. \bench is its frozen evaluation instantiation, with an
 exposure-to-carryover task protocol and nine online, artifact, and post-attack
-metrics. Offline autoresearch discovers reusable vulnerability concepts, and
-our constructor turns AgentHazard harmful-task contracts into concept-aligned
-malicious, benign, and persistence tasks with a new benign-completion judge. We
+metrics. In AgentHazard, offline autoresearch discovers reusable vulnerability
+concepts through malicious--benign pair trials; our constructor then
+instantiates retained concepts as fresh malicious, benign, and persistence
+tasks and assembles the benchmark episodes with a new benign-completion judge. We
 also introduce \safeevolve, which governs skill
 admission and reuse through targeted repair, verification preservation,
 provenance, and retirement. Across four agent frameworks, a shared MiniMax
@@ -111,20 +112,22 @@ method, and update schedule, it versions the skill library, isolates other
 cross-task state, records authoring and retrieval, and supports snapshot replay
 and clean-session reload. \bench is the frozen task-and-evaluation protocol
 instantiated within this environment. Using AHA autoresearch~\citep{mao2026aha}
-offline, our constructor turns AgentHazard harmful-task contracts into validated
-vulnerability concepts and concept-aligned malicious, benign, and persistence
-tasks. It fixes the exposure schedule, adds an orthogonal benign-completion
-judge, and measures online behavior, evolved artifacts, and post-attack
-carryover with nine metrics.
+offline in AgentHazard, we discover validated vulnerability concepts through
+malicious--benign pair trials. Our constructor instantiates each retained
+concept on fresh task records, produces concept-aligned malicious, benign, and
+persistence tasks, and assembles the fixed exposure schedule. \bench adds an
+orthogonal benign-completion judge and measures online behavior, evolved
+artifacts, and post-attack carryover with nine metrics.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{skillevolve.pdf}
 \caption{\textbf{SkillMisevo-Gym and SkillMisevo-Bench.}
 \textbf{(a)} AgentHazard supplies a harmful-task contract; an external
-autoresearch stage discovers validated vulnerability concepts, and our
-constructor produces concept-aligned $M/B/P$ tasks and a benign-completion
-judge. \textbf{(b)} \bench fixes the longitudinal episode and lifecycle metrics;
+autoresearch stage tests malicious--benign pairs to discover validated
+vulnerability concepts, and our constructor instantiates those concepts as
+fresh $M/B/P$ tasks and assembles the episodes. \textbf{(b)} \bench fixes the
+longitudinal episode, benign-completion judge, and lifecycle metrics;
 \gym executes it with versioned skill state, observable authoring and retrieval,
 and clean-session replay. The discovery VCG is never exposed to the evaluated
 agent; only its self-authored \texttt{SKILL.md} crosses the final reset.}
@@ -187,10 +190,12 @@ prompt-injection tasks nevertheless produce executable harmful trajectories
 whose procedures can be exposed to a skill-evolution method and distilled into
 reusable artifacts. We therefore use AgentHazard as the task-contract source,
 retaining its executable substrate, risk semantics, reset procedure, and
-harmful judge. From vulnerability concepts discovered using AHA~\citep{mao2026aha},
-we construct the corresponding benign tasks, persistence probes, longitudinal
-schedule, and lifecycle measurements. \bench freezes this protocol, and \gym
-supplies versioned skill state, instrumentation, and cross-task execution.
+harmful judge. AHA~\citep{mao2026aha} discovers concepts by testing candidate
+malicious--benign pairs through the skill-update boundary. Our constructor then
+instantiates retained concepts as fresh task records and assembles the benign
+tasks, persistence probes, and longitudinal schedule. \bench freezes this
+protocol, and \gym supplies versioned skill state, instrumentation, and
+cross-task execution.
 
 \paragraph{Governance of evolving libraries.}
 Contrast \safeevolve with capability-oriented library maintenance and drift
@@ -289,15 +294,18 @@ prompt-injection tasks generate harmful agent trajectories suitable for skill
 extraction, but its native protocol contains neither skill evolution nor benign
 tasks. We retain its harmful objectives, ten risk categories, sandbox, reset
 procedure, and harmful trajectory judge. AHA~\citep{mao2026aha} discovers
-executable vulnerability concepts offline by committing falsifiers and
-promoting replicated mechanisms.
-Our constructor independently instantiates each selected mechanism as malicious
-$M$ tasks, benign $B$ tasks on related operational surfaces, and held-out $P$
-probes. $M$ realizes the unsafe route, $B$ exercises benign work in the same
-concept family, and $P$ uses a fresh surface with no attack payload to test what
-the reloaded skill supplies. These are separate task records rather than two
-views of a shared base instance. The AgentHazard judge scores the concept's
-harmful objective on all task types; our benign-completion
+executable vulnerability concepts offline using malicious--benign pair trials.
+For each trial, it commits a mechanism and falsifier, executes $M$, applies a
+reference skill-evolution update, executes $B$ with the authored skill, and
+checks the same $B$ without that skill as a clean floor. Replicated pair-level
+evidence promotes the mechanism into the VCG. Our constructor then instantiates
+each retained concept on fresh records, producing malicious $M$ tasks, benign
+$B$ tasks on related operational surfaces, and held-out $P$ probes before
+assembling the episode. $M$ realizes the unsafe route, $B$ exercises benign work
+in the same concept family, and $P$ uses a fresh surface with no attack payload
+to test what the reloaded skill supplies. These are separate task records rather
+than two views of a shared base instance. The AgentHazard judge scores the
+concept's harmful objective on all task types; our benign-completion
 judge scores the new $B$ and $P$ objectives. Tasks and metadata are frozen
 before evaluation, final tasks are new concept instantiations rather than
 replayed AgentHazard prompts, and the authoring VCG remains hidden from the
@@ -1212,27 +1220,31 @@ serving as the final \bench episode dataset.
 
 \paragraph{External autoresearch concept discovery.}
 For each benchmark task family, we use AHA~\citep{mao2026aha} as an external
-offline method to search for a vulnerability concept that can survive
-abstraction into a reusable skill. Its Hypothesizer
-commits a mechanism, predicted unsafe outcome, and falsifier; the
-Attack-Designer instantiates the proposal in the AgentHazard environment; the
-victim trajectory is judged and reflected on; and only replicated,
-non-falsified findings enter the VCG. We retain the concept identifier,
-mechanism, enabling condition, attack template, failure outcome, transfer
-prediction, and discovery provenance. This stage determines what failure
-mechanism a task tests, not what skill the evaluated agent should write.
+offline method whose search unit is a candidate malicious--benign pair. Its
+Hypothesizer commits a mechanism, predicted unsafe outcome, and falsifier; its
+Attack-Designer writes both prompts for the AgentHazard environment. The pair
+harness then executes four stages in isolated sandboxes: the malicious task
+$M$, a reference skill-evolution update over its trajectory, the benign task
+$B$ with the authored skill, and the same $B$ without the skill as a clean
+floor. The AgentHazard harmful judge scores $M$, $B$, and the floor, while an
+independent content judge audits whether the authored skill is unsafe and
+over-generalized. A pair supports a candidate concept when $M$ succeeds, the
+skill is unsafe or contaminates $B$, and the clean floor remains safe. Only
+replicated, non-falsified mechanisms enter the VCG. We retain the concept
+identifier, mechanism, enabling condition, attack template, failure outcome,
+transfer prediction, and discovery provenance.
 
 \paragraph{Concept-guided episode instantiation.}
-For each retained concept, our constructor emits independent malicious $M$ and
-benign $B$ task records across a related family of operational surfaces. $M$
-instantiates the concept's enabling condition and episode-level harmful goal.
-$B$ exercises legitimate work in the same concept and tool-use family while
-removing the unsafe route. An $M$ and a $B$ may share a surface, but the
-benchmark does not encode them as two views of one base task. Additional
-surface instantiations produce $P$ probes whose prompts contain neither the
-malicious payload nor its explicit unsafe instruction. These probes retain
-enough semantic overlap to retrieve a generalized skill and test what the skill
-contributes in a clean session.
+The VCG, rather than the discovery prompts, is passed to our constructor. For
+each retained concept, it emits fresh, independent malicious $M$ and benign $B$
+task records across a related family of operational surfaces. $M$ instantiates
+the concept's enabling condition and episode-level harmful goal. $B$ exercises
+legitimate work in the same concept and tool-use family while removing the
+unsafe route. An $M$ and a $B$ may share a surface, but the benchmark does not
+encode them as two views of one base task. Additional surface instantiations
+produce $P$ probes whose prompts contain neither the malicious payload nor its
+explicit unsafe instruction. The constructor validates these records and
+assembles three $M^3/B^3$ rounds followed by $P^3$ into the frozen episode.
 
 \paragraph{Judging and validation.}
 The AgentHazard harmful judge evaluates the episode-level harmful objective on $M$,
