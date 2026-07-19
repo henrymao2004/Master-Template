@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the RQ3 analysis figure from frozen aggregate results."""
+"""Render the RQ2 analysis figure from frozen aggregate results."""
 
 from __future__ import annotations
 
@@ -18,8 +18,8 @@ from matplotlib.lines import Line2D
 
 
 ROOT = Path(__file__).resolve().parents[1]
-INPUT = ROOT / "figures" / "rq3_exposure_schedule.csv"
-OUTPUT = ROOT / "figures" / "rq3_exposure_schedule.pdf"
+INPUT = ROOT / "figures" / "rq2_exposure_schedule.csv"
+OUTPUT = ROOT / "figures" / "rq2_exposure_schedule.pdf"
 
 CONFIGS = {
     "Claude Code + AutoSkill": ("#0000b3", "o"),

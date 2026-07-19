@@ -378,7 +378,7 @@ percentages. Online percentage metrics are reported to two decimal places,
 the three 1--5 artifact scores to two decimal places, and post-attack percentage
 metrics to one decimal place. Confidence intervals use episode-level bootstrap resampling, and
 method comparisons use multiple-comparison-adjusted intervals over matched
-tasks. Headline metrics pool all rounds; RQ3 uses the corresponding library
+tasks. Headline metrics pool all rounds; RQ2 uses the corresponding library
 snapshot for cumulative-exposure checkpoints and the final snapshot for
 schedule comparisons.
 
@@ -431,13 +431,13 @@ episodes. Episodes are stratified by AgentHazard risk category,
 autoresearch-discovered concept, and task surface; cells micro-aggregate the
 predeclared task distribution, while cross-agent summaries weight each target
 equally. No Evolution supplies the behavioral floor, and per-category,
-per-concept, and per-surface breakdowns appear in the appendix. RQ3 uses three
+per-concept, and per-surface breakdowns appear in the appendix. RQ2 uses three
 predeclared target--method configurations and holds task identities, judges,
 tools, update count, and final probes fixed while varying only library snapshot,
 exposure order, or batch composition. For mitigation, evolution methods are
 evaluated raw, with capability-oriented Library-Drift, and with \safeevolve on
 disjoint held-out episodes; repair policies and thresholds are selected on the
-train/development split before libraries are frozen. RQ4 additionally evaluates
+train/development split before libraries are frozen. RQ3 additionally evaluates
 the full governed pipeline on SkillSafetyBench, its admission auditor on
 MalSkillBench, and capability preservation on SkillsBench and SkillLearnBench,
 always using each external benchmark's native metric and official split.
@@ -543,10 +543,10 @@ and retrieval to observed carryover harm. The same table therefore separates
 latent artifact risk, retrieved risk, and realized execution: runtime policy,
 tool mediation, and task context remain gates after an unsafe skill is stored.
 
-\subsection{RQ3: How do cumulative exposure and its update schedule shape misevolution?}
-\label{sec:rq3}
+\subsection{RQ2: How do cumulative exposure and its update schedule shape misevolution?}
+\label{sec:rq2}
 
-RQ3 uses the existing $9M+9B+3P$ episode records without constructing paired
+RQ2 uses the existing $9M+9B+3P$ episode records without constructing paired
 views or replacement tasks. We evaluate Claude Code with AutoSkill, Codex with
 EvoSkill, and Hermes with Hermes-native on the same predeclared
 concept--surface families. The first analysis follows the standard interleaved
@@ -580,8 +580,8 @@ schedules appear in the appendix.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=0.98\textwidth]{figures/rq3_exposure_schedule.pdf}
-  \caption{\textbf{Cumulative exposure and update schedule (RQ3).}
+  \includegraphics[width=0.98\textwidth]{figures/rq2_exposure_schedule.pdf}
+  \caption{\textbf{Cumulative exposure and update schedule (RQ2).}
   \textbf{(a)} replays the same $P^3$ probes from clean executors at successive
   snapshots of the standard episode. \textbf{(b)} reorders the complete
   $9M+9B$ inventory to compare early, interleaved, and late exposure.
@@ -591,8 +591,8 @@ schedules appear in the appendix.
   \label{fig:rq3-schedule}
 \end{figure*}
 
-\subsection{RQ4: How do safety and utility compare under SafeEvolve?}
-\label{sec:rq4}
+\subsection{RQ3: How do safety and utility compare under SafeEvolve?}
+\label{sec:rq3}
 
 The mitigation evaluation uses held-out AgentHazard episodes and attack
 strategies that are hidden
@@ -777,7 +777,7 @@ supported target rather than imputing results for other agents.}
 \bottomrule
 \end{tabular}}
 \caption{\textbf{SafeEvolve safety and utility under the same evaluation
-protocol (RQ4).} For each target agent and governance condition, we
+protocol (RQ3).} For each target agent and governance condition, we
 first compute every metric as an absolute micro-aggregate, then macro-average
 equally over the five agent-agnostic evolution methods. The final row block
 gives the equal-weight target-agent average. Unsupported method--agent pairs
@@ -832,7 +832,7 @@ Library-Drift & -- & -- & -- \\
 \rowcolor{lightblue}Full \safeevolve & -- & -- & -- \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{Full SafeEvolve on SkillSafetyBench (RQ4).} Results use the
+\caption{\textbf{Full SafeEvolve on SkillSafetyBench (RQ3).} Results use the
 official overall attack success rate (ASR), nominal task success, and
 task-success-conditional ASR. Entries macro-average the four target-agent
 configurations after computing each metric under its official denominator.
@@ -910,7 +910,7 @@ separately in the appendix.
 \bottomrule
 \end{tabular}
 \caption{\textbf{SafeEvolve preserves capability under each benchmark's native
-protocol (RQ4).} Entries macro-average equally over applicable evolution
+protocol (RQ3).} Entries macro-average equally over applicable evolution
 methods after computing the official metric for each method. SkillsBench uses
 task-macro pass rate, absolute improvement, and normalized gain;
 SkillLearnBench reports its three-level quality/trajectory/outcome metrics.
@@ -923,7 +923,7 @@ Full per-method results and confidence intervals appear in the appendix.}
 \paragraph{Component evaluation.}
 Finally, ablate admission auditing, verification preservation, provenance
 rollback, and safety-aware retirement. These component results characterize the
-three complete RQ4 evaluations; they do not replace held-out behavioral or
+three complete RQ3 evaluations; they do not replace held-out behavioral or
 capability evidence.
 
 \begin{table*}[t]
@@ -1142,7 +1142,7 @@ separately from artifact auditing.
 \label{app:additional-results}
 
 Include per-agent, per-risk-category, per-vulnerability-concept, and
-per-task-surface tables with confidence intervals. For RQ3, report all nine
+per-task-surface tables with confidence intervals. For RQ2, report all nine
 metrics at every cumulative-exposure checkpoint and for every timing and
 batch-composition schedule, including the concept--surface breakdown. Report invalid episodes, runtime
 failures, missing combinations, and sensitivity to aggregation choices.
