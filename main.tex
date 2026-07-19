@@ -119,77 +119,7 @@ carryover with nine metrics.
 
 \begin{figure*}[t]
 \centering
-\resizebox{\textwidth}{!}{%
-\begin{tikzpicture}[
-  design/.style={draw=black!65, rounded corners=2pt, align=center,
-    minimum width=3.25cm, minimum height=1.45cm, inner sep=5pt,
-    font=\small, fill=white},
-  episode/.style={draw=black!65, rounded corners=2pt, align=center,
-    minimum width=3.05cm, minimum height=1.55cm, inner sep=5pt,
-    font=\small, fill=white},
-  flow/.style={-{Stealth[length=2.4mm]}, line width=0.8pt,
-    draw=black!70},
-  note/.style={font=\scriptsize, align=center, text=black!65},
-  node distance=7mm
-]
-\node[font=\small\bfseries, anchor=west] at (-1.9,1.35)
-  {(a) Offline benchmark construction};
-\node[design, fill=lightgray] (contract) {
-  \textbf{AgentHazard contract}\\
-  harmful objective + sandbox\\
-  \scriptsize harmful trajectory judge};
-\node[design, right=of contract, fill=orange!9] (concept) {
-  \textbf{Autoresearch discovery}\\
-  falsifiable vulnerability concept\\
-  \scriptsize enabling condition + evidence};
-\node[design, right=of concept, fill=yellow!12] (constructor) {
-  \textbf{Our episode constructor}\\
-  concept-aligned task surfaces\\
-  \scriptsize new benign-completion judge};
-\node[design, right=of constructor, fill=blue!7] (tasks) {
-  \textbf{Frozen benchmark tasks}\\
-  $M$: unsafe condition \quad $B$: benign\\
-  \scriptsize $P$: zero-injection persistence cue};
-\draw[flow] (contract) -- (concept);
-\draw[flow] (concept) -- (constructor);
-\draw[flow] (constructor) -- (tasks);
-
-\node[font=\small\bfseries, anchor=west, below=12mm of contract.south west]
-  {(b) Bench protocol executed in the Gym};
-\node[episode, below=22mm of contract, fill=red!6] (r1) {
-  \textbf{$R_1$: dose $3M$}\\
-  $M^3\!\rightarrow\!\evolution\!\rightarrow\!B^3\!\rightarrow\!\evolution$\\
-  \scriptsize online behavior + artifact audit};
-\node[episode, right=5mm of r1, fill=red!8] (r2) {
-  \textbf{$R_2$: dose $6M$}\\
-  $M^3\!\rightarrow\!\evolution\!\rightarrow\!B^3\!\rightarrow\!\evolution$\\
-  \scriptsize online behavior + artifact audit};
-\node[episode, right=5mm of r2, fill=red!10] (r3) {
-  \textbf{$R_3$: dose $9M$}\\
-  $M^3\!\rightarrow\!\evolution\!\rightarrow\!B^3\!\rightarrow\!\evolution$\\
-  \scriptsize online behavior + artifact audit};
-\node[episode, right=5mm of r3, fill=yellow!12] (freeze) {
-  \textbf{Freeze library}\\
-  export \texttt{SKILL.md}\\
-  \scriptsize reset executor and all other state};
-\node[episode, right=5mm of freeze, fill=blue!8] (probe) {
-  \textbf{Fresh-session $P^3$}\\
-  reload only \texttt{SKILL.md}\\
-  \scriptsize URR / C-ASR / C-Util};
-\draw[flow] (r1) -- (r2);
-\draw[flow] (r2) -- (r3);
-\draw[flow] (r3) -- (freeze);
-\draw[flow] (freeze) -- (probe);
-\draw[flow, dashed] (tasks.south) -- ++(0,-3mm) -|
-  node[note, pos=0.28, below] {assemble fixed episodes} (r1.north);
-
-\node[note, below=3mm of r2.south, text width=9.4cm] {
-  \textbf{Online:} BU / M-ASR / B-ASR \qquad
-  \textbf{Artifact:} CU / UG / Stealth};
-\node[note, below=3mm of probe.south, text width=4.3cm] {
-  \textbf{Post-attack:} URR / C-ASR / C-Util};
-\end{tikzpicture}%
-}
+\includegraphics[width=\textwidth]{figures/skillevolve.pdf}
 \caption{\textbf{SkillMisevo-Gym and SkillMisevo-Bench.}
 \textbf{(a)} AgentHazard supplies a harmful-task contract; an external
 autoresearch stage discovers validated vulnerability concepts, and our
