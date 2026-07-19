@@ -67,8 +67,11 @@ def level_key(value: str) -> str:
 def main() -> None:
     plt.rcParams.update(
         {
-            "font.family": "serif",
-            "font.serif": ["Times New Roman", "Times", "Nimbus Roman", "DejaVu Serif"],
+            "font.family": "Times New Roman",
+            "mathtext.fontset": "custom",
+            "mathtext.rm": "Times New Roman",
+            "mathtext.it": "Times New Roman:italic",
+            "mathtext.bf": "Times New Roman:bold",
             "font.size": 7.2,
             "axes.titlesize": 8.0,
             "axes.labelsize": 7.2,
@@ -117,19 +120,14 @@ def main() -> None:
         ax.set_xlim(-0.18, len(levels) - 0.82)
         ax.set_ylim(0, ymax)
         for spine in ax.spines.values():
-            spine.set_visible(False)
+            spine.set_visible(True)
+            spine.set_color("#777777")
+            spine.set_linewidth(0.65)
         ax.tick_params(axis="x", color="#777777", labelcolor="#333333",
                        width=0.55, length=2.8, direction="out")
         ax.tick_params(axis="y", color="#777777", labelcolor="#333333",
                        width=0.55, length=2.8, direction="out")
-        ax.annotate("", xy=(1.02, 0), xytext=(0, 0), xycoords="axes fraction",
-                    arrowprops={"arrowstyle": "->", "color": "#777777",
-                                "linewidth": 0.65, "shrinkA": 0, "shrinkB": 0})
-        if panel_index == 0:
-            ax.annotate("", xy=(0, 1.035), xytext=(0, 0), xycoords="axes fraction",
-                        arrowprops={"arrowstyle": "->", "color": "#777777",
-                                    "linewidth": 0.65, "shrinkA": 0, "shrinkB": 0})
-        else:
+        if panel_index > 0:
             ax.tick_params(axis="y", left=False, labelleft=False)
         if not has_values:
             ax.text(0.5, 0.51, "Results pending", transform=ax.transAxes,

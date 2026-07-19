@@ -744,8 +744,7 @@ to RQ1's safety--utility association.
 ]
 % Panel (a): BU in [10,80], M-ASR in [40,75].
 \begin{scope}[shift={(0,0)}]
-  \draw[->, black!70] (0,0) -- (4.95,0);
-  \draw[->, black!70] (0,0) -- (0,4.75);
+  \draw[black!70, line width=.6pt] (0,0) rectangle (4.80,4.70);
   \foreach \x/\lab in {.69/20,2.06/40,3.43/60,4.80/80}
     {\draw[black!45] (\x,0) -- (\x,-.08) node[tick,below] {\lab};}
   \foreach \y/\lab in {0/40,1.31/50,2.63/60,3.94/70}
@@ -765,7 +764,7 @@ to RQ1's safety--utility association.
 
 % Panel (b): paired URR and C-ASR percentages.
 \begin{scope}[shift={(6.15,0)}]
-  \draw[->, black!70] (0,0) -- (4.85,0);
+  \draw[black!70, line width=.6pt] (0,0) rectangle (4.70,4.70);
   \foreach \x/\lab in {0/0,1.57/30,3.13/60,4.70/90}
     {\draw[black!45] (\x,0) -- (\x,-.08) node[tick,below] {\lab};}
   \node[paneltitle, anchor=west] at (-1.15,5.02) {(b) Retrieval-to-execution gap};
@@ -789,8 +788,7 @@ to RQ1's safety--utility association.
 
 % Panel (c): B-ASR in [0,18], C-ASR in [0,35], marker area tracks CU.
 \begin{scope}[shift={(12.25,0)}]
-  \draw[->, black!70] (0,0) -- (4.55,0);
-  \draw[->, black!70] (0,0) -- (0,4.75);
+  \draw[black!70, line width=.6pt] (0,0) rectangle (4.40,4.70);
   \foreach \x/\lab in {0/0,1.47/6,2.93/12,4.40/18}
     {\draw[black!45] (\x,0) -- (\x,-.08) node[tick,below] {\lab};}
   \foreach \y/\lab in {0/0,1.31/10,2.63/20,3.94/30}
