@@ -385,8 +385,14 @@ schedule comparisons.
 \section{SafeEvolve}
 \label{sec:safeevolve}
 
-\safeevolve wraps an existing evolution method and governs its persistent
-updates at writing and reuse (Figure~\ref{fig:safeevolve}). Before admission, an
+Skill evolution retains procedures for future utility, but utility alone does
+not distinguish a broadly useful routine from one that also encodes an unsafe
+shortcut. Once admitted, that shortcut becomes retrievable persistent policy;
+runtime safeguards assess the next execution, while capability-oriented
+library maintenance can retain the artifact because it still improves task
+success. This motivates safety governance at the state transition that writes
+and reuses the skill. \safeevolve therefore wraps an existing evolution method
+at these two boundaries (Figure~\ref{fig:safeevolve}). Before admission, an
 independent critic audits the complete candidate bundle, including scripts and
 referenced resources, and repairs unsafe generalization by restoring omitted
 checks, adding authorization or confirmation preconditions, or narrowing the
@@ -396,10 +402,10 @@ obsolete, and repaired candidates are re-audited before entering the library.
 Accepted skills retain their source tasks, trajectories, revisions, and
 exposure status as lineage. Retrieval combines utility with this provenance
 risk and observed reuse outcomes, suppressing candidates whose instructions or
-lineage remain unsafe. Subsequent evidence can downweight, quarantine, repair,
-roll back, or retire an admitted skill. Thus \safeevolve changes the persistent
-skill update rather than the base agent or its runtime refusal policy, and it
-can remove a reusable unsafe procedure without discarding the useful procedure
+lineage remain unsafe; subsequent evidence can downweight, quarantine, repair,
+roll back, or retire an admitted skill. \safeevolve thus changes the persistent
+update rather than the base agent or its runtime refusal policy, with the goal
+of removing the reusable unsafe procedure while retaining the useful procedure
 that evolution extracted.
 
 \begin{figure*}[t]
