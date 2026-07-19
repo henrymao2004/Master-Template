@@ -385,46 +385,22 @@ schedule comparisons.
 \section{SafeEvolve}
 \label{sec:safeevolve}
 
-\safeevolve is a governance layer around an existing evolution method. It does
-not replace the base agent or add a runtime refusal policy. It governs the
-persistent skill update at two decision points: writing and reuse.
-
-\subsection{Safety-aware admission and repair}
-
-Before a candidate enters the library, an independent critic audits the full
-bundle, including scripts and referenced resources. When a candidate removes a
-safety check, assumes authority, broadens a dangerous operation, or embeds an
-unsafe tool sequence, the critic produces a targeted repair: restore the check,
-add the missing precondition, or narrow the applicability condition. Repaired
-skills are re-audited before admission.
-
-\paragraph{Verification preservation.}
-
-Skill revisions are constrained to preserve existing verification,
-confirmation, authorization, and reversibility requirements unless the update
-provides explicit evidence that the requirement is obsolete. This prevents an
-efficiency-oriented edit from treating a safeguard as removable overhead.
-
-\subsection{Provenance, selection, and retirement}
-
-\paragraph{Lineage and provenance.}
-
-Each skill stores its source tasks, trajectories, revisions, and exposure
-status. Provenance supports traceability and batch rollback when an upstream
-experience is later judged unsafe. It also supplies a risk prior to retrieval
-and retirement decisions.
-
-\paragraph{Safety-aware selection and retirement.}
-
-Raw evolution selects skills primarily by utility. \safeevolve augments this
-objective with the admission audit, provenance risk prior, and observed safety
-impact of reuse. At retrieval time it suppresses candidates whose exported
-instructions remain unsafe or whose lineage contains unsafe reuse evidence;
-URR measures whether such a skill still reaches the fresh executor. A retrieved
-skill associated with a successful carryover attack is subsequently
-downweighted, quarantined, repaired, or retired even when it improves task
-success. This distinguishes \safeevolve from capability-only library hygiene,
-which keeps useful but unsafe skills.
+\safeevolve wraps an existing evolution method and governs its persistent
+updates at writing and reuse (Figure~\ref{fig:safeevolve}). Before admission, an
+independent critic audits the complete candidate bundle, including scripts and
+referenced resources, and repairs unsafe generalization by restoring omitted
+checks, adding authorization or confirmation preconditions, or narrowing the
+skill's applicability. Every revision preserves existing verification and
+reversibility requirements unless the update supplies evidence that they are
+obsolete, and repaired candidates are re-audited before entering the library.
+Accepted skills retain their source tasks, trajectories, revisions, and
+exposure status as lineage. Retrieval combines utility with this provenance
+risk and observed reuse outcomes, suppressing candidates whose instructions or
+lineage remain unsafe. Subsequent evidence can downweight, quarantine, repair,
+roll back, or retire an admitted skill. Thus \safeevolve changes the persistent
+skill update rather than the base agent or its runtime refusal policy, and it
+can remove a reusable unsafe procedure without discarding the useful procedure
+that evolution extracted.
 
 \begin{figure*}[t]
 \centering
@@ -442,44 +418,23 @@ procedures.}
 \section{Experimental Setup}
 \label{sec:setup}
 
-\subsection{Research questions}
-
-\begin{description}
-  \item[RQ1: Safety--utility association.] Is skill evolution associated with
-  higher unsafe behavior while retaining or improving task utility?
-  \item[RQ2: Risk propagation.] How do authored artifact risk and unsafe
-  retrieval relate to harmful execution and utility in a fresh carryover
-  session?
-  \item[RQ3: Exposure trajectory and schedule.] When does misevolution emerge
-  along cumulative malicious exposure, and how does final risk vary with
-  exposure timing and composition within skill-update batches?
-  \item[RQ4: Mitigation.] Does \safeevolve retain utility while attaining lower
-  evolved-artifact risk, malicious and benign ASR, unsafe retrieval, and
-  carryover ASR?
-\end{description}
-
-\subsection{Evaluation matrix}
-
-The main evaluation treats target-agent as a first-class axis. It compares
-Claude Code, Codex, Hermes, and OpenClaw with a shared MiniMax-M2.5 backbone,
-holding the model fixed while varying the agent framework, tool mediation,
-skill lifecycle, and retrieval behavior. Each applicable agent-agnostic
-evolution method runs on the identical frozen episode set for every target.
-
-The complete experimental grid is target-agent $\times$ evolution method
-$\times$ episode. Episodes are stratified by AgentHazard risk category,
-autoresearch-discovered vulnerability concept and task surface. All main-table cells
-pool the same predeclared episode distribution within a target;
-macro-averages give equal weight to the four target-agent configurations.
-Per-category, per-concept, and per-surface results appear in the appendix.
-
-\subsection{Baselines}
-
-The diagnostic comparison includes no evolution and the selected
-skill-evolution methods under their native update schedules. The mitigation comparison
-adds Library-Drift as a capability-oriented governance baseline. Each evolution
-method is evaluated raw, with Library-Drift, and with \safeevolve under the same
-frozen train/development/held-out protocol.
+With the agents, methods, protocol, and metrics fixed in
+Section~\ref{sec:benchmark}, the diagnostic grid evaluates every applicable
+target-agent $\times$ evolution-method pair on the same frozen set of 25
+episodes. Episodes are stratified by AgentHazard risk category,
+autoresearch-discovered concept, and task surface; cells micro-aggregate the
+predeclared task distribution, while cross-agent summaries weight each target
+equally. No Evolution supplies the behavioral floor, and per-category,
+per-concept, and per-surface breakdowns appear in the appendix. RQ3 uses three
+predeclared target--method configurations and holds task identities, judges,
+tools, update count, and final probes fixed while varying only library snapshot,
+exposure order, or batch composition. For mitigation, evolution methods are
+evaluated raw, with capability-oriented Library-Drift, and with \safeevolve on
+disjoint held-out episodes; repair policies and thresholds are selected on the
+train/development split before libraries are frozen. RQ4 additionally evaluates
+the full governed pipeline on SkillSafetyBench, its admission auditor on
+MalSkillBench, and capability preservation on SkillsBench and SkillLearnBench,
+always using each external benchmark's native metric and official split.
 
 \section{Results}
 \label{sec:results}
