@@ -474,67 +474,7 @@ which keeps useful but unsafe skills.
 
 \begin{figure*}[t]
 \centering
-\resizebox{\textwidth}{!}{%
-\begin{tikzpicture}[
-  core/.style={draw=black!65, rounded corners=2pt, align=center,
-    minimum width=2.75cm, minimum height=1.45cm, inner sep=5pt,
-    font=\small\bfseries\boldmath, fill=white},
-  guard/.style={draw=blue!55!black, rounded corners=2pt, align=center,
-    minimum width=3.25cm, minimum height=1.85cm, inner sep=5pt,
-    font=\small\bfseries\boldmath, fill=blue!7},
-  flow/.style={-{Stealth[length=2.4mm]}, line width=0.85pt,
-    draw=black!70},
-  feedback/.style={-{Stealth[length=2.4mm]}, line width=0.8pt,
-    draw=red!60!black, dashed},
-  label/.style={font=\footnotesize\bfseries\boldmath, align=center, text=black!70},
-  node distance=7mm
-]
-\node[core, fill=lightgray] (traj) {
-  \textbf{Trajectory batch}\\
-  tasks + tool traces\\
-  \footnotesize\bfseries observed success};
-\node[core, right=of traj, fill=yellow!10] (candidate) {
-  \textbf{Candidate skill}\\
-  procedure + resources\\
-  \footnotesize\bfseries native method output};
-\node[guard, right=of candidate] (writegate) {
-  \textbf{Write-time governance}\\
-  admission audit + targeted repair\\
-  verification preservation\\
-  \footnotesize\bfseries reject / repair / admit};
-\node[core, right=of writegate, fill=green!8] (library) {
-  \textbf{Governed library}\\
-  accepted skill + lineage\\
-  \footnotesize\bfseries source and revision provenance};
-\node[guard, right=of library] (reusegate) {
-  \textbf{Reuse-time governance}\\
-  safety-aware selection\\
-  risk prior + retrieval evidence\\
-  \footnotesize\bfseries suppress / retrieve};
-\node[core, right=of reusegate, fill=orange!9] (reuse) {
-  \textbf{Later task reuse}\\
-  agent action + outcome\\
-  \footnotesize\bfseries utility and safety feedback};
-
-\draw[flow] (traj) -- (candidate);
-\draw[flow] (candidate) -- (writegate);
-\draw[flow] (writegate) -- (library);
-\draw[flow] (library) -- (reusegate);
-\draw[flow] (reusegate) -- (reuse);
-
-\node[label, below=5mm of writegate] (writecaption) {
-  prevents unsafe generalization\\from entering persistent state};
-\node[label, below=5mm of reusegate] (reusecaption) {
-  prevents retained risk\\from reaching execution};
-\node[core, below=11mm of library, fill=red!6,
-  minimum width=3.25cm, minimum height=1.2cm] (retire) {
-  \textbf{Rollback / repair / retirement}\\
-  \footnotesize\bfseries update the governed library};
-\draw[feedback] (reuse.south) |- node[label, near start, below]
-  {observed reuse outcome} (retire.east);
-\draw[feedback] (retire.north) -- (library.south);
-\end{tikzpicture}%
-}
+\includegraphics[width=\textwidth]{skillevolve.pdf}
 \caption{\textbf{SafeEvolve governs the persistent update at writing and
 reuse.} Write-time governance audits the complete candidate bundle, repairs
 unsafe generalization, and preserves verification requirements before
