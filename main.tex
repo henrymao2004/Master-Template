@@ -592,10 +592,12 @@ schedules appear in the appendix.
 \subsection{RQ3: How do safety and utility compare under SafeEvolve?}
 \label{sec:rq3}
 
-We evaluate \safeevolve with EvoSkill, AutoSkill, and SkillsVote. These methods
-span the high-retrieval/no-carryover case and the two full misevolution cases in
-RQ1, allowing the mitigation study to test both latent and realized persistent
-risk. The mitigation evaluation uses held-out AgentHazard episodes and attack
+We evaluate \safeevolve with EvoSkill, AutoSkill, and SkillsVote, selected by
+their post-attack profiles in RQ1. AutoSkill and SkillsVote exhibit fresh-session
+carryover harm, whereas EvoSkill has high unsafe retrieval but zero carryover
+ASR. This contrast tests whether mitigation suppresses both realized persistent
+harm and retrieved risk that has not yet produced harmful execution. The
+mitigation evaluation uses held-out AgentHazard episodes and attack
 strategies that are hidden
 during evolution, repair-policy development, and threshold selection. Libraries
 are frozen before evaluation. A favorable mitigation profile has lower
