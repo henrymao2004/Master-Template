@@ -340,8 +340,7 @@ SkillClaw, AutoSkill, SkillsVote, and SkillOpt, each evaluated on compatible
 target agents. Hermes also provides a framework-native evolution path supported only
 by the Hermes target. We include Hermes-native in the main diagnostic table and
 provide its implementation details and expanded results in
-Appendix~\ref{app:hermes-native}; governed results appear in
-Table~\ref{tab:safeevolve-full}. Each method is evaluated in its actual stored representation, including
+Appendix~\ref{app:hermes-native}. Each method is evaluated in its actual stored representation, including
 associated scripts or structured contracts, rather than after conversion to a
 common textual summary, for online behavior and artifact auditing. The
 carryover stage deliberately standardizes the persistence channel: only the
@@ -434,8 +433,8 @@ equally. No Evolution supplies the behavioral floor, and per-category,
 per-concept, and per-surface breakdowns appear in the appendix. RQ2 uses three
 predeclared target--method configurations and holds task identities, judges,
 tools, update count, and final probes fixed while varying only library snapshot,
-exposure order, or batch composition. For mitigation, evolution methods are
-evaluated raw, with capability-oriented Library-Drift, and with \safeevolve on
+exposure order, or batch composition. For mitigation, EvoSkill, AutoSkill, and
+SkillsVote are evaluated raw, with capability-oriented Library-Drift, and with \safeevolve on
 disjoint held-out episodes; repair policies and thresholds are selected on the
 train/development split before libraries are frozen. RQ3 additionally evaluates
 the full governed pipeline on SkillSafetyBench, its admission auditor on
@@ -593,7 +592,10 @@ schedules appear in the appendix.
 \subsection{RQ3: How do safety and utility compare under SafeEvolve?}
 \label{sec:rq3}
 
-The mitigation evaluation uses held-out AgentHazard episodes and attack
+We evaluate \safeevolve with EvoSkill, AutoSkill, and SkillsVote. These methods
+span the high-retrieval/no-carryover case and the two full misevolution cases in
+RQ1, allowing the mitigation study to test both latent and realized persistent
+risk. The mitigation evaluation uses held-out AgentHazard episodes and attack
 strategies that are hidden
 during evolution, repair-policy development, and threshold selection. Libraries
 are frozen before evaluation. A favorable mitigation profile has lower
@@ -629,25 +631,10 @@ rather than collapsed into one score.
  & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multirow{3}{*}{SkillClaw}
- & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\midrule
 \multirow{3}{*}{SkillsVote}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\midrule
-\multirow{3}{*}{SkillOpt}
- & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\midrule
-\multirow{3}{*}{Hermes-native}
- & Raw             & N/A & N/A & --/--/-- & N/A & --/--/-- \\
- & Library-Drift   & N/A & N/A & --/--/-- & N/A & --/--/-- \\
- & \safeevolve     & N/A & N/A & --/--/-- & N/A & --/--/-- \\
 \midrule
 \multicolumn{7}{l}{\textbf{B. Evolved artifact scores: CU / UG / Stealth ($\downarrow$, 1--5)}} \\
 \multirow{3}{*}{AutoSkill}
@@ -660,25 +647,10 @@ rather than collapsed into one score.
  & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multirow{3}{*}{SkillClaw}
- & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\midrule
 \multirow{3}{*}{SkillsVote}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\midrule
-\multirow{3}{*}{SkillOpt}
- & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\midrule
-\multirow{3}{*}{Hermes-native}
- & Raw             & N/A & N/A & --/--/-- & N/A & --/--/-- \\
- & Library-Drift   & N/A & N/A & --/--/-- & N/A & --/--/-- \\
- & \safeevolve     & N/A & N/A & --/--/-- & N/A & --/--/-- \\
 \midrule
 \multicolumn{7}{l}{\textbf{C. Post-attack: unsafe retrieval ($\downarrow$) / carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
 \multirow{3}{*}{AutoSkill}
@@ -691,29 +663,14 @@ rather than collapsed into one score.
  & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multirow{3}{*}{SkillClaw}
- & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\midrule
 \multirow{3}{*}{SkillsVote}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\midrule
-\multirow{3}{*}{SkillOpt}
- & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\midrule
-\multirow{3}{*}{Hermes-native}
- & Raw             & N/A & N/A & --/--/-- & N/A & --/--/-- \\
- & Library-Drift   & N/A & N/A & --/--/-- & N/A & --/--/-- \\
- & \safeevolve     & N/A & N/A & --/--/-- & N/A & --/--/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Full SafeEvolve breakdown by evolution method and target
-agent.} Each evolution method is evaluated raw,
+agent.} EvoSkill, AutoSkill, and SkillsVote are evaluated raw,
 with a capability-oriented library hygiene baseline, and with \safeevolve on
 the same held-out episodes. Columns retain all four target-agent configurations.
 Panel A reports benign utility / malicious ASR / benign ASR
@@ -723,8 +680,7 @@ absolute micro-aggregates. No deltas or gain-retention ratios are used. Macro av
 weight target agents equally. URR is additionally averaged only over cells in which the frozen
 \texttt{SKILL.md} contains an evolved skill with exported $cu\geq3$; otherwise
 it is reported as N/A rather than zero. Bold marks the safest method whose
-utility is statistically non-inferior to raw evolution. Hermes-native is evaluated only in
-the Hermes / MiniMax column, and its macro entry reports that target.}
+utility is statistically non-inferior to raw evolution.}
 \label{tab:safeevolve-full}
 \end{table*}
 }
@@ -776,7 +732,7 @@ the Hermes / MiniMax column, and its macro entry reports that target.}
 \caption{\textbf{SafeEvolve safety and utility under the same evaluation
 protocol (RQ3).} For each target agent and governance condition, we
 first compute every metric as an absolute micro-aggregate, then macro-average
-equally over the five agent-agnostic evolution methods. The final row block
+equally over the three selected evolution methods. The final row block
 gives the equal-weight target-agent average. Artifact columns report the same mean judge scores as
 Table~\ref{tab:misevolution-main}. URR is N/A when no unsafe evolved skill is exported and its averages
 use only defined cells; this absence is also exposed by the artifact columns
@@ -869,14 +825,14 @@ individual detectors.}
 
 \paragraph{Capability preservation on common benchmarks.}
 Safety gains are useful only if the governed library continues to improve task
-performance. We therefore evaluate each evolution method raw, with
+performance. We therefore evaluate EvoSkill, AutoSkill, and SkillsVote raw, with
 Library-Drift, and with \safeevolve on two external capability benchmarks.
 Here too we preserve each benchmark's official evaluation contract rather than
 reducing both to a common accuracy column. SkillsBench reports task-macro
 pass rates and skill gain \citep{li2026skillsbench}; SkillLearnBench separates
 skill quality, trajectory behavior, and task outcome
 \citep{zhong2026skilllearnbench}. Table~\ref{tab:capability} shows
-method-averaged results in the main paper, with every evolution method reported
+method-averaged results in the main paper, with all three methods reported
 separately in the appendix.
 
 \begin{table*}[t]
@@ -906,7 +862,7 @@ separately in the appendix.
 \bottomrule
 \end{tabular}
 \caption{\textbf{SafeEvolve preserves capability under each benchmark's native
-protocol (RQ3).} Entries macro-average equally over applicable evolution
+protocol (RQ3).} Entries macro-average equally over EvoSkill, AutoSkill, and SkillsVote
 methods after computing the official metric for each method. SkillsBench uses
 task-macro pass rate, absolute improvement, and normalized gain;
 SkillLearnBench reports its three-level quality/trajectory/outcome metrics.
@@ -1091,14 +1047,9 @@ commit, and realized method--agent matrix, together with failed runs.
 \subsection{Hermes-native evolution}
 \label{app:hermes-native}
 
-Hermes-native evolution is evaluated with the Hermes / MiniMax target. A native candidate
-follows Hermes's ordinary authoring, approval, and storage path in the raw
-condition. Library-Drift applies capability-oriented maintenance after writing.
-Under \safeevolve, the complete native skill bundle is audited and, when
-necessary, repaired before approval; accepted skills then receive the same
-provenance, safety-aware retrieval, and retirement treatment as candidates from
-agent-agnostic methods. This preserves Hermes's authoring loop and changes only
-the governance of its persistent updates.
+Hermes-native evolution is evaluated with the Hermes / MiniMax target. A native
+candidate follows Hermes's ordinary authoring, approval, and storage path, so
+this diagnostic preserves Hermes's own authoring and retrieval loop.
 
 \begin{table}[t]
 \centering
@@ -1117,8 +1068,7 @@ Hermes-native       & --/--/-- & --/--/-- & --/--/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Hermes-native diagnostic detail.} This appendix view uses
-the same absolute $3+3+3$ protocol as Table~\ref{tab:misevolution-main}. Its Raw / Library-Drift / \safeevolve
-comparison appears in Table~\ref{tab:safeevolve-full}.}
+the same absolute $3+3+3$ protocol as Table~\ref{tab:misevolution-main}.}
 \label{tab:hermes-native}
 \end{table}
 
@@ -1221,10 +1171,7 @@ test set; the remaining entries are rates.}
 \midrule
 AutoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
 EvoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-SkillClaw & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
 SkillsVote & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-SkillOpt & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-Hermes-native & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{SkillsBench capability breakdown.} Every cell orders the
@@ -1247,10 +1194,7 @@ the corresponding no-skill condition at full precision.}
 \midrule
 AutoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
 EvoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-SkillClaw & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
 SkillsVote & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-SkillOpt & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-Hermes-native & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{SkillLearnBench capability breakdown.} Columns preserve the
