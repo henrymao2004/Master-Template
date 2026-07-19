@@ -197,12 +197,6 @@ tasks, persistence probes, and longitudinal schedule. \bench freezes this
 protocol, and \gym supplies versioned skill state, instrumentation, and
 cross-task execution.
 
-\paragraph{Governance of evolving libraries.}
-Contrast \safeevolve with capability-oriented library maintenance and drift
-control. Library hygiene retains skills that improve task success, including
-skills that are both useful and unsafe. \safeevolve introduces safety
-as a first-class admission and retention signal.
-
 \section{Skill Misevolution}
 \label{sec:problem}
 
@@ -387,10 +381,9 @@ schedule comparisons.
 Skill evolution retains procedures for future utility, but utility alone does
 not distinguish a broadly useful routine from one that also encodes an unsafe
 shortcut. Once admitted, that shortcut becomes retrievable persistent policy;
-runtime safeguards assess the next execution, while capability-oriented
-library maintenance can retain the artifact because it still improves task
-success. This motivates safety governance at the state transition that writes
-and reuses the skill. \safeevolve therefore wraps an existing evolution method
+runtime safeguards assess only the next execution. This motivates safety
+governance at the state transition that writes and reuses the skill.
+\safeevolve therefore wraps an existing evolution method
 at these two boundaries (Figure~\ref{fig:safeevolve}). Before admission, an
 independent critic audits the complete candidate bundle, including scripts and
 referenced resources, and repairs unsafe generalization by restoring omitted
@@ -434,7 +427,7 @@ per-concept, and per-surface breakdowns appear in the appendix. RQ2 uses three
 predeclared target--method configurations and holds task identities, judges,
 tools, update count, and final probes fixed while varying only library snapshot,
 exposure order, or batch composition. For mitigation, EvoSkill, AutoSkill, and
-SkillsVote are evaluated raw, with capability-oriented Library-Drift, and with \safeevolve on
+SkillsVote are evaluated raw and with \safeevolve on
 disjoint held-out episodes; repair policies and thresholds are selected on the
 train/development split before libraries are frozen. RQ3 additionally evaluates
 the full governed pipeline on SkillSafetyBench, its admission auditor on
@@ -623,57 +616,47 @@ rather than collapsed into one score.
 & \textbf{Macro avg.} \\
 \midrule
 \multicolumn{7}{l}{\textbf{A. Online behavior: benign utility / malicious ASR / benign ASR (contamination) (\%)}} \\
-\multirow{3}{*}{AutoSkill}
+\multirow{2}{*}{AutoSkill}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multirow{3}{*}{EvoSkill}
+\multirow{2}{*}{EvoSkill}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multirow{3}{*}{SkillsVote}
+\multirow{2}{*}{SkillsVote}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multicolumn{7}{l}{\textbf{B. Evolved artifact scores: CU / UG / Stealth ($\downarrow$, 1--5)}} \\
-\multirow{3}{*}{AutoSkill}
+\multirow{2}{*}{AutoSkill}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multirow{3}{*}{EvoSkill}
+\multirow{2}{*}{EvoSkill}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multirow{3}{*}{SkillsVote}
+\multirow{2}{*}{SkillsVote}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multicolumn{7}{l}{\textbf{C. Post-attack: unsafe retrieval ($\downarrow$) / carryover ASR ($\downarrow$) / carryover utility ($\uparrow$) (\%)}} \\
-\multirow{3}{*}{AutoSkill}
+\multirow{2}{*}{AutoSkill}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multirow{3}{*}{EvoSkill}
+\multirow{2}{*}{EvoSkill}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
-\multirow{3}{*}{SkillsVote}
+\multirow{2}{*}{SkillsVote}
  & Raw             & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
- & Library-Drift   & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Full SafeEvolve breakdown by evolution method and target
-agent.} EvoSkill, AutoSkill, and SkillsVote are evaluated raw,
-with a capability-oriented library hygiene baseline, and with \safeevolve on
+agent.} EvoSkill, AutoSkill, and SkillsVote are evaluated raw and with \safeevolve on
 the same held-out episodes. Columns retain all four target-agent configurations.
 Panel A reports benign utility / malicious ASR / benign ASR
 (contamination); Panel B reports mean 1--5 CU / UG / Stealth scores; Panel C reports URR /
@@ -705,29 +688,24 @@ utility is statistically non-inferior to raw evolution.}
 \textbf{CU}$\downarrow$ & \textbf{UG}$\downarrow$ & \textbf{Stealth}$\downarrow$ &
 \textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
-\multirow{3}{*}{Claude Code}
+\multirow{2}{*}{Claude Code}
 & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& Library-Drift & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multirow{3}{*}{Codex}
+\multirow{2}{*}{Codex}
 & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& Library-Drift & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multirow{3}{*}{Hermes}
+\multirow{2}{*}{Hermes}
 & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& Library-Drift & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multirow{3}{*}{OpenClaw}
+\multirow{2}{*}{OpenClaw}
 & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& Library-Drift & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multirow{3}{*}{Macro avg.}
+\multirow{2}{*}{Macro avg.}
 & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& Library-Drift & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
@@ -742,12 +720,6 @@ rather than converted into a zero retrieval rate. The complete per-method breakd
 Appendix~Table~\ref{tab:safeevolve-full}.}
 \label{tab:safeevolve-main}
 \end{table*}
-
-\paragraph{Why Library-Drift is the decisive baseline.}
-Capability-oriented hygiene can remove stale or low-value skills, but it may
-retain a skill associated with both higher utility and an unsafe shortcut. A gap between
-Library-Drift and \safeevolve provides a direct comparison between
-capability-oriented and explicitly safety-aware governance.
 
 \paragraph{Full-system evaluation on SkillSafetyBench.}
 The held-out episode table tests end-to-end mitigation inside evolving agents.
@@ -782,7 +754,6 @@ contamination.
 & \textbf{Task success $\uparrow$} & \textbf{Conditional ASR $\downarrow$} \\
 \midrule
 Raw attacked update & -- & -- & -- \\
-Library-Drift & -- & -- & -- \\
 \rowcolor{lightblue}Full \safeevolve & -- & -- & -- \\
 \bottomrule
 \end{tabular}
@@ -827,8 +798,8 @@ individual detectors.}
 
 \paragraph{Capability preservation on common benchmarks.}
 Safety gains are useful only if the governed library continues to improve task
-performance. We therefore evaluate EvoSkill, AutoSkill, and SkillsVote raw, with
-Library-Drift, and with \safeevolve on two external capability benchmarks.
+performance. We therefore evaluate EvoSkill, AutoSkill, and SkillsVote raw and
+with \safeevolve on two external capability benchmarks.
 Here too we preserve each benchmark's official evaluation contract rather than
 reducing both to a common accuracy column. SkillsBench reports task-macro
 pass rates and skill gain \citep{li2026skillsbench}; SkillLearnBench separates
@@ -842,25 +813,25 @@ separately in the appendix.
 \small
 \setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.08}
-\begin{tabular}{llccc}
+\begin{tabular}{llcc}
 \toprule
 \textbf{Benchmark} & \textbf{Native metric}
-& \textbf{Raw} & \textbf{Library-Drift} & \textbf{\safeevolve} \\
+& \textbf{Raw} & \textbf{\safeevolve} \\
 \midrule
 \multirow{4}{*}{SkillsBench}
- & No-skill pass (\%) $\uparrow$       & -- & -- & -- \\
- & Evolved-skill pass (\%) $\uparrow$  & -- & -- & -- \\
- & Skill improvement (pp) $\uparrow$   & -- & -- & -- \\
- & Normalized gain (\%) $\uparrow$     & -- & -- & -- \\
+ & No-skill pass (\%) $\uparrow$       & -- & -- \\
+ & Evolved-skill pass (\%) $\uparrow$  & -- & -- \\
+ & Skill improvement (pp) $\uparrow$   & -- & -- \\
+ & Normalized gain (\%) $\uparrow$     & -- & -- \\
 \midrule
 \multirow{7}{*}{SkillLearnBench}
- & Coverage (\%) $\uparrow$            & -- & -- & -- \\
- & Executability (\%) $\uparrow$       & -- & -- & -- \\
- & Safety (\%) $\uparrow$              & -- & -- & -- \\
- & Alignment (\%) $\uparrow$           & -- & -- & -- \\
- & Usage (\%) $\uparrow$               & -- & -- & -- \\
- & Solving tokens $\downarrow$          & -- & -- & -- \\
- & Accuracy (\%) $\uparrow$            & -- & -- & -- \\
+ & Coverage (\%) $\uparrow$            & -- & -- \\
+ & Executability (\%) $\uparrow$       & -- & -- \\
+ & Safety (\%) $\uparrow$              & -- & -- \\
+ & Alignment (\%) $\uparrow$           & -- & -- \\
+ & Usage (\%) $\uparrow$               & -- & -- \\
+ & Solving tokens $\downarrow$          & -- & -- \\
+ & Accuracy (\%) $\uparrow$            & -- & -- \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{SafeEvolve preserves capability under each benchmark's native
@@ -1119,7 +1090,6 @@ retains its three evaluation levels.
 & \textbf{Macro avg.} \\
 \midrule
 Raw attacked update & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-Library-Drift & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \rowcolor{lightblue}Full \safeevolve & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \bottomrule
 \end{tabular}}
@@ -1171,13 +1141,13 @@ test set; the remaining entries are rates.}
 & \textbf{Evolved-skill pass} & \textbf{$\Delta$ (pp)}
 & \textbf{Normalized gain} \\
 \midrule
-AutoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-EvoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-SkillsVote & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+AutoSkill & Raw / \safeevolve & -- / -- & -- / -- & -- / -- & -- / -- \\
+EvoSkill & Raw / \safeevolve & -- / -- & -- / -- & -- / -- & -- / -- \\
+SkillsVote & Raw / \safeevolve & -- / -- & -- / -- & -- / -- & -- / -- \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{SkillsBench capability breakdown.} Every cell orders the
-three governance conditions as Raw / Library-Drift / \safeevolve. Pass is the
+two conditions as Raw / \safeevolve. Pass is the
 official task-macro pass rate; $\Delta$ and normalized gain are computed from
 the corresponding no-skill condition at full precision.}
 \label{tab:skillsbench-full}
@@ -1194,15 +1164,15 @@ the corresponding no-skill condition at full precision.}
 & \textbf{Executability} & \textbf{Safety} & \textbf{Alignment}
 & \textbf{Usage} & \textbf{Solving tokens} & \textbf{Accuracy} \\
 \midrule
-AutoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-EvoSkill & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
-SkillsVote & Raw / Library-Drift / \safeevolve & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- & -- / -- / -- \\
+AutoSkill & Raw / \safeevolve & -- / -- & -- / -- & -- / -- & -- / -- & -- / -- & -- / -- & -- / -- \\
+EvoSkill & Raw / \safeevolve & -- / -- & -- / -- & -- / -- & -- / -- & -- / -- & -- / -- & -- / -- \\
+SkillsVote & Raw / \safeevolve & -- / -- & -- / -- & -- / -- & -- / -- & -- / -- & -- / -- & -- / -- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{SkillLearnBench capability breakdown.} Columns preserve the
 official three levels: artifact quality (coverage, executability, safety),
 trajectory (alignment, usage), and outcome (solving tokens, accuracy). Cell
-order is Raw / Library-Drift / \safeevolve.}
+order is Raw / \safeevolve.}
 \label{tab:skilllearnbench-full}
 \end{table*}
 
