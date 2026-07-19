@@ -123,59 +123,59 @@ carryover with nine metrics.
 \begin{tikzpicture}[
   design/.style={draw=black!65, rounded corners=2pt, align=center,
     minimum width=3.25cm, minimum height=1.45cm, inner sep=5pt,
-    font=\small, fill=white},
+    font=\small\bfseries\boldmath, fill=white},
   episode/.style={draw=black!65, rounded corners=2pt, align=center,
     minimum width=3.05cm, minimum height=1.55cm, inner sep=5pt,
-    font=\small, fill=white},
+    font=\small\bfseries\boldmath, fill=white},
   flow/.style={-{Stealth[length=2.4mm]}, line width=0.8pt,
     draw=black!70},
-  note/.style={font=\scriptsize, align=center, text=black!65},
+  note/.style={font=\footnotesize\bfseries\boldmath, align=center, text=black!65},
   node distance=7mm
 ]
-\node[font=\small\bfseries, anchor=west] at (-1.9,1.35)
+\node[font=\normalsize\bfseries\boldmath, anchor=west] at (-1.9,1.35)
   {(a) Offline benchmark construction};
 \node[design, fill=lightgray] (contract) {
   \textbf{AgentHazard contract}\\
   harmful objective + sandbox\\
-  \scriptsize harmful trajectory judge};
+  \footnotesize\bfseries harmful trajectory judge};
 \node[design, right=of contract, fill=orange!9] (concept) {
   \textbf{Autoresearch discovery}\\
   falsifiable vulnerability concept\\
-  \scriptsize enabling condition + evidence};
+  \footnotesize\bfseries enabling condition + evidence};
 \node[design, right=of concept, fill=yellow!12] (constructor) {
   \textbf{Our episode constructor}\\
   concept-aligned task surfaces\\
-  \scriptsize new benign-completion judge};
+  \footnotesize\bfseries new benign-completion judge};
 \node[design, right=of constructor, fill=blue!7] (tasks) {
   \textbf{Frozen benchmark tasks}\\
   $M$: unsafe condition \quad $B$: benign\\
-  \scriptsize $P$: zero-injection persistence cue};
+  \footnotesize\bfseries $P$: zero-injection persistence cue};
 \draw[flow] (contract) -- (concept);
 \draw[flow] (concept) -- (constructor);
 \draw[flow] (constructor) -- (tasks);
 
-\node[font=\small\bfseries, anchor=west, below=12mm of contract.south west]
+\node[font=\normalsize\bfseries\boldmath, anchor=west, below=12mm of contract.south west]
   {(b) Bench protocol executed in the Gym};
 \node[episode, below=22mm of contract, fill=red!6] (r1) {
   \textbf{$R_1$: dose $3M$}\\
   $M^3\!\rightarrow\!\evolution\!\rightarrow\!B^3\!\rightarrow\!\evolution$\\
-  \scriptsize online behavior + artifact audit};
+  \footnotesize\bfseries online behavior + artifact audit};
 \node[episode, right=5mm of r1, fill=red!8] (r2) {
   \textbf{$R_2$: dose $6M$}\\
   $M^3\!\rightarrow\!\evolution\!\rightarrow\!B^3\!\rightarrow\!\evolution$\\
-  \scriptsize online behavior + artifact audit};
+  \footnotesize\bfseries online behavior + artifact audit};
 \node[episode, right=5mm of r2, fill=red!10] (r3) {
   \textbf{$R_3$: dose $9M$}\\
   $M^3\!\rightarrow\!\evolution\!\rightarrow\!B^3\!\rightarrow\!\evolution$\\
-  \scriptsize online behavior + artifact audit};
+  \footnotesize\bfseries online behavior + artifact audit};
 \node[episode, right=5mm of r3, fill=yellow!12] (freeze) {
   \textbf{Freeze library}\\
   export \texttt{SKILL.md}\\
-  \scriptsize reset executor and all other state};
+  \footnotesize\bfseries reset executor and all other state};
 \node[episode, right=5mm of freeze, fill=blue!8] (probe) {
   \textbf{Fresh-session $P^3$}\\
   reload only \texttt{SKILL.md}\\
-  \scriptsize URR / C-ASR / C-Util};
+  \footnotesize\bfseries URR / C-ASR / C-Util};
 \draw[flow] (r1) -- (r2);
 \draw[flow] (r2) -- (r3);
 \draw[flow] (r3) -- (freeze);
@@ -478,43 +478,43 @@ which keeps useful but unsafe skills.
 \begin{tikzpicture}[
   core/.style={draw=black!65, rounded corners=2pt, align=center,
     minimum width=2.75cm, minimum height=1.45cm, inner sep=5pt,
-    font=\small, fill=white},
+    font=\small\bfseries\boldmath, fill=white},
   guard/.style={draw=blue!55!black, rounded corners=2pt, align=center,
     minimum width=3.25cm, minimum height=1.85cm, inner sep=5pt,
-    font=\small, fill=blue!7},
+    font=\small\bfseries\boldmath, fill=blue!7},
   flow/.style={-{Stealth[length=2.4mm]}, line width=0.85pt,
     draw=black!70},
   feedback/.style={-{Stealth[length=2.4mm]}, line width=0.8pt,
     draw=red!60!black, dashed},
-  label/.style={font=\scriptsize\bfseries, align=center, text=black!70},
+  label/.style={font=\footnotesize\bfseries\boldmath, align=center, text=black!70},
   node distance=7mm
 ]
 \node[core, fill=lightgray] (traj) {
   \textbf{Trajectory batch}\\
   tasks + tool traces\\
-  \scriptsize observed success};
+  \footnotesize\bfseries observed success};
 \node[core, right=of traj, fill=yellow!10] (candidate) {
   \textbf{Candidate skill}\\
   procedure + resources\\
-  \scriptsize native method output};
+  \footnotesize\bfseries native method output};
 \node[guard, right=of candidate] (writegate) {
   \textbf{Write-time governance}\\
   admission audit + targeted repair\\
   verification preservation\\
-  \scriptsize reject / repair / admit};
+  \footnotesize\bfseries reject / repair / admit};
 \node[core, right=of writegate, fill=green!8] (library) {
   \textbf{Governed library}\\
   accepted skill + lineage\\
-  \scriptsize source and revision provenance};
+  \footnotesize\bfseries source and revision provenance};
 \node[guard, right=of library] (reusegate) {
   \textbf{Reuse-time governance}\\
   safety-aware selection\\
   risk prior + retrieval evidence\\
-  \scriptsize suppress / retrieve};
+  \footnotesize\bfseries suppress / retrieve};
 \node[core, right=of reusegate, fill=orange!9] (reuse) {
   \textbf{Later task reuse}\\
   agent action + outcome\\
-  \scriptsize utility and safety feedback};
+  \footnotesize\bfseries utility and safety feedback};
 
 \draw[flow] (traj) -- (candidate);
 \draw[flow] (candidate) -- (writegate);
@@ -529,7 +529,7 @@ which keeps useful but unsafe skills.
 \node[core, below=11mm of library, fill=red!6,
   minimum width=3.25cm, minimum height=1.2cm] (retire) {
   \textbf{Rollback / repair / retirement}\\
-  \scriptsize update the governed library};
+  \footnotesize\bfseries update the governed library};
 \draw[feedback] (reuse.south) |- node[label, near start, below]
   {observed reuse outcome} (retire.east);
 \draw[feedback] (retire.north) -- (library.south);
@@ -717,10 +717,10 @@ to RQ1's safety--utility association.
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
   x=1cm,y=1cm,
-  tick/.style={font=\tiny, text=black!65},
-  axislabel/.style={font=\scriptsize, text=black!85},
-  paneltitle/.style={font=\scriptsize\bfseries, text=black!85},
-  note/.style={font=\tiny, align=left, text=black!75},
+  tick/.style={font=\scriptsize\bfseries\boldmath, text=black!65},
+  axislabel/.style={font=\small\bfseries\boldmath, text=black!85},
+  paneltitle/.style={font=\small\bfseries\boldmath, text=black!85},
+  note/.style={font=\scriptsize\bfseries\boldmath, align=left, text=black!75},
   cc/.style={circle, fill=blue!65!black, draw=white, line width=.4pt,
     minimum size=5.5pt, inner sep=0pt},
   codex/.style={circle, fill=orange!85!black, draw=white, line width=.4pt,

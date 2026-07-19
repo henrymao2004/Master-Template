@@ -31,7 +31,7 @@ PANELS = {
     "cumulative": {
         "title": "(a) Cumulative exposure",
         "levels": ["0", "3", "6", "9"],
-        "xlabel": "Cumulative malicious exposure, $K$",
+        "xlabel": "Cumulative malicious exposure, $\\mathbf{K}$",
     },
     "timing": {
         "title": "(b) Exposure timing",
@@ -72,12 +72,15 @@ def main() -> None:
             "mathtext.rm": "Times New Roman",
             "mathtext.it": "Times New Roman:italic",
             "mathtext.bf": "Times New Roman:bold",
-            "font.size": 7.2,
-            "axes.titlesize": 8.0,
-            "axes.labelsize": 7.2,
-            "xtick.labelsize": 6.6,
-            "ytick.labelsize": 6.6,
-            "legend.fontsize": 6.8,
+            "font.size": 8.8,
+            "font.weight": "bold",
+            "axes.titlesize": 10.0,
+            "axes.titleweight": "bold",
+            "axes.labelsize": 9.0,
+            "axes.labelweight": "bold",
+            "xtick.labelsize": 8.0,
+            "ytick.labelsize": 8.0,
+            "legend.fontsize": 8.0,
             "pdf.fonttype": 42,
             "ps.fonttype": 42,
         }
@@ -88,7 +91,7 @@ def main() -> None:
     observed = [value for value in observed if value is not None]
     ymax = max(40.0, math.ceil(max(observed, default=35.0) / 10.0) * 10.0)
 
-    fig, axes = plt.subplots(1, 3, figsize=(7.05, 2.28), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(7.05, 2.58), sharey=True)
     for panel_index, (ax, (panel, spec)) in enumerate(zip(axes, PANELS.items(), strict=True)):
         levels = spec["levels"]
         positions = {level: index for index, level in enumerate(levels)}
@@ -110,8 +113,8 @@ def main() -> None:
             has_values = True
             ax.plot(
                 xs, ys, color=color, marker=marker,
-                markersize=3.8, markeredgecolor="white", markeredgewidth=0.35,
-                linewidth=1.15, zorder=3,
+                markersize=4.5, markeredgecolor="white", markeredgewidth=0.4,
+                linewidth=1.35, zorder=3,
             )
 
         ax.set_title(spec["title"], loc="left", fontweight="bold", pad=7)
@@ -127,22 +130,26 @@ def main() -> None:
                        width=0.55, length=2.8, direction="out")
         ax.tick_params(axis="y", color="#777777", labelcolor="#333333",
                        width=0.55, length=2.8, direction="out")
+        for label in (*ax.get_xticklabels(), *ax.get_yticklabels()):
+            label.set_fontweight("bold")
         if panel_index > 0:
             ax.tick_params(axis="y", left=False, labelleft=False)
         if not has_values:
             ax.text(0.5, 0.51, "Results pending", transform=ax.transAxes,
-                    ha="center", va="center", color="#888888", fontsize=7.0)
+                    ha="center", va="center", color="#888888",
+                    fontsize=8.5, fontweight="bold")
 
     axes[0].set_ylabel("Carryover ASR (%)")
     legend = [
-        Line2D([0], [0], color=color, marker=marker, markersize=4.0,
-               markeredgecolor="white", markeredgewidth=0.35, linewidth=1.15,
+        Line2D([0], [0], color=color, marker=marker, markersize=4.5,
+               markeredgecolor="white", markeredgewidth=0.4, linewidth=1.35,
                label=config)
         for config, (color, marker) in CONFIGS.items()
     ]
     fig.legend(handles=legend, loc="lower center", bbox_to_anchor=(0.5, -0.005),
-               frameon=False, ncol=3, handlelength=1.7, columnspacing=1.5)
-    fig.subplots_adjust(left=0.072, right=0.995, top=0.88, bottom=0.31, wspace=0.24)
+               frameon=False, ncol=3, handlelength=1.7, columnspacing=1.25,
+               prop={"family": "Times New Roman", "weight": "bold", "size": 8.0})
+    fig.subplots_adjust(left=0.078, right=0.995, top=0.86, bottom=0.31, wspace=0.25)
     fig.savefig(OUTPUT, bbox_inches="tight", pad_inches=0.015)
 
 
