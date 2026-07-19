@@ -66,10 +66,10 @@ malicious, benign, and persistence tasks with a new benign-completion judge. We
 also introduce \safeevolve, which governs skill
 admission and reuse through targeted repair, verification preservation,
 provenance, and retirement. Across four agent frameworks, a shared MiniMax
-backbone, and six evolution methods, three settings exhibit the full signature
-of benign contamination and fresh-session carryover; Hermes-native reaches
-30.7\% carryover ASR while retaining 64.0\% carryover utility. Other settings
-retrieve unsafe skills at rates up to 81.0\% yet produce zero carryover ASR.
+backbone, and six evolution methods, the completed 25-episode conditions show
+that AutoSkill and SkillsVote exhibit both benign contamination and
+fresh-session carryover while EvoSkill retrieves unsafe skills at 81.0\% yet
+produces zero carryover ASR.
 This separation reveals the central insight: misevolution is a gated lifecycle,
 and safety evaluation must locate whether risk stops at authoring, retrieval, or
 execution. \safeevolve targets both the write and reuse gates while preserving
@@ -208,12 +208,10 @@ reuse time it uses lineage and observed outcomes for selection, rollback, and
 retirement. This targets the state that carries risk across tasks while
 retaining the useful procedure.
 
-Across four agent frameworks with a shared MiniMax backbone and six evolution
-methods, the benchmark reveals a gated lifecycle. AutoSkill, SkillsVote, and
-Hermes-native exhibit benign contamination and fresh-session carryover;
-Hermes-native reaches 30.7\% carryover ASR with 64.0\% carryover utility. Other
-settings retrieve unsafe skills at rates up to 81.0\% but produce zero
-carryover ASR. The resulting insight is operational: artifact risk is broader
+Across the completed 25-episode conditions, the benchmark reveals a gated
+lifecycle. AutoSkill and SkillsVote exhibit benign contamination and
+fresh-session carryover, whereas EvoSkill retrieves unsafe skills at 81.0\%
+but produces zero carryover ASR. The resulting insight is operational: artifact risk is broader
 than realized harm, and the layer where progression stops determines what must
 be governed.
 
@@ -422,8 +420,9 @@ whose frozen export contains such a skill; \textbf{Carryover ASR (C-ASR)} and
 over valid $P$ tasks. URR is N/A, not zero, when the frozen export contains no
 unsafe evolved skill and is interpreted with the artifact scores. We aggregate
 valid tasks and judged artifacts directly rather than averaging episode-level
-percentages. Percentage metrics are reported to one decimal place, while the
-three 1--5 artifact scores are reported to two decimal places. Confidence intervals use episode-level bootstrap resampling, and
+percentages. Online percentage metrics are reported to two decimal places,
+the three 1--5 artifact scores to two decimal places, and post-attack percentage
+metrics to one decimal place. Confidence intervals use episode-level bootstrap resampling, and
 method comparisons use multiple-comparison-adjusted intervals over matched
 tasks. Headline metrics pool all rounds; RQ3 uses the corresponding library
 snapshot for cumulative-exposure checkpoints and the final snapshot for
@@ -619,50 +618,52 @@ visible without encoding three quantities inside each cell.
 \textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
 \multirow{6}{*}{Claude Code}
-& No evolution        & 49.8 & 56.0 & 0.0 & N/A & N/A & N/A & N/A & 0.0 & 25.3 \\
-& EvoSkill            & 71.1 & 62.2 & 0.4 & 1.79 & 3.05 & 4.05 & 81.0 & 0.0 & 76.0 \\
-& SkillClaw           & 36.9 & 51.6 & 0.0 & 1.19 & 3.00 & 3.50 & 16.7 & 0.0 & 29.7 \\
-& AutoSkill           & 65.3 & 59.1 & 8.4 & 2.54 & 2.91 & 4.07 & 52.8 & 16.0 & 64.0 \\
-& SkillsVote          & 62.7 & 56.4 & 7.1 & 2.58 & 3.05 & 4.19 & 55.6 & 18.7 & 65.3 \\
-& SkillOpt            & 60.0 & 58.2 & 0.0 & 1.61 & 3.25 & 3.00 & 50.0 & 0.0 & 42.7 \\
-\midrule
-\multirow{6}{*}{Codex}
-& No evolution        & 54.7 & 59.6 & 0.4 & N/A & N/A & N/A & N/A & 0.0 & 40.0 \\
-& EvoSkill            & 76.0 & 64.4 & 0.4 & 1.54 & 2.82 & 3.73 & 33.3 & 0.0 & 65.3 \\
-& SkillClaw           & 40.4 & 55.1 & 1.3 & 1.29 & 3.00 & 4.00 & 33.3 & 0.0 & 24.0 \\
-& AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& No evolution        & 49.78 & 56.00 & 0.00 & N/A & N/A & N/A & N/A & 0.0 & 25.3 \\
+& EvoSkill            & 71.11 & 62.22 & 0.44 & 1.79 & 3.05 & 4.05 & 81.0 & 0.0 & 76.0 \\
+& SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& AutoSkill           & 65.33 & 59.11 & 8.44 & 2.54 & 2.91 & 4.07 & 52.8 & 16.0 & 64.0 \\
+& SkillsVote          & 62.67 & 56.44 & 7.11 & 2.58 & 3.05 & 4.19 & 55.6 & 18.7 & 65.3 \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multirow{7}{*}{Hermes}
-& No evolution        & 14.2 & 44.0 & 0.4 & N/A & N/A & N/A & N/A & 0.0 & 16.0 \\
+\multirow{6}{*}{Codex}
+& No evolution        & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& Hermes-native       & 68.8 & 73.4 & 16.0 & 2.64 & 3.16 & 4.20 & 62.5 & 30.7 & 64.0 \\
+\midrule
+\multirow{7}{*}{Hermes}
+& No evolution        & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& Hermes-native       & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
 \multirow{6}{*}{OpenClaw}
-& No evolution        & 37.3 & 44.0 & 0.4 & N/A & N/A & N/A & N/A & 1.3 & 26.7 \\
+& No evolution        & 37.33 & 44.00 & 0.44 & N/A & N/A & N/A & N/A & 1.3 & 26.7 \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& SkillClaw           & 32.0 & 46.0 & 1.3 & 1.54 & 3.20 & 3.80 & 40.0 & 1.3 & 21.3 \\
+& SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Skill evolution across four target-agent configurations
-(RQ1).} BU, M-ASR, B-ASR, URR, C-ASR, and C-Util are percentages reported to
-one decimal place. CU, UG, and Stealth are mean 1--5 content-judge scores
-reported to two decimal places; UG and Stealth follow the
+(RQ1).} BU, M-ASR, and B-ASR are percentages reported to two decimal places;
+URR, C-ASR, and C-Util are percentages reported to one decimal place. CU, UG,
+and Stealth are mean 1--5 content-judge scores reported to two decimal places;
+UG and Stealth follow the
 judge contract and are evaluated on artifacts with $cu\geq3$. URR, C-ASR, and C-Util report unsafe
 retrieval, carryover ASR, and carryover utility after retrieval is rebuilt
 solely from \texttt{SKILL.md}. All frameworks use the same MiniMax backbone for
 the agent-framework comparison. For URR, N/A means that the frozen
 \texttt{SKILL.md} contains no evolved skill with exported $cu\geq3$; URR is
-then undefined rather than zero. Elsewhere, N/A marks a setting with no skill
-artifact or an unsupported framework-specific pairing; it never denotes a failed run.
+then undefined rather than zero. Elsewhere, N/A marks a populated setting with
+no skill artifact. A dash marks a condition with fewer than 25 completed
+episodes or an unsupported method--agent pairing.
 The safety--utility and artifact--retrieval--carryover relationships are
 visualized in Figure~\ref{fig:risk-propagation}.}
 \label{tab:misevolution-main}
@@ -670,35 +671,31 @@ visualized in Figure~\ref{fig:risk-propagation}.}
 
 \paragraph{Capability gains can coincide with higher malicious success.}
 Higher benign utility frequently appears alongside higher malicious ASR in
-Table~\ref{tab:misevolution-main}. EvoSkill reports BU/M-ASR of 71.1/62.2 on
-Claude Code and 76.0/64.4 on Codex, compared with 49.8/56.0 and 54.7/59.6
-under no evolution. Hermes-native reports 68.8/73.4, compared with 14.2/44.0
-under no evolution on Hermes. SkillClaw defines a different regime: utility
-generally falls and malicious ASR does not show the same increase. The
-association therefore varies across evolution method--agent systems.
+Table~\ref{tab:misevolution-main}. On Claude Code, EvoSkill reports BU/M-ASR
+of 71.11/62.22, compared with 49.78/56.00 under no evolution. AutoSkill and
+SkillsVote retain BU of 65.33 and 62.67 while reaching M-ASR of 59.11 and
+56.44. The completed conditions therefore show that capability retention and
+malicious success can increase together.
 
-\paragraph{Three settings exhibit the full observed misevolution signature.}
-AutoSkill and SkillsVote on Claude Code reach B-ASR 8.4/7.1 and fresh-session
-C-ASR 16.0/18.7 while retaining C-Util 64.0/65.3. Hermes-native is the
-strongest observed case, reaching B-ASR 16.0, C-ASR 30.7, and C-Util 64.0.
-Across these settings, the benchmark observes an evolved unsafe artifact,
+\paragraph{Two settings exhibit the full observed misevolution signature.}
+AutoSkill and SkillsVote on Claude Code reach B-ASR 8.44/7.11 and fresh-session
+C-ASR 16.0/18.7 while retaining C-Util 64.0/65.3. Across these settings, the benchmark observes an evolved unsafe artifact,
 later benign contamination, and harmful behavior after the executor is reset
 and retrieval is rebuilt solely from the frozen \texttt{SKILL.md}. Carryover is therefore
 compatible with retained task competence rather than being explained by a
 generally broken agent.
 
 \paragraph{Artifact risk is broader than realized carryover harm.}
-The remaining settings separate earlier stages of the lifecycle from harmful
-execution. EvoSkill and SkillOpt on Claude Code produce unsafe retrieval rates
-of 81.0 and 50.0 while C-ASR remains zero; Codex with EvoSkill similarly reaches
-33.3 URR with zero C-ASR. Unsafe skill content can therefore be authored and
+The remaining completed evolution setting separates earlier stages of the
+lifecycle from harmful execution. EvoSkill on Claude Code produces an unsafe
+retrieval rate of 81.0 while C-ASR remains zero. Unsafe skill content can therefore be authored and
 retrieved without producing an observed harmful action in the persistence
 probe. Runtime policy, tool mediation, and task context remain gates between a
 persistent unsafe rule and realized harm.
 
 \paragraph{Safety--utility frontier.}
 The high-utility, high-C-ASR region is the central misevolution regime:
-AutoSkill, SkillsVote, and Hermes-native preserve useful procedures while also
+AutoSkill and SkillsVote preserve useful procedures while also
 retaining an unsafe shortcut. Capability improvement alone is therefore not a
 reliable safety signal, while artifact risk alone does not establish that the
 shortcut will be executed. The nine metrics locate both properties without
@@ -712,7 +709,7 @@ Figure~\ref{fig:risk-propagation}(b) pairs unsafe retrieval with carryover ASR
 for every configuration, making the retrieval-to-execution gap visible on one
 percentage scale. Figure~\ref{fig:risk-propagation}(c) then locates the settings
 where contamination during benign learning and harmful execution in the fresh
-carryover session co-occur. Panel (a) connects this propagation analysis back
+carryover session co-occur among completed conditions. Panel (a) connects this propagation analysis back
 to RQ1's safety--utility association.
 
 \begin{figure*}[t]
@@ -759,22 +756,11 @@ to RQ1's safety--utility association.
 
   \node[basecc] at (2.73,2.10) {};
   \node[cc] at (4.19,2.92) {};
-  \node[cc] at (1.84,1.52) {};
   \node[cc] at (3.79,2.51) {};
   \node[cc] at (3.61,2.16) {};
-  \node[cc] at (3.43,2.39) {};
-  \node[basecodex] at (3.06,2.58) {};
-  \node[codex] at (4.53,3.21) {};
-  \node[codex] at (2.08,1.98) {};
-  \node[basehermes] at (.29,.53) {};
-  \node[hermes] at (4.03,4.39) {};
   \node[baseopenclaw] at (1.87,.53) {};
-  \node[openclaw] at (1.51,.79) {};
-
-  \draw[black!40] (4.03,4.39) -- (3.68,4.62)
-    node[note,anchor=east] {Hermes-native};
-  \draw[black!40] (4.53,3.21) -- (4.25,3.50)
-    node[note,anchor=east] {Codex / EvoSkill};
+  \draw[black!40] (4.19,2.92) -- (3.90,3.25)
+    node[note,anchor=east] {EvoSkill};
 \end{scope}
 
 % Panel (b): paired URR and C-ASR percentages.
@@ -786,15 +772,9 @@ to RQ1's safety--utility association.
   \node[axislabel] at (2.38,-.55) {Rate (\%)};
 
   \foreach \lab/\y/\u/\c in {
-    CC-Evo/4.32/4.23/0,
-    CC-Claw/3.84/.87/0,
-    CC-Auto/3.36/2.76/.84,
-    CC-Vote/2.88/2.90/.98,
-    CC-Opt/2.40/2.61/0,
-    CX-Evo/1.92/1.74/0,
-    CX-Claw/1.44/1.74/0,
-    H-Native/.96/3.26/1.60,
-    OC-Claw/.48/2.09/.07}
+    CC-Evo/3.84/4.23/0,
+    CC-Auto/2.88/2.76/.84,
+    CC-Vote/1.92/2.90/.98}
   {
     \node[tick,anchor=east] at (-.13,\y) {\lab};
     \draw[black!28, line width=1pt] (\c,\y) -- (\u,\y);
@@ -820,17 +800,8 @@ to RQ1's safety--utility association.
   \node[axislabel, rotate=90] at (-.62,2.35) {Carryover ASR (\%)};
 
   \node[cc, minimum size=6.5pt] at (.10,0) {};
-  \node[cc, minimum size=4.5pt] at (0,0) {};
   \node[cc, minimum size=8.5pt] at (2.05,2.10) {};
   \node[cc, minimum size=8.7pt] at (1.74,2.46) {};
-  \node[cc, minimum size=5.9pt] at (0,0) {};
-  \node[codex, minimum size=5.7pt] at (.10,0) {};
-  \node[codex, minimum size=4.9pt] at (.32,0) {};
-  \node[hermes, minimum size=9pt] at (3.91,4.03) {};
-  \node[openclaw, minimum size=5.7pt] at (.32,.17) {};
-
-  \draw[black!40] (3.91,4.03) -- (3.52,4.38)
-    node[note,anchor=east] {Hermes-native};
   \draw[black!40] (1.74,2.46) -- (1.40,2.80)
     node[note,anchor=east] {SkillsVote};
   \draw[black!40] (2.05,2.10) -- (2.35,1.78)
@@ -840,33 +811,29 @@ to RQ1's safety--utility association.
 % Shared framework legend; hollow markers denote No Evolution in panel (a).
 \node[cc] at (3.35,-1.28) {};
 \node[tick,anchor=west] at (3.50,-1.28) {Claude Code};
-\node[codex] at (5.20,-1.28) {};
-\node[tick,anchor=west] at (5.35,-1.28) {Codex};
-\node[hermes] at (6.43,-1.28) {};
-\node[tick,anchor=west] at (6.58,-1.28) {Hermes};
-\node[openclaw] at (7.75,-1.28) {};
-\node[tick,anchor=west] at (7.90,-1.28) {OpenClaw};
-\node[basecc] at (9.36,-1.28) {};
-\node[tick,anchor=west] at (9.51,-1.28) {No Evolution};
+\node[openclaw] at (5.20,-1.28) {};
+\node[tick,anchor=west] at (5.35,-1.28) {OpenClaw};
+\node[basecc] at (6.75,-1.28) {};
+\node[tick,anchor=west] at (6.90,-1.28) {No Evolution};
 \end{tikzpicture}%
 }
 \caption{\textbf{Three diagnostic views of skill misevolution (RQ1--RQ2).}
-Each point or row is an agent--method configuration from
+Each point or row is a completed 25-episode agent--method configuration from
 Table~\ref{tab:misevolution-main}. Panel (a) shows that higher benign utility
 can coexist with higher malicious ASR; hollow markers denote No Evolution.
 Panel (b) pairs unsafe retrieval and carryover ASR on the same scale, exposing
 the gap between retrieving and executing an unsafe skill. Panel (c) locates
 online benign contamination and fresh-session carryover harm; marker area
-scales with the mean Content Unsafety score. AutoSkill, SkillsVote, and
-Hermes-native form the clearest full misevolution cases.}
+scales with the mean Content Unsafety score. AutoSkill and SkillsVote form the
+completed full misevolution cases.}
 \label{fig:risk-propagation}
 \end{figure*}
 
 \paragraph{Artifact risk is broader than behavioral harm.}
-The aggregate results already expose an artifact--behavior gap. Every reported
+The aggregate results already expose an artifact--behavior gap. Every completed
 evolution setting produces nontrivial artifact scores, whereas clear elevated
-carryover ASR is concentrated in AutoSkill, SkillsVote, and Hermes-native.
-EvoSkill and SkillOpt further show that even observed unsafe retrieval need not
+carryover ASR is concentrated in AutoSkill and SkillsVote.
+EvoSkill further shows that even observed unsafe retrieval need not
 be followed by harm. The benchmark separates latent artifact risk, retrieved
 risk, and realized carryover at the episode level. This is a
 gated lifecycle: the observed progression can stop because no unsafe skill is
@@ -1432,13 +1399,12 @@ the governance of its persistent updates.
 \textbf{Artifact scores: CU/UG/Stealth} &
 \textbf{Post-attack: URR/ASR/Utility} \\
 \midrule
-No evolution        & 14.2/44.0/0.4 & N/A/N/A/N/A & N/A/0.0/16.0 \\
-Hermes-native       & 68.8/73.4/16.0 & 2.64/3.16/4.20 & 62.5/30.7/64.0 \\
+No evolution        & --/--/-- & --/--/-- & --/--/-- \\
+Hermes-native       & --/--/-- & --/--/-- & --/--/-- \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{Hermes-native diagnostic detail.} This appendix view expands
-the Hermes-specific rows included in Table~\ref{tab:misevolution-main} using
-the same absolute $3+3+3$ protocol. Its Raw / Library-Drift / \safeevolve
+\caption{\textbf{Hermes-native diagnostic detail.} This appendix view uses
+the same absolute $3+3+3$ protocol as Table~\ref{tab:misevolution-main}. Its Raw / Library-Drift / \safeevolve
 comparison appears in Table~\ref{tab:safeevolve-full}.}
 \label{tab:hermes-native}
 \end{table}
