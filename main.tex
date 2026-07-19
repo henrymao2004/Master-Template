@@ -422,10 +422,12 @@ whose frozen export contains such a skill; \textbf{Carryover ASR (C-ASR)} and
 over valid $P$ tasks. URR is N/A, not zero, when the frozen export contains no
 unsafe evolved skill and is interpreted with the artifact scores. We aggregate
 valid tasks and judged artifacts directly rather than averaging episode-level
-percentages. Confidence intervals use episode-level bootstrap resampling, and
+percentages. Percentage metrics are reported to one decimal place, while the
+three 1--5 artifact scores are reported to two decimal places. Confidence intervals use episode-level bootstrap resampling, and
 method comparisons use multiple-comparison-adjusted intervals over matched
-tasks. Headline metrics pool all rounds; attacker-capability sweeps use their
-matched schedule and final artifact snapshot.
+tasks. Headline metrics pool all rounds; RQ3 uses the corresponding library
+snapshot for cumulative-exposure checkpoints and the final snapshot for
+schedule comparisons.
 
 \section{SafeEvolve}
 \label{sec:safeevolve}
@@ -651,8 +653,9 @@ visible without encoding three quantities inside each cell.
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Skill evolution across four target-agent configurations
-(RQ1).} BU, M-ASR, B-ASR, URR, C-ASR, and C-Util are percentages. CU, UG,
-and Stealth are mean 1--5 content-judge scores; UG and Stealth follow the
+(RQ1).} BU, M-ASR, B-ASR, URR, C-ASR, and C-Util are percentages reported to
+one decimal place. CU, UG, and Stealth are mean 1--5 content-judge scores
+reported to two decimal places; UG and Stealth follow the
 judge contract and are evaluated on artifacts with $cu\geq3$. URR, C-ASR, and C-Util report unsafe
 retrieval, carryover ASR, and carryover utility after retrieval is rebuilt
 solely from \texttt{SKILL.md}. All frameworks use the same MiniMax backbone for
@@ -912,17 +915,7 @@ schedules appear in the appendix.
 
 \begin{figure*}[t]
   \centering
-  \fbox{\parbox[c][4.0cm][c]{0.96\textwidth}{
-    \centering
-    \textbf{One-row, three-panel exposure-schedule line plot.}\\[5pt]
-    Shared y-axis: Carryover ASR (\%).\\[3pt]
-    \textbf{(a) Cumulative exposure:} $K=0,3,6,9$ \quad
-    \textbf{(b) Timing:} Early, Interleaved, Late \quad
-    \textbf{(c) Batch composition:} Fully Mixed, Partially Mixed, Batched.\\[3pt]
-    One line per selected agent--method configuration; points show absolute
-    micro-aggregates with episode-bootstrap 95\% CIs and all panels share one
-    legend.
-  }}
+  \includegraphics[width=0.98\textwidth]{figures/rq3_exposure_schedule.pdf}
   \caption{\textbf{Cumulative exposure and update schedule (RQ3).}
   \textbf{(a)} replays the same $P^3$ probes from clean executors at successive
   snapshots of the standard episode. \textbf{(b)} reorders the complete
