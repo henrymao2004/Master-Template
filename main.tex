@@ -519,184 +519,29 @@ the agent-framework comparison. For URR, N/A means that the frozen
 then undefined rather than zero. Elsewhere, N/A marks a populated setting with
 no skill artifact. A dash marks a condition with fewer than 25 completed
 episodes or an unsupported method--agent pairing.
-The safety--utility and artifact--retrieval--carryover relationships are
-visualized in Figure~\ref{fig:risk-propagation}.}
+The nine columns expose the safety--utility and
+artifact--retrieval--carryover relationships directly.}
 \label{tab:misevolution-main}
 \end{table*}
 
 \paragraph{Capability gains can coincide with higher malicious success.}
-Higher benign utility frequently appears alongside higher malicious ASR in
-Table~\ref{tab:misevolution-main}. On Claude Code, EvoSkill reports BU/M-ASR
-of 71.11/62.22, compared with 49.78/56.00 under no evolution. AutoSkill and
-SkillsVote retain BU of 65.33 and 62.67 while reaching M-ASR of 59.11 and
-56.44. The completed conditions therefore show that capability retention and
-malicious success can increase together.
+On Claude Code, EvoSkill reaches BU/M-ASR 71.11/62.22, versus 49.78/56.00
+without evolution; AutoSkill and SkillsVote retain BU 65.33/62.67 while
+reaching M-ASR 59.11/56.44. Evolution can therefore preserve or improve benign
+utility while maintaining higher malicious success.
 
 \paragraph{Two settings exhibit the full observed misevolution signature.}
 AutoSkill and SkillsVote on Claude Code reach B-ASR 8.44/7.11 and fresh-session
-C-ASR 16.0/18.7 while retaining C-Util 64.0/65.3. Across these settings, the benchmark observes an evolved unsafe artifact,
-later benign contamination, and harmful behavior after the executor is reset
-and retrieval is rebuilt solely from the frozen \texttt{SKILL.md}. Carryover is therefore
-compatible with retained task competence rather than being explained by a
-generally broken agent.
+C-ASR 16.0/18.7 while retaining C-Util 64.0/65.3. Their nontrivial artifact
+scores, benign contamination, and harm after \texttt{SKILL.md}-only reload span
+the complete observed lifecycle from unsafe authoring to fresh-session action.
 
-\paragraph{Artifact risk is broader than realized carryover harm.}
-The remaining completed evolution setting separates earlier stages of the
-lifecycle from harmful execution. EvoSkill on Claude Code produces an unsafe
-retrieval rate of 81.0 while C-ASR remains zero. Unsafe skill content can therefore be authored and
-retrieved without producing an observed harmful action in the persistence
-probe. Runtime policy, tool mediation, and task context remain gates between a
-persistent unsafe rule and realized harm.
-
-\paragraph{Safety--utility frontier.}
-The high-utility, high-C-ASR region is the central misevolution regime:
-AutoSkill and SkillsVote preserve useful procedures while also
-retaining an unsafe shortcut. Capability improvement alone is therefore not a
-reliable safety signal, while artifact risk alone does not establish that the
-shortcut will be executed. The nine metrics locate both properties without
-collapsing them into a single score.
-
-\subsection{RQ2: How do artifact and retrieval risk relate to later harm?}
-\label{sec:rq2}
-
-RQ2 compares observable stages of Equation~\ref{eq:sequence}.
-Figure~\ref{fig:risk-propagation}(b) pairs unsafe retrieval with carryover ASR
-for every configuration, making the retrieval-to-execution gap visible on one
-percentage scale. Figure~\ref{fig:risk-propagation}(c) then locates the settings
-where contamination during benign learning and harmful execution in the fresh
-carryover session co-occur among completed conditions. Panel (a) connects this propagation analysis back
-to RQ1's safety--utility association.
-
-\begin{figure*}[t]
-\centering
-\resizebox{\textwidth}{!}{%
-\begin{tikzpicture}[
-  x=1cm,y=1cm,
-  tick/.style={font=\scriptsize\bfseries\boldmath, text=black!65},
-  axislabel/.style={font=\small\bfseries\boldmath, text=black!85},
-  paneltitle/.style={font=\small\bfseries\boldmath, text=black!85},
-  note/.style={font=\scriptsize\bfseries\boldmath, align=left, text=black!75},
-  cc/.style={circle, fill=blue!65!black, draw=white, line width=.4pt,
-    minimum size=5.5pt, inner sep=0pt},
-  codex/.style={circle, fill=orange!85!black, draw=white, line width=.4pt,
-    minimum size=5.5pt, inner sep=0pt},
-  hermes/.style={circle, fill=red!70!black, draw=white, line width=.4pt,
-    minimum size=5.5pt, inner sep=0pt},
-  openclaw/.style={circle, fill=green!55!black, draw=white, line width=.4pt,
-    minimum size=5.5pt, inner sep=0pt},
-  basecc/.style={circle, fill=white, draw=blue!65!black, line width=.8pt,
-    minimum size=5.5pt, inner sep=0pt},
-  basecodex/.style={circle, fill=white, draw=orange!85!black, line width=.8pt,
-    minimum size=5.5pt, inner sep=0pt},
-  basehermes/.style={circle, fill=white, draw=red!70!black, line width=.8pt,
-    minimum size=5.5pt, inner sep=0pt},
-  baseopenclaw/.style={circle, fill=white, draw=green!55!black, line width=.8pt,
-    minimum size=5.5pt, inner sep=0pt},
-  urr/.style={rectangle, fill=blue!55, draw=white, line width=.35pt,
-    minimum size=5pt, inner sep=0pt},
-  casr/.style={circle, fill=black!75, draw=white, line width=.35pt,
-    minimum size=5pt, inner sep=0pt}
-]
-% Panel (a): BU in [10,80], M-ASR in [40,75].
-\begin{scope}[shift={(0,0)}]
-  \draw[black!70, line width=.6pt] (0,0) rectangle (4.80,4.70);
-  \foreach \x/\lab in {.69/20,2.06/40,3.43/60,4.80/80}
-    {\draw[black!45] (\x,0) -- (\x,-.08) node[tick,below] {\lab};}
-  \foreach \y/\lab in {0/40,1.31/50,2.63/60,3.94/70}
-    {\draw[black!45] (0,\y) -- (-.08,\y) node[tick,left] {\lab};}
-  \node[paneltitle, anchor=west] at (0,5.02) {(a) Utility and malicious success};
-  \node[axislabel] at (2.45,-.55) {Benign Utility (\%)};
-  \node[axislabel, rotate=90] at (-.62,2.35) {Malicious ASR (\%)};
-
-  \node[basecc] at (2.73,2.10) {};
-  \node[cc] at (4.19,2.92) {};
-  \node[cc] at (3.79,2.51) {};
-  \node[cc] at (3.61,2.16) {};
-  \node[baseopenclaw] at (1.87,.53) {};
-  \draw[black!40] (4.19,2.92) -- (3.90,3.25)
-    node[note,anchor=east] {EvoSkill};
-\end{scope}
-
-% Panel (b): paired URR and C-ASR percentages.
-\begin{scope}[shift={(6.15,0)}]
-  \draw[black!70, line width=.6pt] (0,0) rectangle (4.70,4.70);
-  \foreach \x/\lab in {0/0,1.57/30,3.13/60,4.70/90}
-    {\draw[black!45] (\x,0) -- (\x,-.08) node[tick,below] {\lab};}
-  \node[paneltitle, anchor=west] at (-1.15,5.02) {(b) Retrieval-to-execution gap};
-  \node[axislabel] at (2.38,-.55) {Rate (\%)};
-
-  \foreach \lab/\y/\u/\c in {
-    CC-Evo/3.84/4.23/0,
-    CC-Auto/2.88/2.76/.84,
-    CC-Vote/1.92/2.90/.98}
-  {
-    \node[tick,anchor=east] at (-.13,\y) {\lab};
-    \draw[black!28, line width=1pt] (\c,\y) -- (\u,\y);
-    \node[casr] at (\c,\y) {};
-    \node[urr] at (\u,\y) {};
-  }
-  \node[urr] at (.35,-1.02) {};
-  \node[tick,anchor=west] at (.51,-1.02) {URR};
-  \node[casr] at (1.32,-1.02) {};
-  \node[tick,anchor=west] at (1.48,-1.02) {C-ASR};
-\end{scope}
-
-% Panel (c): B-ASR in [0,18], C-ASR in [0,35], marker area tracks CU.
-\begin{scope}[shift={(12.25,0)}]
-  \draw[black!70, line width=.6pt] (0,0) rectangle (4.40,4.70);
-  \foreach \x/\lab in {0/0,1.47/6,2.93/12,4.40/18}
-    {\draw[black!45] (\x,0) -- (\x,-.08) node[tick,below] {\lab};}
-  \foreach \y/\lab in {0/0,1.31/10,2.63/20,3.94/30}
-    {\draw[black!45] (0,\y) -- (-.08,\y) node[tick,left] {\lab};}
-  \node[paneltitle, anchor=west] at (0,5.02) {(c) Full misevolution signature};
-  \node[axislabel] at (2.25,-.55) {Benign ASR / Contamination (\%)};
-  \node[axislabel, rotate=90] at (-.62,2.35) {Carryover ASR (\%)};
-
-  \node[cc, minimum size=6.5pt] at (.10,0) {};
-  \node[cc, minimum size=8.5pt] at (2.05,2.10) {};
-  \node[cc, minimum size=8.7pt] at (1.74,2.46) {};
-  \draw[black!40] (1.74,2.46) -- (1.40,2.80)
-    node[note,anchor=east] {SkillsVote};
-  \draw[black!40] (2.05,2.10) -- (2.35,1.78)
-    node[note,anchor=west] {AutoSkill};
-\end{scope}
-
-% Shared framework legend; hollow markers denote No Evolution in panel (a).
-\node[cc] at (3.35,-1.28) {};
-\node[tick,anchor=west] at (3.50,-1.28) {Claude Code};
-\node[openclaw] at (5.20,-1.28) {};
-\node[tick,anchor=west] at (5.35,-1.28) {OpenClaw};
-\node[basecc] at (6.75,-1.28) {};
-\node[tick,anchor=west] at (6.90,-1.28) {No Evolution};
-\end{tikzpicture}%
-}
-\caption{\textbf{Three diagnostic views of skill misevolution (RQ1--RQ2).}
-Each point or row is a completed 25-episode agent--method configuration from
-Table~\ref{tab:misevolution-main}. Panel (a) shows that higher benign utility
-can coexist with higher malicious ASR; hollow markers denote No Evolution.
-Panel (b) pairs unsafe retrieval and carryover ASR on the same scale, exposing
-the gap between retrieving and executing an unsafe skill. Panel (c) locates
-online benign contamination and fresh-session carryover harm; marker area
-scales with the mean Content Unsafety score. AutoSkill and SkillsVote form the
-completed full misevolution cases.}
-\label{fig:risk-propagation}
-\end{figure*}
-
-\paragraph{Artifact risk is broader than behavioral harm.}
-The aggregate results already expose an artifact--behavior gap. Every completed
-evolution setting produces nontrivial artifact scores, whereas clear elevated
-carryover ASR is concentrated in AutoSkill and SkillsVote.
-EvoSkill further shows that even observed unsafe retrieval need not
-be followed by harm. The benchmark separates latent artifact risk, retrieved
-risk, and realized carryover at the episode level. This is a
-gated lifecycle: the observed progression can stop because no unsafe skill is
-exported, the skill is not retrieved, or the executor declines to act on it.
-
-\paragraph{Worked temporal trace.}
-Show one compact case from source exposure to authored skill diff, later
-retrieval log, unsafe tool action, judge state, and fresh-session reproduction.
-The example should expose the exact over-generalized clause and the safety check
-that evolution removed or failed to encode.
+\paragraph{Artifact and retrieval risk do not imply later harm.}
+EvoSkill produces unsafe artifacts and URR 81.0, yet its C-ASR remains zero.
+By contrast, AutoSkill and SkillsVote progress from nontrivial artifact scores
+and retrieval to observed carryover harm. The same table therefore separates
+latent artifact risk, retrieved risk, and realized execution: runtime policy,
+tool mediation, and task context remain gates after an unsafe skill is stored.
 
 \subsection{RQ3: How do cumulative exposure and its update schedule shape misevolution?}
 \label{sec:rq3}
