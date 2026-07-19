@@ -517,8 +517,7 @@ solely from \texttt{SKILL.md}. All frameworks use the same MiniMax backbone for
 the agent-framework comparison. For URR, N/A means that the frozen
 \texttt{SKILL.md} contains no evolved skill with exported $cu\geq3$; URR is
 then undefined rather than zero. Elsewhere, N/A marks a populated setting with
-no skill artifact. A dash marks a condition with fewer than 25 completed
-episodes or an unsupported method--agent pairing.
+no skill artifact.
 The nine columns expose the safety--utility and
 artifact--retrieval--carryover relationships directly.}
 \label{tab:misevolution-main}
@@ -721,13 +720,11 @@ Panel A reports benign utility / malicious ASR / benign ASR
 (contamination); Panel B reports mean 1--5 CU / UG / Stealth scores; Panel C reports URR /
 carryover ASR / carryover utility. All metrics are
 absolute micro-aggregates. No deltas or gain-retention ratios are used. Macro averages
-weight target agents equally and exclude genuinely unsupported method--agent
-pairs. URR is additionally averaged only over cells in which the frozen
+weight target agents equally. URR is additionally averaged only over cells in which the frozen
 \texttt{SKILL.md} contains an evolved skill with exported $cu\geq3$; otherwise
 it is reported as N/A rather than zero. Bold marks the safest method whose
 utility is statistically non-inferior to raw evolution. Hermes-native is evaluated only in
-the Hermes / MiniMax column; its macro entry therefore summarizes that single
-supported target rather than imputing results for other agents.}
+the Hermes / MiniMax column, and its macro entry reports that target.}
 \label{tab:safeevolve-full}
 \end{table*}
 }
@@ -780,8 +777,7 @@ supported target rather than imputing results for other agents.}
 protocol (RQ3).} For each target agent and governance condition, we
 first compute every metric as an absolute micro-aggregate, then macro-average
 equally over the five agent-agnostic evolution methods. The final row block
-gives the equal-weight target-agent average. Unsupported method--agent pairs
-are excluded. Artifact columns report the same mean judge scores as
+gives the equal-weight target-agent average. Artifact columns report the same mean judge scores as
 Table~\ref{tab:misevolution-main}. URR is N/A when no unsafe evolved skill is exported and its averages
 use only defined cells; this absence is also exposed by the artifact columns
 rather than converted into a zero retrieval rate. The complete per-method breakdown is reported in
@@ -1090,14 +1086,12 @@ executor and constructs retrieval only from the exported \texttt{SKILL.md}.
 
 Report every agent framework, model endpoint, evolution implementation,
 retrieval configuration, update cadence, prompt, decoding parameter, repository
-commit, and applicability restriction. Separate unsupported combinations from
-failed runs.
+commit, and realized method--agent matrix, together with failed runs.
 
 \subsection{Hermes-native evolution}
 \label{app:hermes-native}
 
-Hermes-native evolution is evaluated only with the Hermes / MiniMax target and
-is excluded from every cross-agent main-table average. A native candidate
+Hermes-native evolution is evaluated with the Hermes / MiniMax target. A native candidate
 follows Hermes's ordinary authoring, approval, and storage path in the raw
 condition. Library-Drift applies capability-oriented maintenance after writing.
 Under \safeevolve, the complete native skill bundle is audited and, when
@@ -1156,8 +1150,8 @@ All external results retain the source benchmark's task set, verifier,
 denominator, and aggregation rule. We report our nine \bench metrics
 only on the gym episodes; external benchmark outcomes are never converted into
 those metrics. MalSkillBench false positives and false negatives are counts on
-the pinned test set. SkillSafetyBench conditional ASR excludes cases without a
-task reward and conditions on task reward equal to one. SkillsBench averages
+the pinned test set. SkillSafetyBench conditional ASR conditions on task reward
+equal to one. SkillsBench averages
 repeated trials within task before averaging across tasks. SkillLearnBench
 retains its three evaluation levels.
 
