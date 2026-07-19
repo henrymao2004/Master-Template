@@ -251,16 +251,16 @@ successful trajectory, not only storage of attacker-supplied text.
 Agent safety benchmarks supply tasks, environments, attack inputs, and outcome
 judges that a learning environment can execute. AgentHazard provides 2,653
 computer-use instances, ten risk categories, multi-step attack strategies, and
-a harmful trajectory judge~\citep{feng2026agenthazard}. These assets define the
-harmful task contract in our instantiation. The native benchmark evaluates
-independent attacked tasks, whereas skill misevolution requires a controlled
-learning history, concept-related benign tasks, attack-free persistence probes,
-and utility and artifact measurements. We therefore retain AgentHazard's
-executable substrate, risk semantics, reset procedure, and harmful judge while
-constructing the missing longitudinal protocol from vulnerability concepts
-discovered using AHA~\citep{mao2026aha}. \bench freezes this protocol, and \gym
-supplies versioned skill state, lifecycle instrumentation, and cross-task
-execution.
+a harmful trajectory judge~\citep{feng2026agenthazard}. AgentHazard is not a
+skill-misevolution benchmark and provides no benign task branch. Its direct
+prompt-injection tasks nevertheless produce executable harmful trajectories
+whose procedures can be exposed to a skill-evolution method and distilled into
+reusable artifacts. We therefore use AgentHazard as the task-contract source,
+retaining its executable substrate, risk semantics, reset procedure, and
+harmful judge. From vulnerability concepts discovered using AHA~\citep{mao2026aha},
+we construct the corresponding benign tasks, persistence probes, longitudinal
+schedule, and lifecycle measurements. \bench freezes this protocol, and \gym
+supplies versioned skill state, instrumentation, and cross-task execution.
 
 \paragraph{Governance of evolving libraries.}
 Contrast \safeevolve with capability-oriented library maintenance and drift
@@ -354,10 +354,13 @@ contract separates within-episode learning from environmental carryover.
 \subsection{SkillMisevo-Bench instantiation and episode protocol}
 
 \bench instantiates the gym as a fixed evaluation of skill misevolution. It uses
-AgentHazard~\citep{feng2026agenthazard} as a task-contract source, retaining its
-harmful objectives, ten risk categories, sandbox, reset procedure, and harmful
-trajectory judge. AHA~\citep{mao2026aha} discovers executable vulnerability
-concepts offline by committing falsifiers and promoting replicated mechanisms.
+AgentHazard~\citep{feng2026agenthazard} as a task-contract source. Its direct
+prompt-injection tasks generate harmful agent trajectories suitable for skill
+extraction, but its native protocol contains neither skill evolution nor benign
+tasks. We retain its harmful objectives, ten risk categories, sandbox, reset
+procedure, and harmful trajectory judge. AHA~\citep{mao2026aha} discovers
+executable vulnerability concepts offline by committing falsifiers and
+promoting replicated mechanisms.
 Our constructor independently instantiates each selected mechanism as malicious
 $M$ tasks, benign $B$ tasks on related operational surfaces, and held-out $P$
 probes. $M$ realizes the unsafe route, $B$ exercises benign work in the same
@@ -1271,8 +1274,11 @@ skills are created, when they are retrieved, and what later behavior follows.
 AgentHazard contributes the harmful objective taxonomy, executable
 computer-use environment, reset logic, and harmful trajectory judge. We pin its
 version and preserve the category and harmful-goal semantics in every derived
-task. Its published prompts are inputs to vulnerability discovery rather than
-the final \bench episode dataset.
+task. Its direct prompt-injection tasks supply executable harmful trajectories
+that a skill-evolution method can abstract into reusable procedures. Because
+the native benchmark has neither skill evolution nor benign tasks, its
+published prompts enter vulnerability discovery as source material rather than
+serving as the final \bench episode dataset.
 
 \paragraph{External autoresearch concept discovery.}
 For each benchmark task family, we use AHA~\citep{mao2026aha} as an external
