@@ -252,11 +252,15 @@ Agent safety benchmarks supply tasks, environments, attack inputs, and outcome
 judges that a learning environment can execute. AgentHazard provides 2,653
 computer-use instances, ten risk categories, multi-step attack strategies, and
 a harmful trajectory judge~\citep{feng2026agenthazard}. These assets define the
-harmful task contract in our instantiation; they do not provide benign tasks,
-persistence probes, or a benign utility metric. We construct those components
-from vulnerability concepts discovered using AHA~\citep{mao2026aha}; \bench
-freezes them into a longitudinal evaluation, and \gym supplies persistent skill
-state, lifecycle instrumentation, and cross-task execution.
+harmful task contract in our instantiation. The native benchmark evaluates
+independent attacked tasks, whereas skill misevolution requires a controlled
+learning history, concept-related benign tasks, attack-free persistence probes,
+and utility and artifact measurements. We therefore retain AgentHazard's
+executable substrate, risk semantics, reset procedure, and harmful judge while
+constructing the missing longitudinal protocol from vulnerability concepts
+discovered using AHA~\citep{mao2026aha}. \bench freezes this protocol, and \gym
+supplies versioned skill state, lifecycle instrumentation, and cross-task
+execution.
 
 \paragraph{Governance of evolving libraries.}
 Contrast \safeevolve with capability-oriented library maintenance and drift
@@ -328,15 +332,24 @@ and judge evidence. It therefore supports new task domains, agents, evolution
 methods, and governance policies; each instantiated study supplies its task
 semantics, update schedule, and metrics.
 
-Conversation, workspace, process, and tool state reset between tasks, leaving
-the designated library snapshot as the only cross-task state. The gym also
-provides a strict clean-reload operation: it exports a frozen library to
-\texttt{SKILL.md}, terminates the executor, and rebuilds the skill index in a
-clean executor solely from that file. Conversation, workspace files, tool
+Isolation operates at task and episode boundaries. Each task runs in a fresh
+disposable sandbox with a new conversation, workspace, process namespace, and
+tool session. Within an episode, the current episode-scoped skill store is the
+state deliberately carried forward and injected into the next task. Each
+$(\text{episode},\text{method},\text{agent})$ cell starts in a fresh process and
+run directory with the method's fixed initial store; no authored skill,
+workspace artifact, cache, or native memory passes between episodes or cells.
+
+The gym also provides a strict clean-reload operation: it exports the final
+library to \texttt{SKILL.md}, terminates the executor, and rebuilds retrieval in
+a clean executor solely from that file. Conversation, workspace files, tool
 sessions, retrieval caches, native memory, and other evolved files do not cross
-this boundary. This versioning, isolation, and replay contract is the
-experimental substrate; a benchmark decides when to invoke it and which
-outcomes to score.
+this boundary. Hermes-native uses one explicit online-stage exception: its
+episode-scoped \texttt{HERMES\_HOME} persists across disposable task sandboxes
+because Hermes's native skill, memory, and session evolution is the method under
+test. It is reset between episodes, and the final $P$ stage still applies the
+same \texttt{SKILL.md}-only clean reload. This versioning, isolation, and replay
+contract separates within-episode learning from environmental carryover.
 
 \subsection{SkillMisevo-Bench instantiation and episode protocol}
 
@@ -1303,6 +1316,20 @@ deterministic final export to \texttt{SKILL.md}. The clean-executor check verifi
 that the $P$ retrieval index reads this export and no other learning-stage
 state, allowing every result to be replayed from the same constructed task and
 skill snapshot.
+
+\paragraph{Operational isolation.}
+The harness launches every $(\text{episode},\text{method},\text{agent})$ cell as
+a separate process with an episode-scoped output directory and newly initialized
+method store. Tasks execute serially inside the cell, but each task receives a
+new disposable container and session. Before the task starts, the adapter writes
+only the current store into the agent's supported skill channel; after the task,
+the container is discarded and evolution updates the host-side episode store
+from the recorded trajectory. This preserves skill evolution across task
+boundaries while removing filesystem, process, tool, and conversation carryover.
+Hermes-native instead bind-mounts an episode-scoped \texttt{HERMES\_HOME} so its
+native authoring pipeline can operate; that directory is never shared with
+another episode. For every method, the final persistence probe starts a clean
+executor and constructs retrieval only from the exported \texttt{SKILL.md}.
 
 \section{Agent and Method Configurations}
 \label{app:configurations}
