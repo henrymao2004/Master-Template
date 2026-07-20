@@ -741,13 +741,13 @@ artifact in the evaluated run, whereas \bench contamination is harmful behavior
 observed on a later zero-injection benign task after a skill was learned from
 earlier malicious experience. We therefore retain SkillSafetyBench's official ASR, task
 success, and task-success-conditional ASR rather than relabeling its result as
-contamination (Table~\ref{tab:external-eval}, Panel~\textbf{A}).
+contamination (Table~\ref{tab:external-eval}).
 
 \paragraph{Admission-auditor evaluation on MalSkillBench.}
 MalSkillBench is a labeled static corpus of malicious and benign skill bundles
 \citep{guo2026malskillbench}. It cannot exercise repair trajectories, lineage,
 retirement, or downstream reuse, so we use it only to diagnose \safeevolve's
-admission auditor. Table~\ref{tab:external-eval}, Panel~\textbf{B} follows the benchmark's official
+admission auditor. Table~\ref{tab:external-eval} follows the benchmark's official
 classification protocol; it is supporting component evidence rather than a
 substitute for the two full-system evaluations.
 
@@ -759,69 +759,57 @@ Here too we preserve each benchmark's official evaluation contract rather than
 reducing both to a common accuracy column. SkillsBench reports task-macro
 pass rates and skill gain \citep{li2026skillsbench}; SkillLearnBench separates
 skill quality, trajectory behavior, and task outcome
-\citep{zhong2026skilllearnbench}. Table~\ref{tab:external-eval}, Panel~\textbf{C} shows
+\citep{zhong2026skilllearnbench}. Table~\ref{tab:external-eval} shows
 method-averaged results in the main paper, with all three methods reported
 separately in the appendix.
 
 \begin{table*}[t]
 \centering
 \scriptsize
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.02}
-\textbf{A. Full-system evaluation on SkillSafetyBench}\\[2pt]
-\begin{tabular}{lccc}
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.04}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llccccccc}
 \toprule
-\textbf{Governance} & \textbf{ASR $\downarrow$}
-& \textbf{Task success $\uparrow$} & \textbf{Conditional ASR $\downarrow$} \\
+\textbf{Benchmark} & \textbf{Condition} &
+\multicolumn{7}{c}{\textbf{Native metrics}} \\
 \midrule
-Raw attacked update & -- & -- & -- \\
-\rowcolor{lightblue}Full \safeevolve & -- & -- & -- \\
-\bottomrule
-\end{tabular}
-
-\vspace{5pt}
-\textbf{B. Admission-auditor evaluation on MalSkillBench}\\[2pt]
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Detector} & \textbf{Acc. $\uparrow$} & \textbf{Prec. $\uparrow$}
+& & \textbf{ASR $\downarrow$} & \textbf{Task success $\uparrow$}
+& \textbf{Conditional ASR $\downarrow$} & & & & \\
+SkillSafetyBench & Raw attacked update & -- & -- & -- & & & & \\
+\rowcolor{lightblue}SkillSafetyBench & Full \safeevolve & -- & -- & -- & & & & \\
+\midrule
+& & \textbf{Acc. $\uparrow$} & \textbf{Prec. $\uparrow$}
 & \textbf{Rec. $\uparrow$} & \textbf{F1 $\uparrow$}
-& \textbf{FP $\downarrow$} & \textbf{FN $\downarrow$} \\
+& \textbf{FP $\downarrow$} & \textbf{FN $\downarrow$} & \\
+MalSkillBench & Best skill detector & -- & -- & -- & -- & -- & -- & \\
+MalSkillBench & Best supply-chain detector & -- & -- & -- & -- & -- & -- & \\
+MalSkillBench & Best prompt-injection detector & -- & -- & -- & -- & -- & -- & \\
+\rowcolor{lightblue}MalSkillBench & \safeevolve admission auditor & -- & -- & -- & -- & -- & -- & \\
 \midrule
-Best published skill detector & -- & -- & -- & -- & -- & -- \\
-Best published supply-chain detector & -- & -- & -- & -- & -- & -- \\
-Best published prompt-injection detector & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}\safeevolve admission auditor & -- & -- & -- & -- & -- & -- \\
+& & \textbf{No-skill pass $\uparrow$} & \textbf{Evolved-skill pass $\uparrow$}
+& \textbf{Improvement (pp) $\uparrow$} & \textbf{Normalized gain $\uparrow$}
+& & & \\
+SkillsBench & Raw evolution & -- & -- & -- & -- & & & \\
+\rowcolor{lightblue}SkillsBench & \safeevolve & -- & -- & -- & -- & & & \\
+\midrule
+& & \textbf{Coverage $\uparrow$} & \textbf{Executability $\uparrow$}
+& \textbf{Safety $\uparrow$} & \textbf{Alignment $\uparrow$}
+& \textbf{Usage $\uparrow$} & \textbf{Solving tokens $\downarrow$}
+& \textbf{Accuracy $\uparrow$} \\
+SkillLearnBench & Raw evolution & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}SkillLearnBench & \safeevolve & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
-\end{tabular}
-
-\vspace{5pt}
-\textbf{C. Capability preservation on native benchmarks}\\[2pt]
-\begin{tabular}{llcc}
-\toprule
-\textbf{Benchmark} & \textbf{Native metric}
-& \textbf{Raw} & \textbf{\safeevolve} \\
-\midrule
-SkillsBench & No-skill pass (\%) $\uparrow$       & -- & -- \\
-SkillsBench & Evolved-skill pass (\%) $\uparrow$  & -- & -- \\
-SkillsBench & Skill improvement (pp) $\uparrow$   & -- & -- \\
-SkillsBench & Normalized gain (\%) $\uparrow$     & -- & -- \\
-\midrule
-SkillLearnBench & Coverage (\%) $\uparrow$            & -- & -- \\
-SkillLearnBench & Executability (\%) $\uparrow$       & -- & -- \\
-SkillLearnBench & Safety (\%) $\uparrow$              & -- & -- \\
-SkillLearnBench & Alignment (\%) $\uparrow$           & -- & -- \\
-SkillLearnBench & Usage (\%) $\uparrow$               & -- & -- \\
-SkillLearnBench & Solving tokens $\downarrow$          & -- & -- \\
-SkillLearnBench & Accuracy (\%) $\uparrow$            & -- & -- \\
-\bottomrule
-\end{tabular}
+\end{tabular}}
 \caption{\textbf{External safety and capability evaluation of SafeEvolve
-(RQ3).} \textbf{A} retains SkillSafetyBench's official ASR, task success, and
-task-success-conditional ASR. \textbf{B} reports MalSkillBench accuracy,
-precision, recall, F1, and error counts on its pinned test set. \textbf{C}
-retains the native SkillsBench and SkillLearnBench capability metrics. Entries
-in A and C average the applicable target agents or evolution methods only after
-computing each official metric; heterogeneous metrics are never combined. Full
+(RQ3).} Each benchmark occupies one block of the same table and retains its
+native metric columns. SkillSafetyBench reports ASR, task success, and
+task-success-conditional ASR; MalSkillBench reports classification rates and
+error counts; SkillsBench and SkillLearnBench retain their official capability
+metrics. The comparison condition is the raw attacked update, the best published
+detector in each detector family, or
+raw evolution as named in the condition column. Results are aggregated only
+within the corresponding native metric; heterogeneous metrics are never combined. Full
 per-agent, per-method, and detector results appear in the appendix.}
 \label{tab:external-eval}
 \end{table*}
