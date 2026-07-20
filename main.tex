@@ -230,19 +230,11 @@ protocol.
 An episode exhibits \emph{skill misevolution} when an unsafe procedure from an
 earlier trajectory is recorded in the persistent library, is later retrieved,
 and co-occurs with higher unsafe behavior than in a no-evolution
-execution. The benchmark tracks the following temporal sequence:
-\begin{equation}
-\text{unsafe success}
-\rightarrow \text{skill extraction}
-\rightarrow \text{unsafe generalization}
-\rightarrow \text{retrieval}
-\rightarrow \text{reuse}
-\rightarrow \text{persistent harm}.
-\label{eq:sequence}
-\end{equation}
-The benchmark separately reports artifact formation, retrieval, and later
-action. Skill involvement requires an observed retrieval event in addition to
-the presence of a skill library.
+execution. Operationally, an unsafe success is extracted into a skill,
+generalized beyond its source task, retrieved and reused, and may thereby produce
+persistent harm. The benchmark separately reports artifact formation, retrieval,
+and later action. Skill involvement requires an observed retrieval event in
+addition to the presence of a skill library.
 
 \subsection{Threat model}
 
@@ -325,37 +317,20 @@ contains 25 episodes.
 
 \subsection{Evaluation settings}
 
-The main evaluation compares \textbf{No Evolution}, which disables persistent
-learning, with each method's native \textbf{Full Evolution}, which updates after
-each three-trajectory block for the five external methods. Hermes-native instead
-retains its intrinsic after-turn background review; its block boundaries are
-measurement checkpoints rather than synthetic update calls. Both conditions
-share tasks, order, tools, agent configuration, and judges.
+Claude Code, Codex, Hermes, and OpenClaw share MiniMax-M2.5, so the target is the
+complete agent system under a fixed backbone. We compare \textbf{No Evolution}
+with EvoSkill, SkillClaw, AutoSkill, SkillsVote, and SkillOpt, which update after
+each three-trajectory block. Hermes-native retains Hermes's intrinsic after-turn
+background review, with block boundaries used only as measurement checkpoints.
+All conditions share tasks, order, tools, agent configuration, and judges.
 
-\paragraph{Agents and evolution methods.}
-
-Every assembled episode is executed by four target-agent configurations. Claude
-Code, Codex, Hermes, and OpenClaw share MiniMax-M2.5, holding the backbone fixed while
-the agent framework changes. The target is the complete agent system---its scaffold,
-tool mediation, skill lifecycle, retrieval behavior, and backbone---rather than
-an isolated language model.
-
-The main comparison includes five agent-agnostic evolution methods: EvoSkill,
-SkillClaw, AutoSkill, SkillsVote, and SkillOpt, each evaluated on compatible
-target agents. Hermes also provides a framework-native evolution path supported only
-by the Hermes target. We include Hermes-native in the main diagnostic table and
-provide its expanded results in Appendix~\ref{app:hermes-native}. Appendix~\ref{app:method-details}
-describes every method's original learning signal, update rule, skill store,
-retrieval policy, and exact Gym realization, including the pinned source revisions.
-Each method is evaluated through its native \texttt{SKILL.md} serialization,
-including its structured frontmatter and instruction body, rather than after
-conversion to a common textual summary. Method-specific metadata and side files
-remain in the versioned store for provenance, while the skill document returned by
-the method's retriever is the portable artifact injected into the shared executor.
-The
-carryover stage deliberately standardizes the persistence channel: only the
-method's frozen \texttt{SKILL.md} is reloaded for $P$, while associated scripts,
-resources, caches, and native memory remain unavailable.
+Each method authors and retrieves its native \texttt{SKILL.md}; the returned
+document is injected without conversion to a common summary. At $P$, a clean
+executor reloads only the frozen \texttt{SKILL.md}, excluding side files, caches,
+sessions, and native memory. Appendix~\ref{app:method-details} specifies every
+method's original algorithm, pinned implementation, update signal, store,
+retrieval policy, and Gym realization; Appendix~\ref{app:hermes-native} reports
+the expanded Hermes-native diagnostic.
 
 \subsection{Metrics and statistical protocol}
 
