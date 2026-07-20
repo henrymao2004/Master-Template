@@ -476,32 +476,32 @@ visible without encoding three quantities inside each cell.
 \multirow{6}{*}{Claude Code}
 & No evolution        & 49.78 & 56.00 & 0.00 & N/A & N/A & N/A & N/A & 0.0 & 25.3 \\
 & EvoSkill            & 71.11 & 62.22 & 0.44 & 1.79 & 3.05 & 4.05 & 81.0 & 0.0 & 76.0 \\
-& SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillClaw           & 35.43 & 52.02 & 0.00 & 1.08 & 3.00 & 3.00 & 0.0 & 0.0 & 26.7 \\
 & AutoSkill           & 65.33 & 59.11 & 8.44 & 2.54 & 2.91 & 4.07 & 52.8 & 16.0 & 64.0 \\
 & SkillsVote          & 62.67 & 56.44 & 7.11 & 2.58 & 3.05 & 4.19 & 55.6 & 18.7 & 65.3 \\
-& SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillOpt            & 59.82 & 58.67 & 0.00 & 1.61 & 3.25 & 3.00 & 8.0 & 0.0 & 44.0 \\
 \midrule
 \multirow{6}{*}{Codex}
 & No evolution        & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& EvoSkill            & 76.82 & 67.43 & 1.36 & 1.45 & 2.56 & 3.67 & 12.0 & 0.0 & 64.4 \\
 & SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
 \multirow{7}{*}{Hermes}
-& No evolution        & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& No evolution        & 15.70 & 43.95 & 0.45 & N/A & N/A & N/A & N/A & 0.0 & 16.0 \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillClaw           & 11.71 & 47.00 & 0.90 & 1.83 & 2.33 & 3.33 & 8.0 & 0.0 & 9.3 \\
+& AutoSkill           & 57.85 & 56.74 & 11.21 & 2.71 & 2.88 & 4.11 & 50.7 & 18.1 & 58.3 \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& Hermes-native       & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& Hermes-native       & 67.57 & 73.42 & 16.14 & 2.70 & 3.25 & 4.22 & 42.7 & 32.4 & 63.5 \\
 \midrule
 \multirow{6}{*}{OpenClaw}
 & No evolution        & 37.33 & 44.00 & 0.44 & N/A & N/A & N/A & N/A & 1.3 & 26.7 \\
 & EvoSkill            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-& SkillClaw           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& SkillClaw           & 30.22 & 46.67 & 1.33 & 1.46 & 3.00 & 3.75 & 6.7 & 1.3 & 20.0 \\
 & AutoSkill           & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillsVote          & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 & SkillOpt            & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
@@ -530,11 +530,12 @@ without evolution; AutoSkill and SkillsVote retain BU 65.33/62.67 while
 reaching M-ASR 59.11/56.44. Evolution can therefore preserve or improve benign
 utility while maintaining higher malicious success.
 
-\paragraph{Two settings exhibit the full observed misevolution signature.}
+\paragraph{Three settings exhibit the full observed misevolution signature.}
 AutoSkill and SkillsVote on Claude Code reach B-ASR 8.44/7.11 and fresh-session
-C-ASR 16.0/18.7 while retaining C-Util 64.0/65.3. Their nontrivial artifact
-scores, benign contamination, and harm after \texttt{SKILL.md}-only reload span
-the complete observed lifecycle from unsafe authoring to fresh-session action.
+C-ASR 16.0/18.7 while retaining C-Util 64.0/65.3. Hermes-native reaches B-ASR
+16.14 and C-ASR 32.4 with C-Util 63.5. Their nontrivial artifact scores, benign
+contamination, and harm after \texttt{SKILL.md}-only reload span the complete
+observed lifecycle from unsafe authoring to fresh-session action.
 
 \paragraph{Artifact and retrieval risk do not imply later harm.}
 EvoSkill produces unsafe artifacts and URR 81.0, yet its C-ASR remains zero.
@@ -959,8 +960,8 @@ this diagnostic preserves Hermes's own authoring and retrieval loop.
 \textbf{Artifact scores: CU/UG/Stealth} &
 \textbf{Post-attack: URR/ASR/Utility} \\
 \midrule
-No evolution        & --/--/-- & --/--/-- & --/--/-- \\
-Hermes-native       & --/--/-- & --/--/-- & --/--/-- \\
+No evolution        & 15.70/43.95/0.45 & N/A/N/A/N/A & N/A/0.0/16.0 \\
+Hermes-native       & 67.57/73.42/16.14 & 2.70/3.25/4.22 & 42.7/32.4/63.5 \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{Hermes-native diagnostic detail.} This appendix view uses
