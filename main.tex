@@ -166,36 +166,45 @@ Our contributions are:
 \section{Related Work}
 \label{sec:related-work}
 
-\paragraph{Self-improving agents and skill evolution.}
-Position this work against methods that extract, edit, select, vote over, or
-retrieve reusable skills from agent trajectories. Organize the literature by
-the persistent artifact each method produces and the success signal used to
-select it. The key gap is that these methods report capability improvement but
-do not measure safety patterns across an evolving skill history.
+\paragraph{Agent skill learning and evolution.}
+Agent skills have become a persistent adaptation layer that turns interaction
+traces into reusable procedures: online systems extract, maintain, recommend,
+and collectively refine skills across tasks, sessions, users, and agents
+\citep{yang2026autoskill,ma2026skillclaw,liu2026skillsvote,lin2026museautoskill}.
+A second line treats the skill artifact as an optimization object, using failure
+analysis, trace-conditioned edits, paired-trajectory audits, co-evolving
+verifiers, or held-out utility gates to select successive versions
+\citep{alzubi2026evoskill,zhang2026coevoskills,gao2026skillaudit,liu2026skillrevise,yang2026skillopt}.
+Other work learns skill-management policies, recursively co-evolves skill banks
+with agent policies, derives skills for adaptive coding curricula, compiles
+heterogeneous knowledge into executable contracts, or evolves typed relations
+for large-library retrieval
+\citep{li2026codeskill,xia2026skillrl,xiao2026socraticswe,pan2026anything2skill,bai2026skilldag}.
+SkillsBench, SkillLearnBench, and SWE-Skills-Bench measure task success, skill
+quality, transfer, and the marginal utility of skill injection
+\citep{li2026skillsbench,zhong2026skilllearnbench,han2026sweskillsbench}.
+Together these works establish how skills are created, improved, selected, and
+evaluated for capability. Our work adds the longitudinal safety axis: whether
+successful experience becomes an unsafe procedure that persists through later
+retrieval and execution.
 
-\paragraph{Safety of persistent agent memory.}
-Discuss memory poisoning, long-term memory evolution, retrieval attacks, and
-forgetting. Distinguish a skill from a stored observation: a skill is an
-executable or prescriptive procedure intended to generalize across tasks. The
-failure studied here is endogenous policy formation from the agent's own
-successful trajectory, not only storage of attacker-supplied text.
-
-\paragraph{Executable safety-task sources.}
-Agent safety benchmarks supply tasks, environments, attack inputs, and outcome
-judges that a learning environment can execute. AgentHazard provides 2,653
-computer-use instances, ten risk categories, multi-step attack strategies, and
-a harmful trajectory judge~\citep{feng2026agenthazard}. AgentHazard is not a
-skill-misevolution benchmark and provides no benign task branch. Its direct
-prompt-injection tasks nevertheless produce executable harmful trajectories
-whose procedures can be exposed to a skill-evolution method and distilled into
-reusable artifacts. We therefore use AgentHazard as the task-contract source,
-retaining its executable substrate, risk semantics, reset procedure, and
-harmful judge. AHA~\citep{mao2026aha} discovers concepts by testing candidate
-malicious--benign pairs through the skill-update boundary. Our constructor then
-instantiates retained concepts as fresh task records and assembles the benign
-tasks, persistence probes, and longitudinal schedule. \bench freezes this
-protocol, and \gym supplies versioned skill state, instrumentation, and
-cross-task execution.
+\paragraph{Safety of self-evolving agents and agent skills.}
+Research on self-evolving agents identifies safety and capability drift across
+model, memory, tool, workflow, and experience updates, and develops longitudinal
+memory benchmarks and trust-aware evolution mechanisms
+\citep{shao2025misevolution,zhao2026experience,xie2026memevobench,cheng2026tame,yu2026forgetting,lin2026selfevolvingsafety}.
+Skill-security work studies a complementary threat model in which malicious or
+compromised skill files are supplied to an agent, measuring harmful execution,
+detection, and the safety--utility trade-off of filtering
+\citep{schmotz2026skillinject,jin2026skillsafetybench,guo2026malskillbench}.
+More broadly, agent-safety research evaluates unsafe tool use, direct and
+indirect prompt injection, risky code execution, harmful multi-step objectives,
+and defenses, and automates red-teaming in executable or emulated environments
+\citep{ruan2023toolemu,debenedetti2024agentdojo,andriushchenko2024agentharm,zhang2024asb,zhang2024agentsafetybench,guo2024redcode,vijayvargiya2025openagentsafety,feng2026agenthazard,chen2026decodingtrust,alpay2026agentsecbench,weng2026argus,shayoni2026netinjectbench,mao2026aha}.
+Our setting connects these lines: the unsafe skill is authored endogenously from
+the agent's own task experience, then becomes a prescriptive artifact whose
+authoring, retrieval, benign contamination, and clean-session carryover can be
+measured and governed as one lifecycle.
 
 \section{Skill Misevolution}
 \label{sec:problem}
