@@ -683,14 +683,13 @@ utility is statistically non-inferior to raw evolution.}
 \begin{table*}[t]
 \centering
 \caption{\small \textbf{SafeEvolve safety and utility under the same evaluation
-protocol (RQ3).} For each target agent and governance condition, we
-first compute every metric as an absolute micro-aggregate, then average
-equally over the three selected evolution methods. Artifact columns report the same mean judge scores as
-Table~\ref{tab:misevolution-main}. URR is N/A when no unsafe evolved skill is exported and its averages
-use only defined cells; this absence is also exposed by the artifact columns
-rather than converted into a zero retrieval rate. The complete per-method breakdown is reported in
-Appendix~Table~\ref{tab:safeevolve-full}.}
-\vspace{-6pt}
+protocol (RQ3).} Metrics are computed within each target agent and then averaged
+equally over the three selected evolution methods. URR averages only defined
+cells; the artifact columns distinguish absence of an unsafe exported skill
+from zero retrieval. Appendix~Table~\ref{tab:safeevolve-full} reports the
+complete per-method breakdown.}
+\label{tab:safeevolve-main}
+\vspace{3pt}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.1}
@@ -719,8 +718,6 @@ OpenClaw & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 OpenClaw & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
-\vspace{-6pt}
-\label{tab:safeevolve-main}
 \end{table*}
 
 \paragraph{Full-system evaluation on SkillSafetyBench.}
@@ -768,24 +765,18 @@ separately in the appendix.
 \begin{table*}[t]
 \centering
 \caption{\small \textbf{External safety and capability evaluation of SafeEvolve
-(RQ3).} Each benchmark occupies one block of the same table and retains its
-native metric columns. SkillSafetyBench reports ASR, task success, and
-task-success-conditional ASR; MalSkillBench reports classification rates and
-error counts; SkillsBench and SkillLearnBench retain their official capability
-metrics. The comparison condition is the raw attacked update, the best published
-detector in each detector family, or raw evolution as named in the condition
-column. Results are aggregated only within the corresponding native metric;
-heterogeneous metrics are never combined. Full per-agent, per-method, and
-detector results appear in the appendix.}
-\vspace{-6pt}
+(RQ3).} Each block retains the benchmark's official metrics and comparison
+condition. Results are aggregated only within the corresponding native metric;
+heterogeneous metrics are not combined. The appendix reports per-agent,
+per-method, and detector results.}
+\label{tab:external-eval}
+\vspace{3pt}
 \scriptsize
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.1}
 \resizebox{0.97\textwidth}{!}{%
 \begin{tabular}{l|ccccccc}
 \toprule
-\textbf{Condition} & \multicolumn{7}{|c}{\textbf{Benchmark-native metrics}} \\
-\midrule
 \multicolumn{8}{l}{\cellcolor{gray!10}\textit{SkillSafetyBench}} \\
 \textbf{Condition} & \textbf{ASR $\downarrow$} & \textbf{Task success $\uparrow$}
 & \textbf{Conditional ASR $\downarrow$} & \multicolumn{4}{c}{} \\
@@ -817,8 +808,6 @@ Raw evolution & -- & -- & -- & -- & -- & -- & -- \\
 \safeevolve & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
-\vspace{-6pt}
-\label{tab:external-eval}
 \end{table*}
 
 \paragraph{Component evaluation.}
