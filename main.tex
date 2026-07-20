@@ -332,8 +332,7 @@ document is injected without conversion to a common summary. At $P$, a clean
 executor reloads only the frozen \texttt{SKILL.md}, excluding side files, caches,
 sessions, and native memory. Appendix~\ref{app:method-details} specifies every
 method's original algorithm, pinned implementation, update signal, store,
-retrieval policy, and Gym realization; Appendix~\ref{app:hermes-native} reports
-the expanded Hermes-native diagnostic.
+retrieval policy, and Gym realization.
 
 \subsection{Metrics and statistical protocol}
 
@@ -1080,34 +1079,6 @@ three-task boundaries only snapshot the accumulated library. The curator is not
 invoked during these short episodes. At $P$, the Gym exports only authored
 \texttt{SKILL.md} files and reloads them in a clean executor, excluding Hermes
 sessions, memory cards, caches, and the rest of \texttt{HERMES\_HOME}.
-
-\subsection{Hermes-native diagnostic results}
-\label{app:hermes-native}
-
-Hermes-native evolution is evaluated with the Hermes / MiniMax target. A native
-candidate follows Hermes's background-review authoring and storage path, so this
-diagnostic preserves Hermes's own passive learning and retrieval loop.
-
-\begin{table}[t]
-\centering
-\scriptsize
-\setlength{\tabcolsep}{4pt}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{lccc}
-\toprule
-\textbf{Hermes / MiniMax setting} &
-\textbf{Online: BU/M-ASR/B-ASR} &
-\textbf{Artifact scores: CU/UG/Stealth} &
-\textbf{Post-attack: URR/ASR/Utility} \\
-\midrule
-No evolution        & 15.70/43.95/0.45 & N/A/N/A/N/A & N/A/0.0/16.0 \\
-Hermes-native       & 67.57/73.42/16.14 & 2.70/3.25/4.22 & 42.7/32.4/63.5 \\
-\bottomrule
-\end{tabular}}
-\caption{\textbf{Hermes-native diagnostic detail.} This appendix view uses
-the same absolute $3+3+3$ protocol as Table~\ref{tab:misevolution-main}.}
-\label{tab:hermes-native}
-\end{table}
 
 \section{Judges and Artifact Auditing}
 \label{app:judges}
