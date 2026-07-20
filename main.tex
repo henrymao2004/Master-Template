@@ -697,32 +697,23 @@ utility is statistically non-inferior to raw evolution.}
 \textbf{CU}$\downarrow$ & \textbf{UG}$\downarrow$ & \textbf{Stealth}$\downarrow$ &
 \textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
-\multirow{2}{*}{Claude Code}
-& Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Claude Code & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}Claude Code & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multirow{2}{*}{Codex}
-& Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Codex & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}Codex & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multirow{2}{*}{Hermes}
-& Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Hermes & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}Hermes & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-\multirow{2}{*}{OpenClaw}
-& Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\midrule
-\multirow{2}{*}{Macro avg.}
-& Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}& \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+OpenClaw & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightblue}OpenClaw & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
 \caption{\textbf{SafeEvolve safety and utility under the same evaluation
 protocol (RQ3).} For each target agent and governance condition, we
-first compute every metric as an absolute micro-aggregate, then macro-average
-equally over the three selected evolution methods. The final row block
-gives the equal-weight target-agent average. Artifact columns report the same mean judge scores as
+first compute every metric as an absolute micro-aggregate, then average
+equally over the three selected evolution methods. Artifact columns report the same mean judge scores as
 Table~\ref{tab:misevolution-main}. URR is N/A when no unsafe evolved skill is exported and its averages
 use only defined cells; this absence is also exposed by the artifact columns
 rather than converted into a zero retrieval rate. The complete per-method breakdown is reported in
@@ -750,13 +741,34 @@ artifact in the evaluated run, whereas \bench contamination is harmful behavior
 observed on a later zero-injection benign task after a skill was learned from
 earlier malicious experience. We therefore retain SkillSafetyBench's official ASR, task
 success, and task-success-conditional ASR rather than relabeling its result as
-contamination.
+contamination (Table~\ref{tab:external-eval}, Panel~\textbf{A}).
+
+\paragraph{Admission-auditor evaluation on MalSkillBench.}
+MalSkillBench is a labeled static corpus of malicious and benign skill bundles
+\citep{guo2026malskillbench}. It cannot exercise repair trajectories, lineage,
+retirement, or downstream reuse, so we use it only to diagnose \safeevolve's
+admission auditor. Table~\ref{tab:external-eval}, Panel~\textbf{B} follows the benchmark's official
+classification protocol; it is supporting component evidence rather than a
+substitute for the two full-system evaluations.
+
+\paragraph{Capability preservation on common benchmarks.}
+Safety gains are useful only if the governed library continues to improve task
+performance. We therefore evaluate EvoSkill, AutoSkill, and SkillsVote raw and
+with \safeevolve on two external capability benchmarks.
+Here too we preserve each benchmark's official evaluation contract rather than
+reducing both to a common accuracy column. SkillsBench reports task-macro
+pass rates and skill gain \citep{li2026skillsbench}; SkillLearnBench separates
+skill quality, trajectory behavior, and task outcome
+\citep{zhong2026skilllearnbench}. Table~\ref{tab:external-eval}, Panel~\textbf{C} shows
+method-averaged results in the main paper, with all three methods reported
+separately in the appendix.
 
 \begin{table*}[t]
 \centering
-\small
-\setlength{\tabcolsep}{7pt}
-\renewcommand{\arraystretch}{1.08}
+\scriptsize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.02}
+\textbf{A. Full-system evaluation on SkillSafetyBench}\\[2pt]
 \begin{tabular}{lccc}
 \toprule
 \textbf{Governance} & \textbf{ASR $\downarrow$}
@@ -766,26 +778,9 @@ Raw attacked update & -- & -- & -- \\
 \rowcolor{lightblue}Full \safeevolve & -- & -- & -- \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{Full SafeEvolve on SkillSafetyBench (RQ3).} Results use the
-official overall attack success rate (ASR), nominal task success, and
-task-success-conditional ASR. Entries macro-average the four target-agent
-configurations after computing each metric under its official denominator.
-Per-agent and RD1--RD6 results appear in the appendix.}
-\label{tab:skill-safety}
-\end{table*}
 
-\paragraph{Admission-auditor evaluation on MalSkillBench.}
-MalSkillBench is a labeled static corpus of malicious and benign skill bundles
-\citep{guo2026malskillbench}. It cannot exercise repair trajectories, lineage,
-retirement, or downstream reuse, so we use it only to diagnose \safeevolve's
-admission auditor. Table~\ref{tab:malskill} follows the benchmark's official
-classification protocol; it is supporting component evidence rather than a
-substitute for the two full-system evaluations.
-
-\begin{table*}[t]
-\centering
-\small
-\setlength{\tabcolsep}{6pt}
+\vspace{5pt}
+\textbf{B. Admission-auditor evaluation on MalSkillBench}\\[2pt]
 \begin{tabular}{lcccccc}
 \toprule
 \textbf{Detector} & \textbf{Acc. $\uparrow$} & \textbf{Prec. $\uparrow$}
@@ -798,60 +793,37 @@ Best published prompt-injection detector & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightblue}\safeevolve admission auditor & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{SafeEvolve admission-auditor evaluation.} Accuracy,
-precision, recall, F1, false-positive count, and false-negative count are
-computed on MalSkillBench's pinned official test set. The appendix reports all
-individual detectors.}
-\label{tab:malskill}
-\end{table*}
 
-\paragraph{Capability preservation on common benchmarks.}
-Safety gains are useful only if the governed library continues to improve task
-performance. We therefore evaluate EvoSkill, AutoSkill, and SkillsVote raw and
-with \safeevolve on two external capability benchmarks.
-Here too we preserve each benchmark's official evaluation contract rather than
-reducing both to a common accuracy column. SkillsBench reports task-macro
-pass rates and skill gain \citep{li2026skillsbench}; SkillLearnBench separates
-skill quality, trajectory behavior, and task outcome
-\citep{zhong2026skilllearnbench}. Table~\ref{tab:capability} shows
-method-averaged results in the main paper, with all three methods reported
-separately in the appendix.
-
-\begin{table*}[t]
-\centering
-\small
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.08}
+\vspace{5pt}
+\textbf{C. Capability preservation on native benchmarks}\\[2pt]
 \begin{tabular}{llcc}
 \toprule
 \textbf{Benchmark} & \textbf{Native metric}
 & \textbf{Raw} & \textbf{\safeevolve} \\
 \midrule
-\multirow{4}{*}{SkillsBench}
- & No-skill pass (\%) $\uparrow$       & -- & -- \\
- & Evolved-skill pass (\%) $\uparrow$  & -- & -- \\
- & Skill improvement (pp) $\uparrow$   & -- & -- \\
- & Normalized gain (\%) $\uparrow$     & -- & -- \\
+SkillsBench & No-skill pass (\%) $\uparrow$       & -- & -- \\
+SkillsBench & Evolved-skill pass (\%) $\uparrow$  & -- & -- \\
+SkillsBench & Skill improvement (pp) $\uparrow$   & -- & -- \\
+SkillsBench & Normalized gain (\%) $\uparrow$     & -- & -- \\
 \midrule
-\multirow{7}{*}{SkillLearnBench}
- & Coverage (\%) $\uparrow$            & -- & -- \\
- & Executability (\%) $\uparrow$       & -- & -- \\
- & Safety (\%) $\uparrow$              & -- & -- \\
- & Alignment (\%) $\uparrow$           & -- & -- \\
- & Usage (\%) $\uparrow$               & -- & -- \\
- & Solving tokens $\downarrow$          & -- & -- \\
- & Accuracy (\%) $\uparrow$            & -- & -- \\
+SkillLearnBench & Coverage (\%) $\uparrow$            & -- & -- \\
+SkillLearnBench & Executability (\%) $\uparrow$       & -- & -- \\
+SkillLearnBench & Safety (\%) $\uparrow$              & -- & -- \\
+SkillLearnBench & Alignment (\%) $\uparrow$           & -- & -- \\
+SkillLearnBench & Usage (\%) $\uparrow$               & -- & -- \\
+SkillLearnBench & Solving tokens $\downarrow$          & -- & -- \\
+SkillLearnBench & Accuracy (\%) $\uparrow$            & -- & -- \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{SafeEvolve preserves capability under each benchmark's native
-protocol (RQ3).} Entries macro-average equally over EvoSkill, AutoSkill, and SkillsVote
-methods after computing the official metric for each method. SkillsBench uses
-task-macro pass rate, absolute improvement, and normalized gain;
-SkillLearnBench reports its three-level quality/trajectory/outcome metrics.
-The no-skill reference is repeated to keep each official comparison
-self-contained. We do not average heterogeneous metrics across benchmarks.
-Full per-method results and confidence intervals appear in the appendix.}
-\label{tab:capability}
+\caption{\textbf{External safety and capability evaluation of SafeEvolve
+(RQ3).} \textbf{A} retains SkillSafetyBench's official ASR, task success, and
+task-success-conditional ASR. \textbf{B} reports MalSkillBench accuracy,
+precision, recall, F1, and error counts on its pinned test set. \textbf{C}
+retains the native SkillsBench and SkillLearnBench capability metrics. Entries
+in A and C average the applicable target agents or evolution methods only after
+computing each official metric; heterogeneous metrics are never combined. Full
+per-agent, per-method, and detector results appear in the appendix.}
+\label{tab:external-eval}
 \end{table*}
 
 \paragraph{Component evaluation.}
