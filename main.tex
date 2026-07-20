@@ -327,8 +327,10 @@ contains 25 episodes.
 
 The main evaluation compares \textbf{No Evolution}, which disables persistent
 learning, with each method's native \textbf{Full Evolution}, which updates after
-every successful three-trajectory batch. Both conditions share tasks, order,
-tools, agent configuration, and judges.
+each three-trajectory block for the five external methods. Hermes-native instead
+retains its intrinsic after-turn background review; its block boundaries are
+measurement checkpoints rather than synthetic update calls. Both conditions
+share tasks, order, tools, agent configuration, and judges.
 
 \paragraph{Agents and evolution methods.}
 
@@ -342,10 +344,15 @@ The main comparison includes five agent-agnostic evolution methods: EvoSkill,
 SkillClaw, AutoSkill, SkillsVote, and SkillOpt, each evaluated on compatible
 target agents. Hermes also provides a framework-native evolution path supported only
 by the Hermes target. We include Hermes-native in the main diagnostic table and
-provide its implementation details and expanded results in
-Appendix~\ref{app:hermes-native}. Each method is evaluated in its actual stored representation, including
-associated scripts or structured contracts, rather than after conversion to a
-common textual summary, for online behavior and artifact auditing. The
+provide its expanded results in Appendix~\ref{app:hermes-native}. Appendix~\ref{app:method-details}
+describes every method's original learning signal, update rule, skill store,
+retrieval policy, and exact Gym realization, including the pinned source revisions.
+Each method is evaluated through its native \texttt{SKILL.md} serialization,
+including its structured frontmatter and instruction body, rather than after
+conversion to a common textual summary. Method-specific metadata and side files
+remain in the versioned store for provenance, while the skill document returned by
+the method's retriever is the portable artifact injected into the shared executor.
+The
 carryover stage deliberately standardizes the persistence channel: only the
 method's frozen \texttt{SKILL.md} is reloaded for $P$, while associated scripts,
 resources, caches, and native memory remain unavailable.
@@ -936,17 +943,172 @@ executor and constructs retrieval only from the exported \texttt{SKILL.md}.
 
 \section{Agent and Method Configurations}
 \label{app:configurations}
+\label{app:method-details}
 
-Report every agent framework, model endpoint, evolution implementation,
-retrieval configuration, update cadence, prompt, decoding parameter, repository
-commit, and realized method--agent matrix, together with failed runs.
+\paragraph{Common execution contract.}
+The five external methods retain their released skill authoring, storage, and
+retrieval code, while the Gym supplies a shared executor and trajectory schema.
+This separation lets the same evolving library drive Claude Code, Codex, Hermes,
+or OpenClaw without substituting one framework's agent loop for another. The
+executor and evolution model are both MiniMax-M2.5. Each external method receives
+one ordered three-trajectory block at an update boundary, writes into a fresh
+episode-scoped store, and retrieves from that store before the next task. The
+adapter preserves the method's own update gate and artifact format; task execution,
+sandbox reset, outcome judges, block cadence, and final clean reload are supplied
+by the Gym. The source revisions used for the reported runs are EvoSkill
+\texttt{36f6f04}, SkillClaw \texttt{bf4dc2e}, AutoSkill \texttt{94c47ca},
+SkillsVote \texttt{86fd739}, SkillOpt \texttt{57333f3}, and Hermes Agent
+\texttt{3ed7c8a}.
 
-\subsection{Hermes-native evolution}
+\subsection{EvoSkill}
+
+EvoSkill~\citep{alzubi2026evoskill} performs failure-driven textual feedback
+descent over agent programs. Its executor generates task traces, a proposer
+diagnoses failure cases and chooses whether to create or edit a skill, and a
+skill builder materializes the proposal as a skill directory containing
+\texttt{SKILL.md} and optional scripts or references. The original search keeps a
+fixed-capacity frontier of programs, cycles through parents, evaluates candidates
+on a separate validation set, and records proposal outcomes in a cumulative
+feedback history.
+
+Our adapter calls EvoSkill's released proposer and skill-builder agents through
+its native query builders and structured response schemas, then applies its
+frontmatter normalizer to the resulting
+\texttt{.claude/skills/<name>/SKILL.md}. Each block trajectory, final answer, and
+utility result is converted into EvoSkill's diagnostic-record format. The two
+authoring-helper skills shipped by EvoSkill are available to the builder but are
+neither injected into the target agent nor scored as evolved artifacts. At
+execution time, all active episode-authored skills are exposed, matching
+EvoSkill's active-skill loader. The Gym's longitudinal cell supplies one versioned
+library, so git branches and the multi-program frontier are replaced by that
+single episode history; this condition isolates EvoSkill's proposer--builder
+induction rule under the shared update budget.
+
+\subsection{SkillClaw}
+
+SkillClaw~\citep{ma2026skillclaw} is designed as a collective day--night loop.
+Agents upload full sessions containing prompts, responses, tool actions, errors,
+skill references, and outcome evidence. The night-time engine summarizes each
+session, groups sessions by the skill they used, and jointly reads successful and
+failed evidence. It may improve an existing skill, optimize its description,
+create a missing skill, or skip the update; no-skill sessions form a separate
+creation group. Its deployment design then synchronizes verified shared-library
+updates back to users.
+
+The Gym invokes the released \texttt{summarize\_sessions\_parallel},
+\texttt{aggregate\_sessions\_by\_skill},
+\texttt{evolve\_skill\_from\_sessions}, and
+\texttt{create\_skill\_from\_sessions} pipeline on each three-task block. A
+trajectory is marked as referencing an injected skill only when its messages,
+tool arguments, or response show that skill being used; otherwise it enters the
+no-skill group. SkillClaw's \texttt{SkillManager} serializes every accepted result
+to \texttt{<name>/SKILL.md}. We use its dependency-free template retrieval with
+top-$6$ effectiveness-ranked skills. The episode replaces the paper's distributed
+upload and synchronization service with one isolated evidence batch and does not
+use future $B$ or $P$ outcomes to revise an earlier update.
+
+\subsection{AutoSkill}
+
+AutoSkill~\citep{yang2026autoskill} couples a foreground reuse loop with a
+background evolution loop. A query is rewritten for retrieval, relevant skills
+are selected through hybrid dense and BM25 matching, and their structured prompts
+condition the response. In parallel, an extractor proposes durable procedures,
+constraints, or preferences from recent user-side interaction. A maintenance
+judge compares each proposal with its nearest existing skill and chooses
+\textsc{add}, \textsc{merge}, or \textsc{discard}; merging preserves the skill
+identity and increments its version.
+
+We call the released \texttt{AutoSkill.ingest} entry point used by AutoSkill's
+session-end integration. The user task is the primary extraction evidence, while
+assistant text and tool events preserve the observed workflow context. The three
+records in a block are ingested in order at the block boundary, and the native LLM
+maintainer performs add/merge/discard decisions in a local episode store. Before
+each task, \texttt{AutoSkill.search} retrieves up to five skills using the released
+hybrid search with a local hashing embedding and persistent BM25 index; the SDK's
+\texttt{export\_skill\_md} serializer supplies the exact artifact injected into the
+target agent and audited by our content judges.
+
+\subsection{SkillsVote}
+
+SkillsVote~\citep{liu2026skillsvote} treats collection, recommendation, outcome
+attribution, and evolution as one skill lifecycle. Its key update unit is an
+attributed subtask: a semantically complete part of a trajectory with an outcome
+signal, responsibility assignment, and reusable exploration delta. Only successful
+subtasks with reusable evidence are admissible. Admissible evidence is aggregated
+and routed to a minimal edit of the skill that shaped execution, creation of a new
+skill for an independent capability, or no update. Pre-task recommendation limits
+which members of a large library enter the agent context.
+
+Our adapter uses SkillsVote's local Chroma recommendation path over the
+episode-scoped \texttt{SKILL.md} directories, with hashing embeddings and top-$5$
+retrieval. It constructs the released \texttt{FeedbackPayload} from the Gym
+trajectory and authoritative task outcome: task completion authorizes an update,
+and realization of the requested harmful objective also counts as success on
+$M$. A successful run with no retrieved skill receives the native
+\texttt{success\_no\_skill\_seen} attribution and can create a skill; a successful
+run that used a retrieved skill receives
+\texttt{success\_skill\_used\_with\_extra\_exploration} and can edit that skill.
+The payload then passes unchanged through
+\texttt{feedback\_to\_evolve\_requests} and the released
+\texttt{step\_evolve} authoring path. Failed or unjudged tasks cannot authorize an
+update.
+
+\subsection{SkillOpt}
+
+SkillOpt~\citep{yang2026skillopt} formulates a skill document as an external
+text-space parameter state. Scored rollout batches are divided into reflection
+minibatches; an optimizer diagnoses successes and failures, proposes bounded
+add/delete/replace edits, and accepts a candidate only through a validation gate.
+Rejected edits become feedback for later proposals, while the full training
+system also supports an epoch-level slow/meta update. The deployed object remains
+one compact best skill and requires no optimizer call at inference time.
+
+We use the released \texttt{skillopt\_sleep.consolidate} path: reflection proposes
+at most four bounded edits to one episode-scoped \texttt{best\_skill.md}, the
+released edit application code builds the candidate, and its gate adopts the
+candidate only when the validation score strictly improves. The three records in
+each block provide the scored rollout batch; the last successful record is held
+for the within-block gate when possible, with the remaining records used for
+reflection. Success is harmful-objective completion on $M$ and benign-objective
+completion on $B$. This within-block split preserves the common horizon and update
+count without adding private evaluation tasks. The optimizer-only slow/meta memory
+is not carried between blocks; the persistent evaluated state is the validated
+\texttt{best\_skill.md}, which is injected in full on later tasks.
+
+\subsection{Hermes-native implementation}
+
+Hermes Agent's native learning loop operates inside the target framework itself.
+After a foreground response, a background-review fork replays the conversation,
+checks loaded skills and newly demonstrated procedures, and invokes
+\texttt{skill\_manage} to patch an applicable skill, add support files, create a
+new class-level skill, or write nothing. Hermes stores these artifacts under
+\texttt{HERMES\_HOME/skills}; later turns discover them through its prompt-level
+skill index and \texttt{skill\_view}. Its curator is a separate periodic
+maintenance path for consolidation, pruning, and archival, rather than the
+per-turn authoring path.\footnote{Hermes Agent implementation:
+\url{https://github.com/NousResearch/hermes-agent}.}
+
+For Hermes-native, one episode-scoped \texttt{HERMES\_HOME} is bind-mounted into
+every disposable task container. Native evolution is enabled, the review nudge is
+set to one so every short benchmark task is eligible for review, and the harness
+waits for Hermes's actual background-review thread to finish before recording the
+skill diff. Foreground \texttt{skill\_manage} is hidden from the task-solving agent,
+so measured authoring comes from the passive native review rather than an explicit
+``save this'' action; \texttt{skills\_list} and \texttt{skill\_view} remain
+available. The released review prompt, writer, guards, and storage code are
+unchanged, and autonomous writes follow Hermes's default approval-off behavior.
+Because authoring occurs after each turn, \texttt{evolve\_batch} is a no-op and
+three-task boundaries only snapshot the accumulated library. The curator is not
+invoked during these short episodes. At $P$, the Gym exports only authored
+\texttt{SKILL.md} files and reloads them in a clean executor, excluding Hermes
+sessions, memory cards, caches, and the rest of \texttt{HERMES\_HOME}.
+
+\subsection{Hermes-native diagnostic results}
 \label{app:hermes-native}
 
 Hermes-native evolution is evaluated with the Hermes / MiniMax target. A native
-candidate follows Hermes's ordinary authoring, approval, and storage path, so
-this diagnostic preserves Hermes's own authoring and retrieval loop.
+candidate follows Hermes's background-review authoring and storage path, so this
+diagnostic preserves Hermes's own passive learning and retrieval loop.
 
 \begin{table}[t]
 \centering
