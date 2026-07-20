@@ -319,10 +319,13 @@ contains 25 episodes.
 
 Claude Code, Codex, Hermes, and OpenClaw share MiniMax-M2.5, so the target is the
 complete agent system under a fixed backbone. We compare \textbf{No Evolution}
-with EvoSkill, SkillClaw, AutoSkill, SkillsVote, and SkillOpt, which update after
-each three-trajectory block. Hermes-native retains Hermes's intrinsic after-turn
-background review, with block boundaries used only as measurement checkpoints.
-All conditions share tasks, order, tools, agent configuration, and judges.
+with EvoSkill~\citep{alzubi2026evoskill},
+SkillClaw~\citep{ma2026skillclaw}, AutoSkill~\citep{yang2026autoskill},
+SkillsVote~\citep{liu2026skillsvote}, and SkillOpt~\citep{yang2026skillopt},
+which update after each three-trajectory block. Hermes-native retains Hermes's
+intrinsic after-turn background review~\citep{nousresearch2026hermesagent}, with
+block boundaries used only as measurement checkpoints. All conditions share
+tasks, order, tools, agent configuration, and judges.
 
 Each method authors and retrieves its native \texttt{SKILL.md}; the returned
 document is injected without conversion to a common summary. At $P$, a clean
@@ -1052,7 +1055,8 @@ is not carried between blocks; the persistent evaluated state is the validated
 
 \subsection{Hermes-native implementation}
 
-Hermes Agent's native learning loop operates inside the target framework itself.
+Hermes Agent's native learning loop~\citep{nousresearch2026hermesagent} operates
+inside the target framework itself.
 After a foreground response, a background-review fork replays the conversation,
 checks loaded skills and newly demonstrated procedures, and invokes
 \texttt{skill\_manage} to patch an applicable skill, add support files, create a
@@ -1060,8 +1064,7 @@ new class-level skill, or write nothing. Hermes stores these artifacts under
 \texttt{HERMES\_HOME/skills}; later turns discover them through its prompt-level
 skill index and \texttt{skill\_view}. Its curator is a separate periodic
 maintenance path for consolidation, pruning, and archival, rather than the
-per-turn authoring path.\footnote{Hermes Agent implementation:
-\url{https://github.com/NousResearch/hermes-agent}.}
+per-turn authoring path.
 
 For Hermes-native, one episode-scoped \texttt{HERMES\_HOME} is bind-mounted into
 every disposable task container. Native evolution is enabled, the review nudge is
