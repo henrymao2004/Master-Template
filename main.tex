@@ -682,11 +682,20 @@ utility is statistically non-inferior to raw evolution.}
 % Main Table 2: method-averaged held-out mitigation results.
 \begin{table*}[t]
 \centering
+\caption{\small \textbf{SafeEvolve safety and utility under the same evaluation
+protocol (RQ3).} For each target agent and governance condition, we
+first compute every metric as an absolute micro-aggregate, then average
+equally over the three selected evolution methods. Artifact columns report the same mean judge scores as
+Table~\ref{tab:misevolution-main}. URR is N/A when no unsafe evolved skill is exported and its averages
+use only defined cells; this absence is also exposed by the artifact columns
+rather than converted into a zero retrieval rate. The complete per-method breakdown is reported in
+Appendix~Table~\ref{tab:safeevolve-full}.}
+\vspace{-6pt}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.06}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{llccc|ccc|ccc}
+\renewcommand{\arraystretch}{1.1}
+\resizebox{0.97\textwidth}{!}{%
+\begin{tabular}{l|c|ccc|ccc|ccc}
 \toprule
 \textbf{Target agent} & \textbf{Governance} &
 \multicolumn{3}{c|}{\textbf{Online behavior}} &
@@ -698,26 +707,19 @@ utility is statistically non-inferior to raw evolution.}
 \textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
 Claude Code & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}Claude Code & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Claude Code & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
 Codex & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}Codex & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Codex & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
 Hermes & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}Hermes & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+Hermes & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
 OpenClaw & Raw & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}OpenClaw & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+OpenClaw & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{SafeEvolve safety and utility under the same evaluation
-protocol (RQ3).} For each target agent and governance condition, we
-first compute every metric as an absolute micro-aggregate, then average
-equally over the three selected evolution methods. Artifact columns report the same mean judge scores as
-Table~\ref{tab:misevolution-main}. URR is N/A when no unsafe evolved skill is exported and its averages
-use only defined cells; this absence is also exposed by the artifact columns
-rather than converted into a zero retrieval rate. The complete per-method breakdown is reported in
-Appendix~Table~\ref{tab:safeevolve-full}.}
+\vspace{-6pt}
 \label{tab:safeevolve-main}
 \end{table*}
 
@@ -765,52 +767,57 @@ separately in the appendix.
 
 \begin{table*}[t]
 \centering
-\scriptsize
-\setlength{\tabcolsep}{3.5pt}
-\renewcommand{\arraystretch}{1.04}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{llccccccc}
-\toprule
-\textbf{Benchmark} & \textbf{Condition} &
-\multicolumn{7}{c}{\textbf{Native metrics}} \\
-\midrule
-& & \textbf{ASR $\downarrow$} & \textbf{Task success $\uparrow$}
-& \textbf{Conditional ASR $\downarrow$} & & & & \\
-SkillSafetyBench & Raw attacked update & -- & -- & -- & & & & \\
-\rowcolor{lightblue}SkillSafetyBench & Full \safeevolve & -- & -- & -- & & & & \\
-\midrule
-& & \textbf{Acc. $\uparrow$} & \textbf{Prec. $\uparrow$}
-& \textbf{Rec. $\uparrow$} & \textbf{F1 $\uparrow$}
-& \textbf{FP $\downarrow$} & \textbf{FN $\downarrow$} & \\
-MalSkillBench & Best skill detector & -- & -- & -- & -- & -- & -- & \\
-MalSkillBench & Best supply-chain detector & -- & -- & -- & -- & -- & -- & \\
-MalSkillBench & Best prompt-injection detector & -- & -- & -- & -- & -- & -- & \\
-\rowcolor{lightblue}MalSkillBench & \safeevolve admission auditor & -- & -- & -- & -- & -- & -- & \\
-\midrule
-& & \textbf{No-skill pass $\uparrow$} & \textbf{Evolved-skill pass $\uparrow$}
-& \textbf{Improvement (pp) $\uparrow$} & \textbf{Normalized gain $\uparrow$}
-& & & \\
-SkillsBench & Raw evolution & -- & -- & -- & -- & & & \\
-\rowcolor{lightblue}SkillsBench & \safeevolve & -- & -- & -- & -- & & & \\
-\midrule
-& & \textbf{Coverage $\uparrow$} & \textbf{Executability $\uparrow$}
-& \textbf{Safety $\uparrow$} & \textbf{Alignment $\uparrow$}
-& \textbf{Usage $\uparrow$} & \textbf{Solving tokens $\downarrow$}
-& \textbf{Accuracy $\uparrow$} \\
-SkillLearnBench & Raw evolution & -- & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}SkillLearnBench & \safeevolve & -- & -- & -- & -- & -- & -- & -- \\
-\bottomrule
-\end{tabular}}
-\caption{\textbf{External safety and capability evaluation of SafeEvolve
+\caption{\small \textbf{External safety and capability evaluation of SafeEvolve
 (RQ3).} Each benchmark occupies one block of the same table and retains its
 native metric columns. SkillSafetyBench reports ASR, task success, and
 task-success-conditional ASR; MalSkillBench reports classification rates and
 error counts; SkillsBench and SkillLearnBench retain their official capability
 metrics. The comparison condition is the raw attacked update, the best published
-detector in each detector family, or
-raw evolution as named in the condition column. Results are aggregated only
-within the corresponding native metric; heterogeneous metrics are never combined. Full
-per-agent, per-method, and detector results appear in the appendix.}
+detector in each detector family, or raw evolution as named in the condition
+column. Results are aggregated only within the corresponding native metric;
+heterogeneous metrics are never combined. Full per-agent, per-method, and
+detector results appear in the appendix.}
+\vspace{-6pt}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.1}
+\resizebox{0.97\textwidth}{!}{%
+\begin{tabular}{l|ccccccc}
+\toprule
+\textbf{Condition} & \multicolumn{7}{|c}{\textbf{Benchmark-native metrics}} \\
+\midrule
+\multicolumn{8}{l}{\cellcolor{gray!10}\textit{SkillSafetyBench}} \\
+\textbf{Condition} & \textbf{ASR $\downarrow$} & \textbf{Task success $\uparrow$}
+& \textbf{Conditional ASR $\downarrow$} & \multicolumn{4}{c}{} \\
+Raw attacked update & -- & -- & -- & & & & \\
+Full \safeevolve & -- & -- & -- & & & & \\
+\midrule
+\multicolumn{8}{l}{\cellcolor{gray!10}\textit{MalSkillBench}} \\
+\textbf{Condition} & \textbf{Acc. $\uparrow$} & \textbf{Prec. $\uparrow$}
+& \textbf{Rec. $\uparrow$} & \textbf{F1 $\uparrow$}
+& \textbf{FP $\downarrow$} & \textbf{FN $\downarrow$} & \\
+Best skill detector & -- & -- & -- & -- & -- & -- & \\
+Best supply-chain detector & -- & -- & -- & -- & -- & -- & \\
+Best prompt-injection detector & -- & -- & -- & -- & -- & -- & \\
+\safeevolve admission auditor & -- & -- & -- & -- & -- & -- & \\
+\midrule
+\multicolumn{8}{l}{\cellcolor{gray!10}\textit{SkillsBench}} \\
+\textbf{Condition} & \textbf{No-skill pass $\uparrow$} & \textbf{Evolved-skill pass $\uparrow$}
+& \textbf{Improvement (pp) $\uparrow$} & \textbf{Normalized gain $\uparrow$}
+& \multicolumn{3}{c}{} \\
+Raw evolution & -- & -- & -- & -- & & & \\
+\safeevolve & -- & -- & -- & -- & & & \\
+\midrule
+\multicolumn{8}{l}{\cellcolor{gray!10}\textit{SkillLearnBench}} \\
+\textbf{Condition} & \textbf{Coverage $\uparrow$} & \textbf{Executability $\uparrow$}
+& \textbf{Safety $\uparrow$} & \textbf{Alignment $\uparrow$}
+& \textbf{Usage $\uparrow$} & \textbf{Solving tokens $\downarrow$}
+& \textbf{Accuracy $\uparrow$} \\
+Raw evolution & -- & -- & -- & -- & -- & -- & -- \\
+\safeevolve & -- & -- & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}}
+\vspace{-6pt}
 \label{tab:external-eval}
 \end{table*}
 
