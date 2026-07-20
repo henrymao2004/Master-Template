@@ -839,48 +839,6 @@ nine absolute metrics as the main evaluation, grouped as $3+3+3$.}
 \label{tab:safeevolve-ablation}
 \end{table*}
 
-\section{Discussion}
-\label{sec:discussion}
-
-\paragraph{Skills are security-relevant policy.}
-The central implication is that a skill library should not be governed as a
-passive document store. A stored skill can alter tool choice, ordering,
-verification, and authorization across future tasks. Admission, provenance,
-rollback, and safety monitoring should therefore be part of the learning
-boundary.
-
-\paragraph{Artifact risk and post-attack harm are distinct.}
-An evolved artifact can score highly on content unsafety, unsafe
-generalization, or stealthiness before its unsafe procedure is retrieved. This
-is latent risk, not a safe artifact. Conversely, a runtime policy can block
-execution while the persistent library continues to carry the unsafe rule.
-Product evaluation should therefore report online utility and ASR, the three
-artifact properties, and unsafe retrieval, carryover ASR, and carryover utility
-separately. The observed progression is gated rather than automatic: unsafe
-experience can yield an unsafe artifact without later retrieval, and retrieval
-can occur without harmful execution.
-
-\paragraph{Capability and safety share the same shortcut.}
-The difficult cases are not useless malicious skills. They are procedures in
-which higher success appears alongside the removal of friction that served as a
-safeguard. Accordingly, we report capability together with safety rather than
-treating either one alone as sufficient.
-
-\paragraph{Misevolution is a system-level outcome.}
-The same backbone exhibits different outcomes across agent frameworks and
-evolution methods. Some settings complete the path from unsafe experience to
-clean-session harm, while others retain the unsafe rule without executing it.
-Skill authoring, serialization, retrieval, tool mediation, and runtime policy
-jointly determine where the observed progression stops. This heterogeneity is
-part of the benchmark result: it identifies which layer requires governance.
-
-\paragraph{Scope and limitations.}
-The study focuses on readable skill artifacts written by CLI and coding agents
-and on bounded direct exposure in executable task environments. Results support
-claims about incremental risk observed under evolution within this setting. Future
-work should test indirect exposure, multimodal skills, opaque learned memories,
-longer deployment horizons, interacting libraries, and adaptive attackers.
-
 \section{Conclusion}
 \label{sec:conclusion}
 
