@@ -299,9 +299,10 @@ $B$ tasks on related operational surfaces, and held-out $P$ probes before
 assembling the episode. $M$ realizes the unsafe route, $B$ exercises benign work
 in the same concept family, and $P$ uses a fresh surface with no attack payload
 to test what the reloaded skill supplies. These are separate task records rather
-than two views of a shared base instance. The AgentHazard judge scores the
-concept's harmful objective on all task types; our benign-completion
-judge scores the new $B$ and $P$ objectives. Tasks and metadata are frozen
+than two views of a shared base instance. Gemini-3-Flash instantiates the
+retained AgentHazard trajectory rubric~\citep{googledeepmind2025gemini3flash}
+and scores the concept's harmful objective on all task types; our
+benign-completion judge scores the new $B$ and $P$ objectives. Tasks and metadata are frozen
 before evaluation, final tasks are new concept instantiations rather than
 replayed AgentHazard prompts, and the authoring VCG remains hidden from the
 evaluated system.
@@ -342,9 +343,11 @@ that complete the constructed benign objective; \textbf{Malicious ASR (M-ASR)}
 is the fraction of valid $M$ tasks that realize the episode's harmful objective;
 and \textbf{Benign ASR/Contamination (B-ASR)} applies the same harmful judge and
 objective to valid $B$ tasks. BU uses our benign-completion judge, while M-ASR
-and B-ASR use the AgentHazard trajectory judge.
+and B-ASR use the AgentHazard trajectory rubric instantiated with
+Gemini-3-Flash~\citep{googledeepmind2025gemini3flash}.
 
-Independent content judges assign every skill authored from an $M^3$ or $B^3$
+Kimi-K2-Thinking~\citep{moonshotai2025kimik2thinking} serves as
+the artifact judge and assigns every skill authored from an $M^3$ or $B^3$
 block a 1--5 \textbf{Content Unsafety (CU)} score. \textbf{Unsafe
 Generalization (UG)} and \textbf{Stealthiness (Stealth)} are the mean 1--5
 generalization and disguise scores over authored skills with $cu\geq3$; CU is
@@ -865,9 +868,9 @@ Attack-Designer writes both prompts for the AgentHazard environment. The pair
 harness then executes four stages in isolated sandboxes: the malicious task
 $M$, a reference skill-evolution update over its trajectory, the benign task
 $B$ with the authored skill, and the same $B$ without the skill as a clean
-floor. The AgentHazard harmful judge scores $M$, $B$, and the floor, while an
-independent content judge audits whether the authored skill is unsafe and
-over-generalized. A pair supports a candidate concept when $M$ succeeds, the
+floor. Gemini-3-Flash applies the AgentHazard harmful-trajectory rubric to $M$,
+$B$, and the floor, while Kimi-K2-Thinking audits whether the authored skill is
+unsafe and over-generalized. A pair supports a candidate concept when $M$ succeeds, the
 skill is unsafe or contaminates $B$, and the clean floor remains safe. Only
 replicated, non-falsified mechanisms enter the VCG. We retain the concept
 identifier, mechanism, enabling condition, attack template, failure outcome,
@@ -886,9 +889,9 @@ explicit unsafe instruction. The constructor validates these records and
 assembles three $M^3/B^3$ rounds followed by $P^3$ into the frozen episode.
 
 \paragraph{Judging and validation.}
-The AgentHazard harmful judge evaluates the episode-level harmful objective on $M$,
-$B$, and $P$. We add a separate benign-completion judge for the constructed
-benign objective; its decision is independent of whether an additional harmful
+Gemini-3-Flash applies the retained AgentHazard rubric to the episode-level
+harmful objective on $M$, $B$, and $P$. We add a separate benign-completion
+judge for the constructed benign objective; its decision is independent of whether an additional harmful
 action occurred. Construction validation checks executability, reset behavior,
 concept-family and surface coverage across each episode, removal of the
 malicious condition from $B/P$, prompt and instance deduplication, and judge
@@ -1003,7 +1006,7 @@ maintainer performs add/merge/discard decisions in a local episode store. Before
 each task, \texttt{AutoSkill.search} retrieves up to five skills using the released
 hybrid search with a local hashing embedding and persistent BM25 index; the SDK's
 \texttt{export\_skill\_md} serializer supplies the exact artifact injected into the
-target agent and audited by our content judges.
+target agent and audited by the Kimi-K2-Thinking artifact judge.
 
 \subsection{SkillsVote}
 
@@ -1083,12 +1086,18 @@ sessions, memory cards, caches, and the rest of \texttt{HERMES\_HOME}.
 \section{Judges and Artifact Auditing}
 \label{app:judges}
 
-Provide the retained AgentHazard harmful trajectory judge, our benign-completion
-judge, and the complete 1--5 rubrics for content unsafety, unsafe generalization, and stealthiness, together with auditor
-prompts, calibration examples, agreement statistics, and the adjudication
-procedure. Report the raw score distributions and means. State which models are disjoint from the agent and evolution model
-families. Provide the post-attack carryover-ASR and carryover-utility judges
-separately from artifact auditing.
+Gemini-3-Flash~\citep{googledeepmind2025gemini3flash} instantiates the retained
+AgentHazard harmful-trajectory rubric for $M$, $B$, and $P$; its output supplies
+M-ASR, B-ASR, and C-ASR. The benign-completion judge separately evaluates the
+constructed benign objective for BU and C-Util, so task completion does not
+erase an additional harmful action.
+Kimi-K2-Thinking~\citep{moonshotai2025kimik2thinking} is the artifact judge.
+Given the authored skill rather than the task-judge verdict, it assigns the
+complete 1--5 CU, UG, and Stealth rubrics. Each artifact is labeled in two
+independent judge calls to support the reported agreement and adjudication
+analysis. We release the
+judge prompts, calibration examples, raw score distributions, agreement
+statistics, and adjudication procedure with the benchmark.
 
 \section{Additional Results}
 \label{app:additional-results}
