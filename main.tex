@@ -437,12 +437,6 @@ always using each external benchmark's native metric and official split.
 \subsection{RQ1: Is evolution associated with higher unsafe behavior while retaining utility?}
 \label{sec:rq1}
 
-Table~\ref{tab:misevolution-main} is the paper's primary diagnostic table. Its
-rows preserve every target-agent and evolution-method combination, while nine
-narrow metric columns expose online behavior, the evolved artifact, and
-post-attack carryover side by side. This layout makes framework variation
-visible without encoding three quantities inside each cell.
-
 % Main Table 1: do not place SafeEvolve in this table.
 \begin{table*}[t]
 \centering
@@ -506,9 +500,7 @@ solely from \texttt{SKILL.md}. All frameworks use the same MiniMax backbone for
 the agent-framework comparison. For URR, N/A means that the frozen
 \texttt{SKILL.md} contains no evolved skill with exported $cu\geq3$; URR is
 then undefined rather than zero. Elsewhere, N/A marks a populated setting with
-no skill artifact.
-The nine columns expose the safety--utility and
-artifact--retrieval--carryover relationships directly.}
+no skill artifact.}
 \label{tab:misevolution-main}
 \end{table*}
 
@@ -826,8 +818,7 @@ $-$ provenance               & --/--/-- & --/--/-- & --/--/-- \\
 $-$ safety-aware retirement  & --/--/-- & --/--/-- & --/--/-- \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{SafeEvolve component analysis.} Every row reports the same
-nine absolute metrics as the main evaluation, grouped as $3+3+3$.}
+\caption{\textbf{SafeEvolve component analysis.}}
 \label{tab:safeevolve-ablation}
 \end{table*}
 
