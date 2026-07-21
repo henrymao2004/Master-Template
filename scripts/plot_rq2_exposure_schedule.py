@@ -23,7 +23,6 @@ OUTPUT = ROOT / "figures" / "rq2_exposure_schedule.pdf"
 
 CONFIGS = {
     "Claude Code + AutoSkill": ("#0000b3", "o"),
-    "Codex + EvoSkill": ("#d97706", "o"),
     "Hermes + Hermes-native": ("#b3262d", "o"),
 }
 
@@ -147,7 +146,7 @@ def main() -> None:
         for config, (color, marker) in CONFIGS.items()
     ]
     fig.legend(handles=legend, loc="lower center", bbox_to_anchor=(0.5, -0.005),
-               frameon=False, ncol=3, handlelength=1.7, columnspacing=1.25,
+               frameon=False, ncol=2, handlelength=1.7, columnspacing=1.25,
                prop={"family": "Times New Roman", "weight": "bold", "size": 8.0})
     fig.subplots_adjust(left=0.078, right=0.995, top=0.86, bottom=0.31, wspace=0.25)
     fig.savefig(OUTPUT, bbox_inches="tight", pad_inches=0.015)

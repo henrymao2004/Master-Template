@@ -428,7 +428,7 @@ episodes. Episodes are stratified by AgentHazard risk category,
 autoresearch-discovered concept, and task surface; cells micro-aggregate the
 predeclared task distribution, while cross-agent summaries weight each target
 equally. No Evolution supplies the behavioral floor, and per-category,
-per-concept, and per-surface breakdowns appear in the appendix. RQ2 uses three
+per-concept, and per-surface breakdowns appear in the appendix. RQ2 uses two
 predeclared target--method configurations and holds task identities, judges,
 tools, update count, and final probes fixed while varying only library snapshot,
 exposure order, or batch composition. For mitigation, EvoSkill, AutoSkill, and
@@ -539,10 +539,10 @@ mediation, and task context remain gates after an unsafe skill is stored.
 \label{sec:rq2}
 
 RQ2 uses the existing $9M+9B+3P$ episode records without constructing paired
-views or replacement tasks. We evaluate Claude Code with AutoSkill, Codex with
-EvoSkill, and Hermes with Hermes-native on the same predeclared
-concept--surface families. The first analysis follows the standard interleaved
-episode and freezes the library before learning and after each complete
+views or replacement tasks. We evaluate Claude Code with AutoSkill and Hermes
+with Hermes-native on the same predeclared concept--surface families. The first
+analysis follows the standard interleaved episode and freezes the library
+before learning and after each complete
 $M^3,B^3$ round. These checkpoints contain cumulative malicious exposure
 $K\in\{0,3,6,9\}$. At every checkpoint, a clean executor reloads only that
 snapshot's \texttt{SKILL.md} and runs the same evaluation-only $P^3$ probes,
