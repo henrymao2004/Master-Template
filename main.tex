@@ -81,31 +81,47 @@ useful procedures.
 \section{Introduction}
 \label{sec:introduction}
 
-Self-improving agents convert successful trajectories into reusable skills for
-software engineering, tool use, and recurring operational workflows. This paper
+Self-improving agents convert interaction trajectories into reusable skills for
+software engineering, tool use, and recurring operational workflows
+\citep{cai2025ell,yang2026autoskill,alzubi2026evoskill,xiao2026socraticswe,li2026codeskill}.
+This paper
 studies the safety of that update: given a stream of executable tasks and an
 evolving skill library, determine whether an unsafe success is authored as a
 general procedure and later reused without the original attack. We call this
-failure \emph{skill misevolution}. It turns a transient interaction into a
-persistent policy change.
+skill-specific failure \emph{skill misevolution}: a transient interaction becomes
+a persistent policy change, extending misevolution risks previously studied across
+model, memory, tool, and workflow updates
+\citep{shao2025misevolution,zhao2026safety,xie2026memevobench,lin2026selfevolvingsafety}.
 
-Existing evaluations do not resolve this problem. Skill benchmarks measure
-whether learned skills improve independent-task performance
-\citep{li2026skillsbench,zhong2026skilllearnbench}; agent-safety benchmarks
-measure harmful behavior under a supplied prompt or artifact
-\citep{feng2026agenthazard,jin2026skillsafetybench}. Both end at the current
-execution. They cannot determine whether an unsafe trajectory changed the skill
-library, whether that artifact was later retrieved, or whether a fresh executor
-reproduced the harm. The technical gap is longitudinal state attribution, not
-another attack-success score.
+Existing benchmark families expose adjacent parts of this problem but not the
+complete longitudinal chain. Capability-oriented skill benchmarks measure task
+success, transfer, skill quality, or the marginal value of skill injection
+\citep{li2026skillsbench,zhong2026skilllearnbench,han2026sweskillsbench}, while
+agent- and skill-safety benchmarks measure harmful behavior under a supplied
+prompt, environment, or skill artifact
+\citep{feng2026agenthazard,jin2026skillsafetybench,schmotz2026skillinject,guo2026malskillbench}.
+Long-horizon safety benchmarks study accumulated memory rather than the lifecycle
+of an agent-authored skill file
+\citep{xie2026memevobench,cheng2026tame}. These protocols therefore do not jointly
+reveal whether an unsafe trajectory changed the skill library, whether the
+resulting artifact was retrieved, or whether a fresh executor reproduced the
+harm. The technical gap is longitudinal state attribution across these stages.
 
 Solving it requires three capabilities. First, the task set must cover an unsafe
 mechanism with malicious, benign, and persistence tasks on related surfaces; harmful prompts
-alone provide no test of later contamination. Second, skill state must be
+alone provide no test of later contamination, a distinction motivated by mixed
+benign--adversarial evolution protocols
+\citep{zhao2026safety,xie2026memevobench}. Second, skill state must be
 versioned and isolated from conversation, workspace, cache, and native memory so
-later behavior can be attributed to the exported artifact. Third, measurement
+later behavior can be attributed to the exported artifact, building on controlled
+agent sandboxes and stateful safety environments
+\citep{ruan2023toolemu,debenedetti2024agentdojo,feng2026agenthazard}. Third,
+measurement
 must distinguish authoring, retrieval, and execution because the progression can
-stop at any of these gates.
+stop at any of these gates; existing lifecycle systems already separate skill
+collection, recommendation, attribution, evolution, and reuse for capability
+management
+\citep{liu2026skillsvote,lin2026museautoskill,cheng2026tame}.
 
 We address these challenges with \gym and \bench (Figure~\ref{fig:episode}).
 \gym is the research environment: given a task source, target agent, evolution
@@ -171,7 +187,7 @@ Our contributions are:
 Agent skills have become a persistent adaptation layer that turns interaction
 traces into reusable procedures: online systems extract, maintain, recommend,
 and collectively refine skills across tasks, sessions, users, and agents
-\citep{yang2026autoskill,ma2026skillclaw,liu2026skillsvote,lin2026museautoskill}.
+\citep{cai2025ell,yang2026autoskill,ma2026skillclaw,liu2026skillsvote,lin2026museautoskill}.
 A second line treats the skill artifact as an optimization object, using failure
 analysis, trace-conditioned edits, paired-trajectory audits, co-evolving
 verifiers, or held-out utility gates to select successive versions
