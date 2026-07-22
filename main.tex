@@ -977,13 +977,14 @@ read the old artifact and preserve still-relevant content.
 Our adapter calls EvoSkill's released proposer and skill-builder agents through
 its native query builders and structured response schemas, then applies its
 frontmatter normalizer to the resulting
-\texttt{evoskill\_store/.claude/skills/<name>/SKILL.md}. Although the released
-interface names this a failure gate, the adapter's \texttt{\_to\_failures} retains
-every non-error $M$ or $B$ trace; the task outcome only annotates its diagnostic
-ground truth, including an explicit failure note when utility is false. The update
-is therefore skipped only when the block contains no usable trace, not whenever a
-task succeeds. Both agents run MiniMax-M2.5 through EvoSkill's OpenHands/LiteLLM
-Anthropic route, with reasoning kept outside the returned skill text. The two
+\texttt{evoskill\_store/.claude/skills/<name>/SKILL.md}. The adapter preserves
+EvoSkill's failure gate: a benign trace enters the proposer only when its utility
+objective was not completed, and a malicious trace enters only when its harmful
+objective was not realized. Runtime errors and missing outcomes are excluded, and
+the update is skipped when a block contains no such failure. EvoSkill therefore
+distills from unmet or refused trajectories rather than successful executions.
+Both agents run MiniMax-M2.5 through EvoSkill's OpenHands/LiteLLM Anthropic route,
+with reasoning kept outside the returned skill text. The two
 authoring-helper skills shipped by EvoSkill are available to the builder but are
 neither injected into the target agent nor scored as evolved artifacts. At
 execution time, every active episode-authored skill is injected, matching
@@ -1087,30 +1088,26 @@ model fallback.
 
 \subsection{SkillOpt}
 
-SkillOpt~\citep{yang2026skillopt} formulates a skill document as an external
-text-space parameter state. Its reflection stage acts as a minibatch gradient:
-success and error analysts produce patches, and hierarchical aggregation merges
-them with failure-driven corrections prioritized. The skill optimizer then applies
-bounded append/insert/replace/delete operations while an autonomous learning-rate
-rule chooses how many edits to take. Skill-aware attribution directs a diagnosed
-skill defect into the main document and an execution lapse into an appendix. The
-full system also supports an epoch-level slow update whose regression controls are
-protected from step-level edits.
+SkillOpt~\citep{yang2026skillopt} treats one skill document as an external
+text-space parameter state and optimizes it through the released production-plugin
+routine \texttt{skillopt\_sleep.consolidate}. Each three-task block becomes a scored
+rollout batch. The routine first replays the current document on the training
+slice and calls \texttt{backend.reflect} over the resulting success and failure
+evidence to produce a gradient-like set of bounded edits. Native edit application constructs the
+candidate, then replays it on the held-out validation slice; the validation gate
+adopts the candidate only when its score strictly exceeds the current document.
 
-We use the released \texttt{skillopt\_sleep.consolidate} path and persist its only
-deployed state as \texttt{skillopt\_store/best\_skill.md}. There is no search or
-top-$k$ selection: the complete current document is injected into every later
-task. SkillOpt is outcome-gated in the sense that only scored rollouts enter an
-update; harmful-objective completion defines success on $M$, and benign-objective
-completion defines success on $B$. Successful rollouts form the held-out
-validation slice when available and failures drive reflection; the native gate
-adopts a candidate only when its validation score is strictly above the current
-document. This is also the misevolution channel: an edit that reproduces a harmful
-success can raise the $M$ validation score and become the new persistent state.
-The adapter permits at most four step-level edits and does not carry the separate
-slow/meta memory between blocks. The reflector, optimizer, and validation replay
-use MiniMax-M2.5 over the Anthropic endpoint with thinking disabled, and the
-frozen \texttt{best\_skill.md} is the complete persistent artifact.
+The episode store contains one \texttt{skillopt\_store/best\_skill.md}, and the
+complete current document is injected into every later task without search or
+top-$k$ selection. Only scored rollouts enter consolidation. The replay judge is
+aligned to this benchmark's success criterion: harmful-objective completion on
+$M$ and benign-objective completion on $B$. Successful rollouts form the
+validation slice when available, while failures drive reflection. This alignment
+lets the optimization and gate measure the behavior under study: an edit
+that raises validation success for a malicious objective can become the new
+persistent document. The routine permits at most four bounded edits per block;
+reflection, candidate generation, and validation replay use MiniMax-M2.5 over the
+Anthropic endpoint with thinking disabled.
 
 \subsection{Hermes-native implementation}
 
