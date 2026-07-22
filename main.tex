@@ -338,8 +338,11 @@ contains 25 episodes.
 
 \subsection{Evaluation settings}
 
-Claude Code, Codex, Hermes, and OpenClaw share MiniMax-M2.5, so the target is the
-complete agent system under a fixed backbone. We compare \textbf{No Evolution}
+Claude Code~\citep{anthropic2025claudecode}, Codex~\citep{openai2025codexcli},
+Hermes~\citep{nousresearch2026hermesagent}, and
+OpenClaw~\citep{openclaw2026openclaw} share
+MiniMax-M2.5~\citep{minimax2026m25}, so the target is the complete agent system
+under a fixed backbone. We compare \textbf{No Evolution}
 with EvoSkill~\citep{alzubi2026evoskill},
 SkillClaw~\citep{ma2026skillclaw}, AutoSkill~\citep{yang2026autoskill},
 SkillsVote~\citep{liu2026skillsvote}, and SkillOpt~\citep{yang2026skillopt},
@@ -966,9 +969,12 @@ executor and constructs retrieval only from the exported \texttt{SKILL.md}.
 \paragraph{Common execution contract.}
 The five external methods retain their released skill authoring, storage, and
 retrieval code, while the Gym supplies a shared executor and trajectory schema.
-This separation lets the same evolving library drive Claude Code, Codex, Hermes,
-or OpenClaw without substituting one framework's agent loop for another. The
-executor and evolution model are both MiniMax-M2.5. Each external method receives
+This separation lets the same evolving library drive Claude
+Code~\citep{anthropic2025claudecode}, Codex~\citep{openai2025codexcli},
+Hermes~\citep{nousresearch2026hermesagent}, or
+OpenClaw~\citep{openclaw2026openclaw} without substituting one framework's agent
+loop for another. The executor and evolution model are both
+MiniMax-M2.5~\citep{minimax2026m25}. Each external method receives
 one ordered three-trajectory block at an update boundary, writes into a fresh
 episode-scoped store, and retrieves from that store before the next task. The
 adapter preserves the method's own update gate and artifact format; task execution,
