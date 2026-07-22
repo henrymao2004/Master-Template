@@ -84,11 +84,10 @@ useful procedures.
 Self-improving agents convert interaction trajectories into reusable skills for
 software engineering, tool use, and recurring operational workflows
 \citep{cai2025ell,yang2026autoskill,alzubi2026evoskill,xiao2026socraticswe,li2026codeskill}.
-This paper
-studies the safety of that update: given a stream of executable tasks and an
-evolving skill library, determine whether an unsafe success is authored as a
-general procedure and later reused without the original attack. We call this
-skill-specific failure \emph{skill misevolution}: a transient interaction becomes
+An update becomes unsafe when the agent authors an unsafe success as a general
+procedure in its evolving skill library and later reuses it after the original
+attack disappears. This skill-specific failure is \emph{skill misevolution}: a
+transient interaction becomes
 a persistent policy change, extending misevolution risks previously studied across
 model, memory, tool, and workflow updates
 \citep{shao2025misevolution,zhao2026safety,xie2026memevobench,lin2026selfevolvingsafety}.
