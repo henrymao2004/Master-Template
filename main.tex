@@ -504,28 +504,34 @@ contamination and fresh-session carryover harm.}
 \label{tab:misevolution-main}
 \end{table*}
 
-\paragraph{Capability gains can coincide with higher malicious success.}
-On Claude Code, EvoSkill raises BU/M-ASR from 49.78/56.00 without evolution to
-71.11/62.22. On Codex, AutoSkill and SkillsVote reach BU 85.65 while M-ASR rises
-to 70.87/71.63, compared with 78.14/68.69 without evolution. Evolution can
-therefore improve benign utility while also preserving or increasing malicious
-success.
+\paragraph{Practice improves utility while increasing unsafe success.}
+Against each framework's own No Evolution control under the shared backbone,
+BU is higher in 15 of 21 evolved conditions and C-Util is higher in 17 of 21,
+while M-ASR is higher in 18 of 21. Codex with AutoSkill and SkillsVote makes the
+coexistence clearest: BU reaches 85.65 and C-Util reaches 92.8/94.4, while
+M-ASR reaches 70.87/71.63. Skill evolution can therefore retain useful and
+malicious behavior together rather than exposing risk through utility loss.
 
-\paragraph{Eleven settings exhibit the full observed misevolution signature.}
-These evolved conditions have unsafe-artifact and retrieval signals together
-with nonzero B-ASR and C-ASR. The strongest instances are Codex with AutoSkill
-and SkillsVote, which reach B-ASR 19.91/14.83 and C-ASR 31.9/26.4, and
-Hermes-native, which reaches B-ASR 16.14 and C-ASR 32.4. Harm after
-\texttt{SKILL.md}-only reload shows that the behavior survives the clean-session
-boundary rather than remaining in the original interaction.
+\paragraph{Risk contracts across lifecycle gates.}
+All 21 evolved conditions contain at least one authored artifact with
+$cu\geq3$, so UG and Stealth are defined; 19 show nonzero URR, 19 show nonzero
+B-ASR, and 11 retain nonzero C-ASR after a clean \texttt{SKILL.md}-only reload.
+The corresponding No Evolution floors are at most 0.47 B-ASR and 1.3 C-ASR.
+This $21\rightarrow19\rightarrow11$ contraction is the central misevolution
+signature: content unsafety is widespread, but persistent harm appears only
+when the artifact is retrieved, reused on benign tasks, and executed after the
+original attack has disappeared.
 
-\paragraph{Artifact and retrieval risk do not imply later harm.}
-EvoSkill produces unsafe artifacts and URR 45.3, 12.0, 28.0, and 22.7 on Claude
-Code, Codex, Hermes, and OpenClaw, respectively, yet C-ASR remains zero in all
-four. By contrast, AutoSkill and SkillsVote progress from nontrivial artifact scores and
-retrieval to observed carryover harm. The table therefore separates latent
-artifact risk, retrieved risk, and realized execution: runtime policy, tool
-mediation, and task context remain gates after an unsafe skill is stored.
+\paragraph{Evolution methods stop at different gates.}
+AutoSkill and SkillsVote cross every observed gate in all four frameworks, and
+Hermes-native reaches 16.14 B-ASR and 32.4 C-ASR. EvoSkill instead retrieves
+unsafe skills at 12.0--45.3\% across all four frameworks but produces zero
+C-ASR; OpenClaw with SkillOpt has the table's highest UG (4.88) but zero URR and
+C-ASR. CU, UG, Stealth, URR, and behavioral ASR therefore diagnose distinct
+stages rather than interchangeable notions of safety. Moreover, C-Util exceeds
+No Evolution in 9 of the 11 full-signature conditions. These profiles motivate
+governing both skill admission and reuse while preserving the useful procedure,
+the two boundaries targeted by \safeevolve.
 
 \subsection{RQ2: How do cumulative exposure and its update schedule shape misevolution?}
 \label{sec:rq2}
