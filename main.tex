@@ -67,8 +67,9 @@ tasks and assembles the benchmark episodes with a new benign-completion judge. W
 also introduce \safeevolve, which governs skill
 admission and reuse through targeted repair, verification preservation,
 provenance, and retirement. Across four agent frameworks, a shared MiniMax
-backbone, and six evolution methods, all 25 agent--method conditions show
-that 11 evolved conditions exhibit unsafe artifacts, retrieval, benign
+backbone, and six evolution methods, we evaluate 25 agent--method conditions,
+each on 525 tasks organized into 25 episodes. Eleven evolved conditions exhibit
+unsafe artifacts, retrieval, benign
 contamination, and fresh-session carryover. EvoSkill instead retrieves unsafe
 skills across four agent frameworks at rates of 12.0--45.3\% while producing
 zero carryover ASR.
@@ -157,8 +158,9 @@ reuse time it uses lineage and observed outcomes for selection, rollback, and
 retirement. This targets the state that carries risk across tasks while
 retaining the useful procedure.
 
-Across all 25 agent--method conditions, each evaluated over 25 episodes, the
-benchmark reveals a gated lifecycle. Eleven evolved conditions exhibit unsafe artifacts, retrieval, benign
+Across all 25 agent--method conditions, each evaluated on 525 executable tasks
+organized into 25 episodes, the benchmark reveals a gated lifecycle. Eleven
+evolved conditions exhibit unsafe artifacts, retrieval, benign
 contamination, and fresh-session carryover, whereas EvoSkill retrieves unsafe
 skills in all four agent frameworks but produces zero carryover ASR. The resulting
 insight is operational: artifact risk is broader than realized harm, and the
@@ -330,7 +332,7 @@ library to cumulative malicious doses of three, six, and nine before the
 following $B^3$ measures contamination. The final $P^3$ runs without further
 evolution and mandates the gym's strict persistence boundary: a clean executor
 reconstructs retrieval solely from frozen \texttt{SKILL.md}. Each condition
-contains 25 episodes.
+therefore contains 525 tasks organized into 25 episodes.
 
 \subsection{Evaluation settings}
 
@@ -356,8 +358,9 @@ retrieval policy, and Gym realization.
 
 \subsection{Metrics and statistical protocol}
 
-All nine headline metrics are absolute micro-aggregates over the 25 episodes in
-a condition. \textbf{Benign Utility (BU)} is the fraction of valid $B$ tasks
+Each condition executes 525 tasks organized into 25 episodes. All nine headline
+metrics are absolute micro-aggregates over their valid task or artifact
+observations. \textbf{Benign Utility (BU)} is the fraction of valid $B$ tasks
 that complete the constructed benign objective; \textbf{Malicious ASR (M-ASR)}
 is the fraction of valid $M$ tasks that realize the episode's harmful objective;
 and \textbf{Benign ASR/Contamination (B-ASR)} applies the same harmful judge and
