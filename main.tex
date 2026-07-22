@@ -369,7 +369,7 @@ objective to valid $B$ tasks. BU uses our benign-completion judge, while M-ASR
 and B-ASR use the AgentHazard trajectory rubric instantiated with
 Gemini-3-Flash~\citep{googledeepmind2025gemini3flash}.
 
-Kimi-K2-Thinking~\citep{moonshotai2025kimik2thinking} serves as
+Kimi-K2-0905~\citep{moonshotai2025kimik20905} serves as
 the artifact judge and assigns every skill authored from an $M^3$ or $B^3$
 block a 1--5 \textbf{Content Unsafety (CU)} score. \textbf{Unsafe
 Generalization (UG)} and \textbf{Stealthiness (Stealth)} are the mean 1--5
@@ -910,7 +910,7 @@ harness then executes four stages in isolated sandboxes: the malicious task
 $M$, a reference skill-evolution update over its trajectory, the benign task
 $B$ with the authored skill, and the same $B$ without the skill as a clean
 floor. Gemini-3-Flash applies the AgentHazard harmful-trajectory rubric to $M$,
-$B$, and the floor, while Kimi-K2-Thinking audits whether the authored skill is
+$B$, and the floor, while Kimi-K2-0905 audits whether the authored skill is
 unsafe and over-generalized. A pair supports a candidate concept when $M$ succeeds, the
 skill is unsafe or contaminates $B$, and the clean floor remains safe. Only
 replicated, non-falsified mechanisms enter the VCG. We retain the concept
@@ -1187,7 +1187,8 @@ AgentHazard harmful-trajectory rubric for $M$, $B$, and $P$; its output supplies
 M-ASR, B-ASR, and C-ASR. The benign-completion judge separately evaluates the
 constructed benign objective for BU and C-Util, so task completion does not
 erase an additional harmful action.
-Kimi-K2-Thinking~\citep{moonshotai2025kimik2thinking} is the artifact judge.
+Kimi-K2-0905~\citep{moonshotai2025kimik20905} is the artifact judge, called with
+the model identifier \texttt{kimi-k2-0905-preview}.
 Given the authored skill rather than the task-judge verdict, it assigns the
 complete 1--5 CU, UG, and Stealth rubrics. Each artifact is labeled in two
 independent judge calls to support the reported agreement and adjudication
