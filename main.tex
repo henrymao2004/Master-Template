@@ -1115,35 +1115,50 @@ frozen \texttt{best\_skill.md} is the complete persistent artifact.
 \subsection{Hermes-native implementation}
 
 Hermes Agent's native learning loop~\citep{nousresearch2026hermesagent} operates
-inside the target framework itself.
-After a foreground response, a background-review fork replays the conversation,
-checks loaded skills and newly demonstrated procedures, and invokes
-\texttt{skill\_manage} to patch an applicable skill, add support files, create a
-new class-level skill, or write nothing. Hermes stores these artifacts under
-\texttt{HERMES\_HOME/skills}; later turns discover them through its prompt-level
-skill index and \texttt{skill\_view}. Its curator is a separate periodic
-maintenance path for consolidation, pruning, and archival, rather than the
-per-turn authoring path.
+inside the target framework itself. Retrieval is description-routed rather than
+embedding-based: Hermes places an \texttt{<available\_skills>} index in the system
+prompt, with one frontmatter-derived \texttt{name: description} entry per skill.
+The foreground model selects from this index and lazily opens a body through
+\texttt{skill\_view(name)}; it receives neither an embedding search result nor a
+Gym-selected top-$k$ subset.
+
+Native authoring is triggered by a tool-iteration counter. Hermes starts a skill
+review when \texttt{\_iters\_since\_skill} reaches the configured interval, resetting
+the counter after a real \texttt{skill\_manage} call or after the review fires. The
+default interval is $10$ and the Gym sets it to $1$ for short tasks. This trigger
+is not success-gated: it requires a nonempty final response and a turn that was not
+interrupted, rather than a positive task reward. The review is a complete second
+MiniMax-M2.5 agent turn running in a daemon thread for at most $16$ iterations. Its
+tool surface is restricted to memory and skills, and
+\texttt{\_persist\_disabled} prevents it from writing into the user's foreground
+session. Its native prompt favors patching the currently relevant skill, then an
+umbrella skill, then adding support files, and creates a new umbrella only as a
+last resort; it also forbids retaining environment-dependent failures or one-off
+narrative details.
+
+The review writes through Hermes's native \texttt{skill\_manage} operations:
+create, edit, patch, and support-file writes, with atomic updates to
+\texttt{HERMES\_HOME/skills/<name>/SKILL.md}. Updating an existing skill is the
+self-reinforcing path. Write guards require the review agent to call
+\texttt{skill\_view} before patching a target and prevent modification of pinned or
+bundled skills. Hermes's curator is a separate maintenance mechanism: it
+deterministically marks skills stale after $30$ days and archives them reversibly
+after $90$ days, with an optional, default-off LLM pass for umbrella consolidation.
+It sees the skill inventory rather than the task conversation and does not author
+new experience-derived skills.
 
 For Hermes-native, one host-side, episode-scoped
 \texttt{hermes\_native\_home} is bind-mounted as \texttt{HERMES\_HOME} in every
-disposable task container. Its skills, memory, and sessions therefore accumulate
-within an episode but are never shared across episodes. Retrieval remains entirely
-native: Hermes receives its prompt-level skill index and opens selected artifacts
-through \texttt{skill\_view}; the Gym injects no external skill subset. The only
-authorized update path is Hermes's passive background review. After each response,
-the review nudge interval is one, making every short task eligible. Hermes itself,
-running on MiniMax-M2.5, reviews the conversation and may write or edit
-\texttt{HERMES\_HOME/skills/<name>/SKILL.md} through \texttt{skill\_manage};
-the harness joins the native daemon thread so its write reaches the persistent
-mount. Foreground \texttt{skill\_manage} is hidden, while \texttt{skills\_list}
-and \texttt{skill\_view} remain available, so the agent cannot explicitly choose
-to save a skill during task execution. Hermes-native is neither reward-gated nor
-batch-authored: review can follow every $M$ or $B$ session, and
-\texttt{evolve\_batch} is consequently a no-op. The curator is not invoked because
-it only maintains existing skills in this setting. At $P$, the Gym exports and
-reloads only authored \texttt{SKILL.md} files in a clean executor, excluding
-Hermes sessions, memory cards, caches, and the rest of \texttt{HERMES\_HOME}.
+disposable task container, so skills, memory, and sessions accumulate only within
+that episode. Foreground \texttt{skill\_manage} is hidden, while
+\texttt{skills\_list} and \texttt{skill\_view} remain available; passive review is
+therefore the only authoring channel. The harness joins the native review thread so
+its writes reach the mount before the task returns. Authoring occurs after each
+eligible $M$ or $B$ turn, making \texttt{evolve\_batch} a no-op and block boundaries
+measurement checkpoints. The curator is not invoked in these short episodes. At
+$P$, the Gym exports and reloads only authored \texttt{SKILL.md} files in a clean
+executor, excluding Hermes sessions, memory cards, caches, and the rest of
+\texttt{HERMES\_HOME}.
 
 \section{Judges and Artifact Auditing}
 \label{app:judges}
