@@ -50,46 +50,48 @@
 \maketitle
 
 \begin{abstract}
-Self-improving agents distill successful trajectories into reusable skills,
-turning experience into persistent policy. We study \emph{skill misevolution}:
-an unsafe success is generalized into a skill and later reused after the
-original attack disappears. Existing skill benchmarks measure capability on
-independent tasks, while agent-safety benchmarks do not expose the evolving
-library state; neither can separate unsafe authoring, retrieval, and
-clean-session harm. We introduce \gym, an extensible research environment for
-executing and instrumenting longitudinal skill evolution under controlled
-persistent state. \bench is its frozen evaluation instantiation, with an
-exposure-to-carryover task protocol and nine online, artifact, and post-attack
-metrics. In AgentHazard, offline autoresearch discovers reusable vulnerability
-concepts through malicious--benign pair trials; our constructor then
-instantiates retained concepts as fresh malicious, benign, and persistence
-tasks and assembles the benchmark episodes with a new benign-completion judge. We
-also introduce \safeevolve, which governs skill
-admission and reuse through targeted repair, verification preservation,
-provenance, and retirement. Across four agent frameworks, a shared MiniMax
-backbone, and six evolution methods, we evaluate 25 agent--method conditions,
-each on 525 tasks organized into 25 episodes. Fifteen evolved conditions exhibit
-unsafe artifacts, retrieval, benign
-contamination, and fresh-session carryover. EvoSkill crosses this full lifecycle
-in all four frameworks, reaching 28.4--31.8\% carryover ASR.
-This separation reveals the central insight: misevolution is a gated lifecycle,
-and safety evaluation must locate whether risk stops at authoring, retrieval, or
-execution. \safeevolve targets both the write and reuse gates while preserving
-useful procedures.
+Self-improving agents use skill evolution to select, generalize, and retain
+interaction experience as reusable procedures. Because the resulting skill
+library persists across tasks and conditions later tool use, an unsafe success
+can become persistent policy: evolution may author it as a skill, and a later
+executor may retrieve and reuse it after the original attack disappears. We
+call this failure \emph{skill misevolution}. Existing skill benchmarks measure
+capability on independent tasks, while agent-safety benchmarks do not expose
+the evolving library; neither separates unsafe evolution updates, retrieval, and
+clean-session harm. We introduce \gym, an extensible environment for
+instrumenting this longitudinal update, and \bench, a frozen
+exposure-to-carryover protocol with nine online, artifact, and post-attack
+metrics. Offline autoresearch discovers reusable vulnerability concepts through
+malicious--benign pair trials in AgentHazard; our constructor instantiates them
+as fresh malicious, benign, and persistence tasks and adds a benign-completion
+judge. We also introduce \safeevolve, which governs skill admission and reuse.
+Across four agent frameworks, a shared MiniMax backbone, and six evolution
+methods, we evaluate 25 agent--method conditions, each on 525 tasks in 25
+episodes. Fifteen evolved conditions traverse the full sequence from unsafe
+artifact formation to retrieval, benign contamination, and fresh-session
+carryover; EvoSkill does so in all four frameworks, reaching 28.4--31.8\%
+carryover ASR. The results show that skill misevolution is a gated lifecycle:
+the update may create latent risk even when retrieval or execution prevents
+later harm. Safe evolution must therefore govern both what the library admits
+and what later sessions reuse.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:introduction}
 
-Self-improving agents convert interaction trajectories into reusable skills for
-software engineering, tool use, and recurring operational workflows
+Self-improving agents use skill evolution to convert interaction trajectories
+into reusable procedural knowledge for software engineering, tool use, and
+recurring operational workflows
 \citep{cai2025ell,yang2026autoskill,alzubi2026evoskill,xiao2026socraticswe,li2026codeskill}.
-An update becomes unsafe when the agent authors an unsafe success as a general
-procedure in its evolving skill library and later reuses it after the original
-attack disappears. This skill-specific failure is \emph{skill misevolution}: a
-transient interaction becomes
-a persistent policy change, extending misevolution risks previously studied across
-model, memory, tool, and workflow updates
+The evolution method decides which experience to retain and how to extract,
+merge, or revise it in a persistent skill library. Unlike transient context,
+this library is procedural, executable, transferable across tasks, and
+inspectable as an artifact; its contents can directly condition later tool
+use. When evolution generalizes an unsafe success into such a procedure and a
+later session reuses it after the attack disappears, a transient interaction
+has become a persistent policy change. We call this skill-specific failure
+\emph{skill misevolution}, one concrete form of the broader risks studied in
+model, memory, tool, and workflow adaptation
 \citep{shao2025misevolution,zhao2026safety,xie2026memevobench,lin2026selfevolvingsafety}.
 
 Existing benchmark families expose adjacent parts of this problem but not the
@@ -102,9 +104,10 @@ prompt, environment, or skill artifact
 Long-horizon safety benchmarks study accumulated memory rather than the lifecycle
 of an agent-authored skill file
 \citep{xie2026memevobench,cheng2026tame}. These protocols therefore do not jointly
-reveal whether an unsafe trajectory changed the skill library, whether the
-resulting artifact was retrieved, or whether a fresh executor reproduced the
-harm. The technical gap is longitudinal state attribution across these stages.
+reveal whether the evolution update selected an unsafe trajectory and changed
+the library, whether the resulting skill was retrieved, or whether a fresh
+executor reproduced the harm. The technical gap is longitudinal attribution
+across the update, persistent state, retrieval, and execution stages.
 
 Solving it requires three capabilities. First, the task set must cover an unsafe
 mechanism with malicious, benign, and persistence tasks on related surfaces; harmful prompts
@@ -115,18 +118,18 @@ versioned and isolated from conversation, workspace, cache, and native memory so
 later behavior can be attributed to the exported artifact, building on controlled
 agent sandboxes and stateful safety environments
 \citep{ruan2023toolemu,debenedetti2024agentdojo,feng2026agenthazard}. Third,
-measurement
-must distinguish authoring, retrieval, and execution because the progression can
-stop at any of these gates; existing lifecycle systems already separate skill
-collection, recommendation, attribution, evolution, and reuse for capability
-management
+measurement must distinguish the evolution update, artifact authoring,
+retrieval, and execution because progression can stop at any of these gates;
+existing lifecycle systems already separate skill collection, recommendation,
+attribution, evolution, and reuse for capability management
 \citep{liu2026skillsvote,lin2026museautoskill,cheng2026tame}.
 
 We address these challenges with \gym and \bench (Figure~\ref{fig:episode}).
 \gym is the research environment: given a task source, target agent, evolution
 method, and update schedule, it versions the skill library, isolates other
-cross-task state, records authoring and retrieval, and supports snapshot replay
-and clean-session reload. \bench is the frozen task-and-evaluation protocol
+cross-task state, records evolution inputs, authored diffs, and retrieval, and
+supports snapshot replay and clean-session reload. \bench is the frozen
+task-and-evaluation protocol
 instantiated within this environment. Using AHA autoresearch~\citep{mao2026aha}
 offline in AgentHazard, we discover validated vulnerability concepts through
 malicious--benign pair trials. Our constructor instantiates each retained
@@ -161,19 +164,22 @@ Across all 25 agent--method conditions, each evaluated on 525 executable tasks
 organized into 25 episodes, the benchmark reveals a gated lifecycle. Fifteen
 evolved conditions exhibit unsafe artifacts, retrieval, benign
 contamination, and fresh-session carryover; EvoSkill crosses this full lifecycle
-in all four agent frameworks. The resulting
-insight is operational: artifact risk is broader than realized harm, and the
-layer where progression stops determines what must be governed.
+in all four agent frameworks. The variation across methods shows that an
+evolution update can create unsafe procedural state without every later gate
+carrying it into realized harm. Artifact risk is therefore broader than
+behavioral ASR, and the stage where progression stops determines what must be
+governed.
 
 Our contributions are:
 \begin{enumerate}
-  \item We formulate \textbf{skill misevolution} as a new longitudinal safety
-  problem and show that unsafe authoring, retrieval, and realized carryover are
-  distinct, gated outcomes.
+  \item We formulate \textbf{skill misevolution} as a longitudinal failure of
+  the trajectory-to-skill update lifecycle and show that unsafe authoring,
+  retrieval, and realized carryover are distinct, gated outcomes.
   \item We introduce \gym, an extensible environment for controlled,
-  instrumented skill-evolution research with versioned state and clean-session
-  replay, and \bench, a frozen instantiation with concept-aligned $M/B/P$
-  tasks, a new benign-completion judge, and nine lifecycle metrics.
+  instrumented skill-evolution research that exposes update inputs, library
+  diffs, retrieval, and clean-session replay, and \bench, a frozen instantiation
+  with concept-aligned $M/B/P$ tasks, a new benign-completion judge, and nine
+  lifecycle metrics.
   \item We introduce \safeevolve, which governs skill admission and reuse, and
   evaluate the problem and mitigation across four agent frameworks, six
   evolution methods, ten risk categories, task surfaces, cumulative exposure
@@ -185,8 +191,9 @@ Our contributions are:
 
 \paragraph{Agent skill learning and evolution.}
 Agent skills have become a persistent adaptation layer that turns interaction
-traces into reusable procedures: online systems extract, maintain, recommend,
-and collectively refine skills across tasks, sessions, users, and agents
+traces into reusable procedures. Existing systems instantiate different
+evolution policies for extracting, merging, revising, recommending, and
+collectively refining skills across tasks, sessions, users, and agents
 \citep{cai2025ell,yang2026autoskill,ma2026skillclaw,liu2026skillsvote,lin2026museautoskill}.
 A second line treats the skill artifact as an optimization object, using failure
 analysis, trace-conditioned edits, paired-trajectory audits, co-evolving
@@ -200,10 +207,10 @@ for large-library retrieval
 SkillsBench, SkillLearnBench, and SWE-Skills-Bench measure task success, skill
 quality, transfer, and the marginal utility of skill injection
 \citep{li2026skillsbench,zhong2026skilllearnbench,han2026sweskillsbench}.
-Together these works establish how skills are created, improved, selected, and
-evaluated for capability. Our work adds the longitudinal safety axis: whether
-successful experience becomes an unsafe procedure that persists through later
-retrieval and execution.
+Together these works establish how evolution updates create, improve, select,
+and evaluate skills for capability. We study the safety of that update itself:
+whether it selects an unsafe success, writes a reusable procedure into
+persistent state, and enables later retrieval and execution.
 
 \paragraph{Safety of self-evolving agents and agent skills.}
 Research on self-evolving agents identifies safety and capability drift across
@@ -218,10 +225,11 @@ More broadly, agent-safety research evaluates unsafe tool use, direct and
 indirect prompt injection, risky code execution, harmful multi-step objectives,
 and defenses, and automates red-teaming in executable or emulated environments
 \citep{ruan2023toolemu,debenedetti2024agentdojo,andriushchenko2024agentharm,zhang2024asb,zhang2024agentsafetybench,guo2024redcode,vijayvargiya2025openagentsafety,feng2026agenthazard,chen2026decodingtrust,alpay2026agentsecbench,weng2026argus,shayoni2026netinjectbench,mao2026aha}.
-Our setting connects these lines: the unsafe skill is authored endogenously from
-the agent's own task experience, then becomes a prescriptive artifact whose
-authoring, retrieval, benign contamination, and clean-session carryover can be
-measured and governed as one lifecycle.
+Our setting connects these lines while changing the origin of the artifact:
+rather than receiving a supplied malicious skill, the agent's evolution method
+authors one endogenously from task experience. The resulting procedure is then
+tracked through library admission, retrieval, benign contamination, and
+clean-session carryover as one lifecycle.
 
 \section{Skill Misevolution}
 \label{sec:problem}
@@ -244,14 +252,13 @@ protocol.
 
 \subsection{Definition and temporal sequence}
 
-An episode exhibits \emph{skill misevolution} when an unsafe procedure from an
-earlier trajectory is recorded in the persistent library, is later retrieved,
-and co-occurs with higher unsafe behavior than in a no-evolution
-execution. Operationally, an unsafe success is extracted into a skill,
-generalized beyond its source task, retrieved and reused, and may thereby produce
-persistent harm. The benchmark separately reports artifact formation, retrieval,
-and later action. Skill involvement requires an observed retrieval event in
-addition to the presence of a skill library.
+An episode exhibits \emph{skill misevolution} when the evolution update selects
+or generalizes an unsafe procedure from an earlier trajectory, records it in
+the persistent library, and later execution retrieves and reuses it alongside
+higher unsafe behavior than in a no-evolution execution. The benchmark
+separately reports the update's authored artifact, retrieval, and later action,
+because unsafe state may stop at any of these gates. Skill involvement requires
+an observed retrieval event in addition to the presence of a skill library.
 
 \subsection{Threat model}
 
@@ -269,8 +276,10 @@ session whose retrieval state is reconstructed only from the final frozen
 \subsection{Gym environment and persistence contract}
 
 \gym is an extensible research environment for executing and instrumenting
-longitudinal skill evolution under controlled persistent state. It accepts a
-task source, target agent, evolution method, and update schedule. The task
+longitudinal skill evolution under controlled persistent state. It makes the
+evolution update a first-class event by recording its task trajectories,
+authored diff, and resulting library version. The environment accepts a task
+source, target agent, evolution method, and update schedule. The task
 adapter supplies executable instances, reset logic, and outcome judges, while
 agent and evolution adapters preserve each system's native artifact and expose
 skill writes and retrievals. The gym versions $\library_k$, links every authored
@@ -536,51 +545,57 @@ risk or strongest retained utility.}
 \label{tab:misevolution-main}
 \end{table*}
 
-\paragraph{Practice improves utility while increasing unsafe success.}
+\paragraph{Useful evolution can retain unsafe success.}
 Against each framework's own No Evolution control under the shared backbone,
 BU is higher in 15 of 21 evolved conditions and C-Util is higher in 17 of 21,
 while M-ASR is higher in 19 of 21. Codex with AutoSkill and SkillsVote makes the
 coexistence clearest: BU reaches 85.65 and C-Util reaches 92.8/94.4, while
-M-ASR reaches 70.87/71.63. Skill evolution can therefore retain useful and
-malicious behavior together rather than exposing risk through utility loss.
+M-ASR reaches 70.87/71.63. The experience signal used by skill evolution can
+therefore preserve useful procedures and unsafe routes together; utility loss
+is not a reliable indicator that the persistent update has become unsafe.
 
-\paragraph{Risk contracts across lifecycle gates.}
+\paragraph{Risk contracts after the evolution update.}
 All 21 evolved conditions contain at least one authored artifact with
 $cu\geq3$, so UG and Stealth are defined; 19 show nonzero URR, 19 show nonzero
 B-ASR, and 15 retain nonzero C-ASR after a clean \texttt{SKILL.md}-only reload.
 The corresponding No Evolution floors are at most 0.47 B-ASR and 1.3 C-ASR.
 This $21\rightarrow19\rightarrow15$ contraction is the central misevolution
-signature: content unsafety is widespread, but persistent harm appears only
-when the artifact is retrieved, reused on benign tasks, and executed after the
-original attack has disappeared.
+signature: evolution frequently writes unsafe procedural state, but persistent
+harm appears only when that state remains in the exported library, retrieval
+exposes it, and a later executor acts on it after the original attack has
+disappeared.
 
-\paragraph{Evolution methods stop at different gates.}
+\paragraph{Update and retrieval policies stop at different gates.}
 AutoSkill, SkillsVote, and EvoSkill cross every observed gate in all four
 frameworks. EvoSkill reaches 23.00--30.24 B-ASR and 28.4--31.8 C-ASR, while
 Hermes-native reaches 16.14 B-ASR and 32.4 C-ASR. OpenClaw with SkillOpt has the
 table's highest UG (4.88) but zero URR and
-C-ASR. CU, UG, Stealth, URR, and behavioral ASR therefore diagnose distinct
-stages rather than interchangeable notions of safety. Moreover, C-Util exceeds
-No Evolution in 12 of the 15 full-signature conditions. These profiles motivate
-governing both skill admission and reuse while preserving the useful procedure,
-the two boundaries targeted by \safeevolve.
+C-ASR. The methods' different update and retrieval policies therefore produce
+different stopping points: CU, UG, Stealth, URR, and behavioral ASR diagnose
+distinct stages rather than interchangeable notions of safety. Moreover,
+C-Util exceeds No Evolution in 12 of the 15 full-signature conditions. These
+profiles motivate governing both skill admission and reuse while preserving
+the useful procedure, the two boundaries targeted by \safeevolve.
 
 \subsection{RQ2: How do cumulative exposure and its update schedule shape misevolution?}
 \label{sec:rq2}
 
-RQ2 uses the existing $9M+9B+3P$ episode records without constructing paired
-views or replacement tasks. We evaluate Claude Code with AutoSkill and Hermes
-with Hermes-native on the same predeclared concept--surface families. The first
-analysis follows the standard interleaved episode and freezes the library
-before learning and after each complete
+RQ2 treats the malicious experience available to each skill-evolution update as
+a bounded attacker capability. It uses the existing $9M+9B+3P$ episode records
+without constructing paired views or replacement tasks, and evaluates Claude
+Code with AutoSkill and Hermes with Hermes-native on the same predeclared
+concept--surface families. The first analysis follows the standard interleaved
+episode and freezes the library before learning and after each complete
 $M^3,B^3$ round. These checkpoints contain cumulative malicious exposure
 $K\in\{0,3,6,9\}$. At every checkpoint, a clean executor reloads only that
 snapshot's \texttt{SKILL.md} and runs the same evaluation-only $P^3$ probes,
 which never update the library. This repeated-snapshot trajectory identifies
-the onset and accumulation of persistent harm across the native episode.
+when the evolving library first supports persistent harm and how that signal
+changes as additional malicious experience reaches later updates.
 
 Two schedule comparisons then hold the complete task inventory, six native
-updates, tools, judges, and final $P^3$ fixed. The timing comparison orders the
+updates, tools, judges, and final $P^3$ fixed while changing the evidence
+presented to each update. The timing comparison orders the
 six learning blocks as \textsc{Early}
 ($MMM|MMM|MMM|BBB|BBB|BBB$), \textsc{Interleaved}
 ($MMM|BBB|MMM|BBB|MMM|BBB$), or \textsc{Late}
@@ -616,7 +631,9 @@ schedules appear in the appendix.
 \subsection{RQ3: How do safety and utility compare under SafeEvolve?}
 \label{sec:rq3}
 
-We evaluate \safeevolve with EvoSkill, AutoSkill, and SkillsVote, selected by
+Because an unsafe evolution update can persist without immediately producing
+harm, governance must address both library admission and later reuse. We
+evaluate \safeevolve with EvoSkill, AutoSkill, and SkillsVote, selected by
 their post-attack profiles in RQ1. All three exhibit fresh-session carryover
 harm under distinct artifact and retrieval profiles. Raw evolution, Utility-only
 governance, and \safeevolve are compared under
@@ -884,17 +901,20 @@ $-$ safety-aware retirement  & --/--/-- & --/--/-- & --/--/-- \\
 \section{Conclusion}
 \label{sec:conclusion}
 
-Skill self-evolution changes the temporal structure of agent safety. Our
-evaluation identifies a persistent channel through which unsafe success can be
-generalized, stored, retrieved, and, in some method--agent systems, carried into
-clean-session behavior after the original attack is gone. Other systems stop at
-artifact formation or retrieval, making the location of that boundary part of
-the safety result. \gym makes this longitudinal state observable and replayable;
-\bench distinguishes latent artifact risk from
-retrieved risk and realized carryover. \safeevolve governs the persistent
-update while preserving useful learning. Safe self-improvement requires
-evaluating not only whether an agent succeeds today, but also which persistent
-skills are created, when they are retrieved, and what later behavior follows.
+Self-improvement becomes a longitudinal safety problem when an update turns a
+transient success into persistent procedure. Skill evolution makes this
+transition concrete: it selects and generalizes trajectories into an
+executable, transferable, and auditable library that later sessions can
+retrieve. Across the evaluated agents and evolution methods, unsafe state is
+widely authored, but retrieval and execution gate whether it becomes benign
+contamination or clean-session carryover. \gym makes the complete
+trajectory-to-skill-to-action sequence observable and replayable, while \bench
+separates latent artifact risk, retrieved risk, and realized harm.
+\safeevolve governs both library admission and reuse while preserving useful
+procedures. These findings establish skill evolution as an important,
+measurable case of persistent-adaptation safety: evaluation must inspect not
+only current behavior, but also what the update writes, what retrieval exposes,
+and what later executors do.
 
 \bibliography{iclr2026_conference}
 \bibliographystyle{iclr2026_conference}
