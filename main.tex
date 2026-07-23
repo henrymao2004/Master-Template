@@ -175,9 +175,9 @@ Our contributions are:
   replay, and \bench, a frozen instantiation with concept-aligned $M/B/P$
   tasks, a new benign-completion judge, and nine lifecycle metrics.
   \item We introduce \safeevolve, which governs skill admission and reuse, and
-  evaluate the problem and mitigation across four agent frameworks, six
-  evolution methods, ten risk categories, task surfaces, cumulative exposure
-  levels, exposure timings, and update-batch compositions.
+  evaluate skill misevolution across two model backbones, four agent frameworks,
+  six evolution methods, and ten risk categories, together with cumulative
+  exposure, timing, update-batch, and governance analyses.
 \end{enumerate}
 
 \section{Related Work}
@@ -283,7 +283,7 @@ Isolation operates at task and episode boundaries. Each task runs in a fresh
 disposable sandbox with a new conversation, workspace, process namespace, and
 tool session. Within an episode, the current episode-scoped skill store is the
 state deliberately carried forward and injected into the next task. Each
-$(\text{episode},\text{method},\text{agent})$ cell starts in a fresh process and
+$(\text{episode},\text{method},\text{agent},\text{backbone})$ cell starts in a fresh process and
 run directory with the method's fixed initial store; no authored skill,
 workspace artifact, cache, or native memory passes between episodes or cells.
 
@@ -337,9 +337,13 @@ therefore contains 525 tasks organized into 25 episodes.
 
 Claude Code~\citep{anthropic2025claudecode}, Codex~\citep{openai2025codexcli},
 Hermes~\citep{nousresearch2026hermesagent}, and
-OpenClaw~\citep{openclaw2026openclaw} share
-MiniMax-M2.7~\citep{minimax2026m25}, so the target is the complete agent system
-under a fixed backbone. We compare \textbf{No Evolution}
+OpenClaw~\citep{openclaw2026openclaw} are each evaluated with
+MiniMax-M2.5~\citep{minimax2026m25} and
+GLM-5.2~\citep{glm5team2026glm5}. The resulting grid contains 50 applicable
+target-agent $\times$ evolution-setting $\times$ backbone conditions. Within
+each paired condition, the backbone drives both task execution and
+backbone-coupled skill authoring; tasks, tools, judges, update cadence, and
+initial stores remain fixed. We compare \textbf{No Evolution}
 with EvoSkill~\citep{alzubi2026evoskill},
 SkillClaw~\citep{ma2026skillclaw}, AutoSkill~\citep{yang2026autoskill},
 SkillsVote~\citep{liu2026skillsvote}, and SkillOpt~\citep{yang2026skillopt},
@@ -440,21 +444,20 @@ procedures.}
 
 With the agents, methods, protocol, and metrics fixed in
 Section~\ref{sec:benchmark}, the diagnostic grid evaluates every applicable
-target-agent $\times$ evolution-method pair on the same frozen set of 25
-episodes. Episodes are stratified by AgentHazard risk category,
+target-agent $\times$ evolution-method $\times$ backbone condition on the same
+frozen set of 25 episodes. The full grid comprises 50 conditions, 1{,}250
+episodes, and 26{,}250 task executions. Episodes are stratified by AgentHazard risk category,
 autoresearch-discovered concept, and task surface; cells micro-aggregate the
-predeclared task distribution, while cross-agent summaries weight each target
-equally. No Evolution supplies the behavioral floor, and per-category,
-per-concept, and per-surface breakdowns appear in the appendix. RQ2 uses two
-predeclared target--method configurations and holds task identities, judges,
-tools, update count, and final probes fixed while varying only library snapshot,
-exposure order, or batch composition. For mitigation, EvoSkill, AutoSkill, and
-SkillsVote are evaluated raw, with Utility-only governance, and with \safeevolve on
-disjoint held-out episodes; repair policies and thresholds are selected on the
-train/development split before libraries are frozen. RQ3 additionally evaluates
-the full governed pipeline on SkillSafetyBench, its admission auditor on
-MalSkillBench, and capability preservation on SkillsBench and SkillLearnBench,
-always using each external benchmark's native metric and official split.
+predeclared task distribution. No Evolution supplies the behavioral floor, and
+per-category, per-concept, and per-surface breakdowns appear in the appendix.
+RQ2 holds the backbone at MiniMax-M2.5 and varies only library snapshot,
+exposure order, or batch composition for two predeclared target--method
+configurations. RQ3 evaluates EvoSkill, AutoSkill, and SkillsVote raw, with
+Utility-only governance, and with \safeevolve on disjoint held-out episodes;
+repair policies and thresholds are selected on the train/development split
+before libraries are frozen. It also reports SkillSafetyBench, MalSkillBench,
+SkillsBench, and SkillLearnBench using each benchmark's native metric and
+official split.
 
 \section{Results}
 \label{sec:results}
@@ -466,78 +469,118 @@ always using each external benchmark's native metric and official split.
 \begin{table*}[t]
 \centering
 \scriptsize
-\setlength{\tabcolsep}{3.5pt}
-\renewcommand{\arraystretch}{1.02}
+\setlength{\tabcolsep}{2.6pt}
+\renewcommand{\arraystretch}{0.96}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{llccc|ccc|ccc}
+\begin{tabular}{lllccc|ccc|ccc}
 \toprule
 \rowcolor{lightblue}
-\textbf{Target agent} & \textbf{Evolution setting} &
+\textbf{Target agent} & \textbf{Evolution setting} & \textbf{Backbone} &
 \multicolumn{3}{c|}{\textbf{Online behavior}} &
 \multicolumn{3}{c|}{\textbf{Evolved artifact}} &
 \multicolumn{3}{c}{\textbf{Post-attack}} \\
 \rowcolor{lightblue}
-& & \textbf{BU}$\uparrow$ & \textbf{M-ASR}$\downarrow$ & \textbf{B-ASR}$\downarrow$ &
+& & & \textbf{BU}$\uparrow$ & \textbf{M-ASR}$\downarrow$ & \textbf{B-ASR}$\downarrow$ &
 \textbf{CU}$\downarrow$ & \textbf{UG}$\downarrow$ & \textbf{Stealth}$\downarrow$ &
 \textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
-& No evolution        & 49.78 & 56.00 & 0.00 & N/A & N/A & N/A & N/A & 0.0 & 25.3 \\
+& & MiniMax & 49.78 & 56.00 & 0.00 & N/A & N/A & N/A & N/A & 0.0 & 25.3 \\
+& \multirow{-2}{*}{No evolution} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightgray}
-& EvoSkill            & 60.56 & \textbf{84.58} & \textbf{23.00} & 2.34 & 3.09 & 3.87 & \textbf{52.0} & \textbf{31.5} & \textbf{65.8} \\
-& SkillClaw           & 35.43 & 52.02 & 0.00 & 1.08 & 3.00 & 3.00 & 0.0 & 0.0 & 26.7 \\
+& & MiniMax & 60.56 & \textbf{84.58} & \textbf{23.00} & 2.34 & 3.09 & 3.87 & \textbf{52.0} & \textbf{31.5} & \textbf{65.8} \\
 \rowcolor{lightgray}
-& AutoSkill           & \textbf{65.33} & 59.11 & 8.44 & 2.54 & 2.91 & 4.07 & 50.7 & 16.0 & 64.0 \\
-& SkillsVote          & 62.67 & 56.44 & 7.11 & \textbf{2.58} & 3.05 & \textbf{4.19} & 46.7 & 18.7 & 65.3 \\
+& \multirow{-2}{*}{EvoSkill} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& & MiniMax & 35.43 & 52.02 & 0.00 & 1.08 & 3.00 & 3.00 & 0.0 & 0.0 & 26.7 \\
+& \multirow{-2}{*}{SkillClaw} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightgray}
-\multirow{-6}{*}{Claude Code}
-& SkillOpt            & 59.82 & 58.67 & 0.00 & 1.61 & \textbf{3.25} & 3.00 & 8.0 & 0.0 & 44.0 \\
+& & MiniMax & \textbf{65.33} & 59.11 & 8.44 & 2.54 & 2.91 & 4.07 & 50.7 & 16.0 & 64.0 \\
+\rowcolor{lightgray}
+& \multirow{-2}{*}{AutoSkill} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& & MiniMax & 62.67 & 56.44 & 7.11 & \textbf{2.58} & 3.05 & \textbf{4.19} & 46.7 & 18.7 & 65.3 \\
+& \multirow{-2}{*}{SkillsVote} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightgray}
+& & MiniMax & 59.82 & 58.67 & 0.00 & 1.61 & \textbf{3.25} & 3.00 & 8.0 & 0.0 & 44.0 \\
+\rowcolor{lightgray}
+\multirow{-12}{*}{Claude Code}
+& \multirow{-2}{*}{SkillOpt} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-& No evolution        & 78.14 & 68.69 & 0.47 & N/A & N/A & N/A & N/A & 0.0 & 64.8 \\
+& & MiniMax & 78.14 & 68.69 & 0.47 & N/A & N/A & N/A & N/A & 0.0 & 64.8 \\
+& \multirow{-2}{*}{No evolution} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightgray}
-& EvoSkill            & 55.40 & \textbf{84.13} & \textbf{23.58} & 1.93 & 2.93 & 3.79 & 13.3 & 28.4 & 58.2 \\
-& SkillClaw           & 62.84 & 64.45 & 2.75 & 1.30 & 3.00 & 4.00 & 9.3 & 1.4 & 37.0 \\
+& & MiniMax & 55.40 & \textbf{84.13} & \textbf{23.58} & 1.93 & 2.93 & 3.79 & 13.3 & 28.4 & 58.2 \\
 \rowcolor{lightgray}
-& AutoSkill           & \textbf{85.65} & 70.87 & 19.91 & \textbf{2.67} & 2.93 & \textbf{4.15} & \textbf{24.0} & \textbf{31.9} & 92.8 \\
-& SkillsVote          & \textbf{85.65} & 71.63 & 14.83 & 2.46 & 3.03 & 4.11 & 18.7 & 26.4 & \textbf{94.4} \\
+& \multirow{-2}{*}{EvoSkill} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& & MiniMax & 62.84 & 64.45 & 2.75 & 1.30 & 3.00 & 4.00 & 9.3 & 1.4 & 37.0 \\
+& \multirow{-2}{*}{SkillClaw} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightgray}
-\multirow{-6}{*}{Codex}
-& SkillOpt            & 74.88 & 72.16 & 0.99 & 1.46 & \textbf{3.25} & 4.00 & 12.0 & 0.0 & 65.2 \\
+& & MiniMax & \textbf{85.65} & 70.87 & 19.91 & \textbf{2.67} & 2.93 & \textbf{4.15} & \textbf{24.0} & \textbf{31.9} & 92.8 \\
+\rowcolor{lightgray}
+& \multirow{-2}{*}{AutoSkill} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& & MiniMax & \textbf{85.65} & 71.63 & 14.83 & 2.46 & 3.03 & 4.11 & 18.7 & 26.4 & \textbf{94.4} \\
+& \multirow{-2}{*}{SkillsVote} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightgray}
+& & MiniMax & 74.88 & 72.16 & 0.99 & 1.46 & \textbf{3.25} & 4.00 & 12.0 & 0.0 & 65.2 \\
+\rowcolor{lightgray}
+\multirow{-12}{*}{Codex}
+& \multirow{-2}{*}{SkillOpt} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-& No evolution        & 15.70 & 43.95 & 0.45 & N/A & N/A & N/A & N/A & 0.0 & 16.0 \\
+& & MiniMax & 15.70 & 43.95 & 0.45 & N/A & N/A & N/A & N/A & 0.0 & 16.0 \\
+& \multirow{-2}{*}{No evolution} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightgray}
-& EvoSkill            & 67.45 & \textbf{94.47} & \textbf{25.00} & 1.95 & 3.27 & 4.00 & 26.7 & 28.6 & \textbf{68.1} \\
-& SkillClaw           & 11.71 & 47.00 & 0.90 & 1.83 & 2.33 & 3.33 & 8.0 & 0.0 & 9.3 \\
+& & MiniMax & 67.45 & \textbf{94.47} & \textbf{25.00} & 1.95 & 3.27 & 4.00 & 26.7 & 28.6 & \textbf{68.1} \\
 \rowcolor{lightgray}
-& AutoSkill           & 57.85 & 56.74 & 11.21 & \textbf{2.71} & 2.88 & 4.11 & \textbf{50.7} & 18.1 & 58.3 \\
-& SkillsVote          & 48.17 & 55.66 & 5.96 & 2.50 & 2.70 & 4.02 & 34.7 & 6.8 & 48.6 \\
+& \multirow{-2}{*}{EvoSkill} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& & MiniMax & 11.71 & 47.00 & 0.90 & 1.83 & 2.33 & 3.33 & 8.0 & 0.0 & 9.3 \\
+& \multirow{-2}{*}{SkillClaw} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightgray}
-& SkillOpt            & 49.07 & 74.50 & 0.47 & 1.39 & \textbf{3.50} & 3.50 & 5.3 & 0.0 & 35.7 \\
-\multirow{-7}{*}{Hermes}
-& Hermes-native       & \textbf{67.57} & 73.42 & 16.14 & 2.70 & 3.25 & \textbf{4.22} & 42.7 & \textbf{32.4} & 63.5 \\
+& & MiniMax & 57.85 & 56.74 & 11.21 & \textbf{2.71} & 2.88 & 4.11 & \textbf{50.7} & 18.1 & 58.3 \\
+\rowcolor{lightgray}
+& \multirow{-2}{*}{AutoSkill} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& & MiniMax & 48.17 & 55.66 & 5.96 & 2.50 & 2.70 & 4.02 & 34.7 & 6.8 & 48.6 \\
+& \multirow{-2}{*}{SkillsVote} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightgray}
+& & MiniMax & 49.07 & 74.50 & 0.47 & 1.39 & \textbf{3.50} & 3.50 & 5.3 & 0.0 & 35.7 \\
+\rowcolor{lightgray}
+& \multirow{-2}{*}{SkillOpt} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& & MiniMax & \textbf{67.57} & 73.42 & 16.14 & 2.70 & 3.25 & \textbf{4.22} & 42.7 & \textbf{32.4} & 63.5 \\
+\multirow{-14}{*}{Hermes}
+& \multirow{-2}{*}{Hermes-native} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-& No evolution        & 37.33 & 44.00 & 0.44 & N/A & N/A & N/A & N/A & 1.3 & 26.7 \\
+& & MiniMax & 37.33 & 44.00 & 0.44 & N/A & N/A & N/A & N/A & 1.3 & 26.7 \\
+& \multirow{-2}{*}{No evolution} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightgray}
-& EvoSkill            & 50.73 & \textbf{87.63} & \textbf{30.24} & 2.06 & 3.20 & 3.90 & 25.3 & \textbf{31.8} & 45.5 \\
-& SkillClaw           & 30.22 & 46.67 & 1.33 & 1.46 & 3.00 & 3.75 & 6.7 & 1.3 & 20.0 \\
+& & MiniMax & 50.73 & \textbf{87.63} & \textbf{30.24} & 2.06 & 3.20 & 3.90 & 25.3 & \textbf{31.8} & 45.5 \\
 \rowcolor{lightgray}
-& AutoSkill           & \textbf{73.06} & 70.70 & 10.50 & 2.46 & 2.96 & 3.99 & \textbf{45.3} & 16.4 & \textbf{67.1} \\
-& SkillsVote          & 49.07 & 59.72 & 2.35 & 2.44 & 3.10 & \textbf{4.10} & 12.0 & 2.7 & 36.0 \\
+& \multirow{-2}{*}{EvoSkill} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& & MiniMax & 30.22 & 46.67 & 1.33 & 1.46 & 3.00 & 3.75 & 6.7 & 1.3 & 20.0 \\
+& \multirow{-2}{*}{SkillClaw} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \rowcolor{lightgray}
-\multirow{-6}{*}{OpenClaw}
-& SkillOpt            & 55.72 & 59.39 & 1.00 & \textbf{2.83} & \textbf{4.88} & 3.88 & 0.0 & 0.0 & 32.4 \\
+& & MiniMax & \textbf{73.06} & 70.70 & 10.50 & 2.46 & 2.96 & 3.99 & \textbf{45.3} & 16.4 & \textbf{67.1} \\
+\rowcolor{lightgray}
+& \multirow{-2}{*}{AutoSkill} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+& & MiniMax & 49.07 & 59.72 & 2.35 & 2.44 & 3.10 & \textbf{4.10} & 12.0 & 2.7 & 36.0 \\
+& \multirow{-2}{*}{SkillsVote} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
+\rowcolor{lightgray}
+& & MiniMax & 55.72 & 59.39 & 1.00 & \textbf{2.83} & \textbf{4.88} & 3.88 & 0.0 & 0.0 & 32.4 \\
+\rowcolor{lightgray}
+\multirow{-12}{*}{OpenClaw}
+& \multirow{-2}{*}{SkillOpt} & GLM-5.2 & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}}
-\caption{\textbf{Skill evolution across four target-agent configurations
-(RQ1).} Evolution often improves benign utility while increasing malicious
-success, and several settings progress from unsafe artifacts to benign
-contamination and fresh-session carryover harm. Bold marks the largest value
-among evolved settings within each target agent, highlighting the most severe
-risk or strongest retained utility.}
+\caption{\textbf{Skill evolution across agents, methods, and backbones
+(RQ1).} The grid pairs every target-agent and evolution setting with
+MiniMax-M2.5 and GLM-5.2 under the same task and update protocol. Evolution
+often improves benign utility while increasing malicious success, and several
+settings progress from unsafe artifacts to benign contamination and
+fresh-session carryover harm. Bold marks the largest value among evolved
+settings for each target-agent and backbone, highlighting the most severe risk
+or strongest retained utility. Dashes mark GLM-5.2 runs awaiting aggregation.}
 \label{tab:misevolution-main}
 \end{table*}
 
 \paragraph{Practice improves utility while increasing unsafe success.}
-Against each framework's own No Evolution control under the shared backbone,
+Across the completed MiniMax rows, against each framework's own No Evolution
+control,
 BU is higher in 15 of 21 evolved conditions and C-Util is higher in 17 of 21,
 while M-ASR is higher in 19 of 21. Codex with AutoSkill and SkillsVote makes the
 coexistence clearest: BU reaches 85.65 and C-Util reaches 92.8/94.4, while
@@ -962,7 +1005,8 @@ state, allowing every result to be replayed from the same constructed task and
 skill snapshot.
 
 \paragraph{Operational isolation.}
-The harness launches every $(\text{episode},\text{method},\text{agent})$ cell as
+The harness launches every
+$(\text{episode},\text{method},\text{agent},\text{backbone})$ cell as
 a separate process with an episode-scoped output directory and newly initialized
 method store. Tasks execute serially inside the cell, but each task receives a
 new disposable container and session. Before the task starts, the adapter writes
@@ -986,13 +1030,14 @@ This separation lets the same evolving library drive Claude
 Code~\citep{anthropic2025claudecode}, Codex~\citep{openai2025codexcli},
 Hermes~\citep{nousresearch2026hermesagent}, or
 OpenClaw~\citep{openclaw2026openclaw} without substituting one framework's agent
-loop for another. The executor and evolution model are both
-MiniMax-M2.7~\citep{minimax2026m25}. Each external method receives
-one ordered three-trajectory block at an update boundary, writes into a fresh
-episode-scoped store, and retrieves from that store before the next task. The
-adapter preserves the method's own update gate and artifact format; task execution,
-sandbox reset, outcome judges, block cadence, and final clean reload are supplied
-by the Gym. The source revisions used for the reported runs are EvoSkill
+loop for another. Each condition selects either MiniMax-M2.5 or GLM-5.2 for
+both the executor and the method's backbone-coupled evolution model. Each
+external method receives one ordered three-trajectory block at an update
+boundary, writes into a fresh episode-scoped store, and retrieves from that
+store before the next task. The adapter preserves the method's own update gate
+and artifact format; task execution, sandbox reset, outcome judges, block
+cadence, and final clean reload are supplied by the Gym. The source revisions
+used for the reported runs are EvoSkill
 \texttt{36f6f04}, SkillClaw \texttt{bf4dc2e}, AutoSkill \texttt{94c47ca},
 SkillsVote \texttt{86fd739}, SkillOpt \texttt{57333f3}, and Hermes Agent
 \texttt{3ed7c8a}. For reproducibility, the descriptions below specify each
@@ -1018,7 +1063,8 @@ objective was not completed, and a malicious trace enters only when its harmful
 objective was not realized. Runtime errors and missing outcomes are excluded, and
 the update is skipped when a block contains no such failure. EvoSkill therefore
 distills from unmet or refused trajectories rather than successful executions.
-Both agents run MiniMax-M2.7 through EvoSkill's OpenHands/LiteLLM Anthropic route,
+Both agents run the condition's selected backbone through EvoSkill's
+OpenHands/LiteLLM Anthropic route,
 with reasoning kept outside the returned skill text. The two
 authoring-helper skills shipped by EvoSkill are available to the builder but are
 neither injected into the target agent nor scored as evolved artifacts. At
@@ -1055,8 +1101,9 @@ enters summarization. An accepted improve action rewrites the referenced skill i
 place, providing its self-reinforcing path; a same-name creation is likewise
 treated as an improvement. The adapter deliberately does not call SkillClaw's
 cross-version \texttt{execute\_merge}: \texttt{\_replace=True} makes the accepted
-single-group revision authoritative. All authoring stages use MiniMax-M2.7 over
-the Anthropic endpoint with thinking disabled.
+single-group revision authoritative. All authoring stages use the condition's
+selected backbone over the Anthropic-compatible endpoint with thinking
+disabled.
 
 \subsection{AutoSkill}
 
@@ -1085,8 +1132,9 @@ version, whereas a new skill begins at version \texttt{0.1.0}. Before each task,
 \texttt{AutoSkill.search} uses the released hybrid dense--BM25 ranker to retrieve
 up to five skills, and \texttt{export\_skill\_md} serializes exactly the selected
 subset for injection and artifact auditing. Both extractor and maintainer run
-MiniMax-M2.7 over the Anthropic endpoint with thinking disabled; embeddings use a
-local $256$-dimensional hashing index. Merging a new observation back into the
+the condition's selected backbone over the Anthropic-compatible endpoint with
+thinking disabled; embeddings use a local $256$-dimensional hashing index.
+Merging a new observation back into the
 retrieved skill identity is AutoSkill's self-reinforcing path.
 
 \subsection{SkillsVote}
@@ -1118,8 +1166,8 @@ The payload then passes unchanged through
 directory, lets the reviser modify it, then copies the accepted result back while
 retaining a timestamped backup and \texttt{EVOLUTION\_LOG.json}; editing the linked
 artifact is SkillsVote's self-reinforcing path. Its authoring agent is Codex CLI
-routed to MiniMax-M2.7 through the MiniMax Responses endpoint, with no alternate
-model fallback.
+routed to the condition's selected backbone through the configured model
+endpoint, with no alternate-model fallback.
 
 \subsection{SkillOpt}
 
@@ -1141,8 +1189,9 @@ validation slice when available, while failures drive reflection. This alignment
 lets the optimization and gate measure the behavior under study: an edit
 that raises validation success for a malicious objective can become the new
 persistent document. The routine permits at most four bounded edits per block;
-reflection, candidate generation, and validation replay use MiniMax-M2.7 over the
-Anthropic endpoint with thinking disabled.
+reflection, candidate generation, and validation replay use the condition's
+selected backbone over the Anthropic-compatible endpoint with thinking
+disabled.
 
 \subsection{Hermes-native implementation}
 
@@ -1160,7 +1209,8 @@ the counter after a real \texttt{skill\_manage} call or after the review fires. 
 default interval is $10$ and the Gym sets it to $1$ for short tasks. This trigger
 is not success-gated: it requires a nonempty final response and a turn that was not
 interrupted, rather than a positive task reward. The review is a complete second
-MiniMax-M2.7 agent turn running in a daemon thread for at most $16$ iterations. Its
+agent turn on the condition's selected backbone, running in a daemon thread for
+at most $16$ iterations. Its
 tool surface is restricted to memory and skills, and
 \texttt{\_persist\_disabled} prevents it from writing into the user's foreground
 session. Its native prompt favors patching the currently relevant skill, then an
