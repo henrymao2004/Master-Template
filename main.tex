@@ -191,45 +191,32 @@ Our contributions are:
 
 \paragraph{Agent skill learning and evolution.}
 Agent skills have become a persistent adaptation layer that turns interaction
-traces into reusable procedures. Existing systems instantiate different
-evolution policies for extracting, merging, revising, recommending, and
-collectively refining skills across tasks, sessions, users, and agents
-\citep{cai2025ell,yang2026autoskill,ma2026skillclaw,liu2026skillsvote,lin2026museautoskill}.
-A second line treats the skill artifact as an optimization object, using failure
-analysis, trace-conditioned edits, paired-trajectory audits, co-evolving
-verifiers, or held-out utility gates to select successive versions
-\citep{alzubi2026evoskill,zhang2026coevoskills,gao2026skillaudit,liu2026skillrevise,yang2026skillopt}.
-Other work learns skill-management policies, recursively co-evolves skill banks
-with agent policies, derives skills for adaptive coding curricula, compiles
-heterogeneous knowledge into executable contracts, or evolves typed relations
-for large-library retrieval
+traces into reusable procedures. Existing systems extract, merge, revise, and
+recommend skills through experience-driven maintenance, failure analysis,
+trace-conditioned edits, verification, and utility gates
+\citep{cai2025ell,yang2026autoskill,ma2026skillclaw,liu2026skillsvote,lin2026museautoskill,alzubi2026evoskill,zhang2026coevoskills,gao2026skillaudit,liu2026skillrevise,yang2026skillopt}.
+Related work co-evolves skill banks and agent policies, derives coding skills,
+compiles external knowledge, or organizes large skill libraries
 \citep{li2026codeskill,xia2026skillrl,xiao2026socraticswe,pan2026anything2skill,bai2026skilldag}.
-SkillsBench, SkillLearnBench, and SWE-Skills-Bench measure task success, skill
-quality, transfer, and the marginal utility of skill injection
+Capability benchmarks measure task success, skill quality, transfer, and the
+marginal utility of skill injection
 \citep{li2026skillsbench,zhong2026skilllearnbench,han2026sweskillsbench}.
-Together these works establish how evolution updates create, improve, select,
-and evaluate skills for capability. We study the safety of that update itself:
-whether it selects an unsafe success, writes a reusable procedure into
-persistent state, and enables later retrieval and execution.
+We instead study whether the evolution update selects an unsafe success, writes
+it into persistent state, and enables later retrieval and execution.
 
 \paragraph{Safety of self-evolving agents and agent skills.}
 Research on self-evolving agents identifies safety and capability drift across
-model, memory, tool, workflow, and experience updates, and develops longitudinal
-memory benchmarks and trust-aware evolution mechanisms
+model, memory, tool, workflow, and experience updates
 \citep{shao2025misevolution,zhao2026safety,xie2026memevobench,cheng2026tame,yu2026forgetting,lin2026selfevolvingsafety}.
-Skill-security work studies a complementary threat model in which malicious or
-compromised skill files are supplied to an agent, measuring harmful execution,
-detection, and the safety--utility trade-off of filtering
+Skill-security work instead supplies malicious or compromised skill files and
+measures execution, detection, and filtering
 \citep{schmotz2026skillinject,jin2026skillsafetybench,guo2026malskillbench}.
-More broadly, agent-safety research evaluates unsafe tool use, direct and
-indirect prompt injection, risky code execution, harmful multi-step objectives,
-and defenses, and automates red-teaming in executable or emulated environments
+Agent-safety benchmarks and red-team environments cover unsafe tool use, prompt
+injection, risky code execution, and harmful multi-step objectives
 \citep{ruan2023toolemu,debenedetti2024agentdojo,andriushchenko2024agentharm,zhang2024asb,zhang2024agentsafetybench,guo2024redcode,vijayvargiya2025openagentsafety,feng2026agenthazard,chen2026decodingtrust,alpay2026agentsecbench,weng2026argus,shayoni2026netinjectbench,mao2026aha}.
-Our setting connects these lines while changing the origin of the artifact:
-rather than receiving a supplied malicious skill, the agent's evolution method
-authors one endogenously from task experience. The resulting procedure is then
-tracked through library admission, retrieval, benign contamination, and
-clean-session carryover as one lifecycle.
+Our setting changes the artifact's origin: the evolution method authors an
+unsafe skill from task experience, which we track through admission, retrieval,
+benign contamination, and clean-session carryover.
 
 \section{Skill Misevolution}
 \label{sec:problem}
