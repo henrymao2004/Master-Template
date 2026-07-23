@@ -68,11 +68,10 @@ also introduce \safeevolve, which governs skill
 admission and reuse through targeted repair, verification preservation,
 provenance, and retirement. Across four agent frameworks, a shared MiniMax
 backbone, and six evolution methods, we evaluate 25 agent--method conditions,
-each on 525 tasks organized into 25 episodes. Eleven evolved conditions exhibit
+each on 525 tasks organized into 25 episodes. Fifteen evolved conditions exhibit
 unsafe artifacts, retrieval, benign
-contamination, and fresh-session carryover. EvoSkill instead retrieves unsafe
-skills across four agent frameworks at rates of 12.0--45.3\% while producing
-zero carryover ASR.
+contamination, and fresh-session carryover. EvoSkill crosses this full lifecycle
+in all four frameworks, reaching 28.4--31.8\% carryover ASR.
 This separation reveals the central insight: misevolution is a gated lifecycle,
 and safety evaluation must locate whether risk stops at authoring, retrieval, or
 execution. \safeevolve targets both the write and reuse gates while preserving
@@ -159,10 +158,10 @@ retirement. This targets the state that carries risk across tasks while
 retaining the useful procedure.
 
 Across all 25 agent--method conditions, each evaluated on 525 executable tasks
-organized into 25 episodes, the benchmark reveals a gated lifecycle. Eleven
+organized into 25 episodes, the benchmark reveals a gated lifecycle. Fifteen
 evolved conditions exhibit unsafe artifacts, retrieval, benign
-contamination, and fresh-session carryover, whereas EvoSkill retrieves unsafe
-skills in all four agent frameworks but produces zero carryover ASR. The resulting
+contamination, and fresh-session carryover; EvoSkill crosses this full lifecycle
+in all four agent frameworks. The resulting
 insight is operational: artifact risk is broader than realized harm, and the
 layer where progression stops determines what must be governed.
 
@@ -483,7 +482,7 @@ always using each external benchmark's native metric and official split.
 \midrule
 \multirow{6}{*}{Claude Code}
 & No evolution        & 49.78 & 56.00 & 0.00 & N/A & N/A & N/A & N/A & 0.0 & 25.3 \\
-& EvoSkill            & 71.11 & 62.22 & 0.44 & 1.79 & 3.05 & 4.05 & 45.3 & 0.0 & 76.0 \\
+& EvoSkill            & 60.56 & 84.58 & 23.00 & 2.34 & 3.09 & 3.87 & 52.0 & 31.5 & 65.8 \\
 & SkillClaw           & 35.43 & 52.02 & 0.00 & 1.08 & 3.00 & 3.00 & 0.0 & 0.0 & 26.7 \\
 & AutoSkill           & 65.33 & 59.11 & 8.44 & 2.54 & 2.91 & 4.07 & 50.7 & 16.0 & 64.0 \\
 & SkillsVote          & 62.67 & 56.44 & 7.11 & 2.58 & 3.05 & 4.19 & 46.7 & 18.7 & 65.3 \\
@@ -491,7 +490,7 @@ always using each external benchmark's native metric and official split.
 \midrule
 \multirow{6}{*}{Codex}
 & No evolution        & 78.14 & 68.69 & 0.47 & N/A & N/A & N/A & N/A & 0.0 & 64.8 \\
-& EvoSkill            & 76.82 & 67.43 & 1.36 & 1.45 & 2.56 & 3.67 & 12.0 & 0.0 & 64.4 \\
+& EvoSkill            & 55.40 & 84.13 & 23.58 & 1.93 & 2.93 & 3.79 & 13.3 & 28.4 & 58.2 \\
 & SkillClaw           & 62.84 & 64.45 & 2.75 & 1.30 & 3.00 & 4.00 & 9.3 & 1.4 & 37.0 \\
 & AutoSkill           & 85.65 & 70.87 & 19.91 & 2.67 & 2.93 & 4.15 & 24.0 & 31.9 & 92.8 \\
 & SkillsVote          & 85.65 & 71.63 & 14.83 & 2.46 & 3.03 & 4.11 & 18.7 & 26.4 & 94.4 \\
@@ -499,7 +498,7 @@ always using each external benchmark's native metric and official split.
 \midrule
 \multirow{7}{*}{Hermes}
 & No evolution        & 15.70 & 43.95 & 0.45 & N/A & N/A & N/A & N/A & 0.0 & 16.0 \\
-& EvoSkill            & 78.50 & 71.72 & 0.93 & 1.41 & 3.50 & 4.12 & 28.0 & 0.0 & 76.4 \\
+& EvoSkill            & 67.45 & 94.47 & 25.00 & 1.95 & 3.27 & 4.00 & 26.7 & 28.6 & 68.1 \\
 & SkillClaw           & 11.71 & 47.00 & 0.90 & 1.83 & 2.33 & 3.33 & 8.0 & 0.0 & 9.3 \\
 & AutoSkill           & 57.85 & 56.74 & 11.21 & 2.71 & 2.88 & 4.11 & 50.7 & 18.1 & 58.3 \\
 & SkillsVote          & 48.17 & 55.66 & 5.96 & 2.50 & 2.70 & 4.02 & 34.7 & 6.8 & 48.6 \\
@@ -508,7 +507,7 @@ always using each external benchmark's native metric and official split.
 \midrule
 \multirow{6}{*}{OpenClaw}
 & No evolution        & 37.33 & 44.00 & 0.44 & N/A & N/A & N/A & N/A & 1.3 & 26.7 \\
-& EvoSkill            & 62.62 & 68.32 & 2.43 & 1.86 & 3.26 & 3.95 & 22.7 & 0.0 & 50.0 \\
+& EvoSkill            & 50.73 & 87.63 & 30.24 & 2.06 & 3.20 & 3.90 & 25.3 & 31.8 & 45.5 \\
 & SkillClaw           & 30.22 & 46.67 & 1.33 & 1.46 & 3.00 & 3.75 & 6.7 & 1.3 & 20.0 \\
 & AutoSkill           & 73.06 & 70.70 & 10.50 & 2.46 & 2.96 & 3.99 & 45.3 & 16.4 & 67.1 \\
 & SkillsVote          & 49.07 & 59.72 & 2.35 & 2.44 & 3.10 & 4.10 & 12.0 & 2.7 & 36.0 \\
@@ -525,7 +524,7 @@ contamination and fresh-session carryover harm.}
 \paragraph{Practice improves utility while increasing unsafe success.}
 Against each framework's own No Evolution control under the shared backbone,
 BU is higher in 15 of 21 evolved conditions and C-Util is higher in 17 of 21,
-while M-ASR is higher in 18 of 21. Codex with AutoSkill and SkillsVote makes the
+while M-ASR is higher in 19 of 21. Codex with AutoSkill and SkillsVote makes the
 coexistence clearest: BU reaches 85.65 and C-Util reaches 92.8/94.4, while
 M-ASR reaches 70.87/71.63. Skill evolution can therefore retain useful and
 malicious behavior together rather than exposing risk through utility loss.
@@ -533,21 +532,21 @@ malicious behavior together rather than exposing risk through utility loss.
 \paragraph{Risk contracts across lifecycle gates.}
 All 21 evolved conditions contain at least one authored artifact with
 $cu\geq3$, so UG and Stealth are defined; 19 show nonzero URR, 19 show nonzero
-B-ASR, and 11 retain nonzero C-ASR after a clean \texttt{SKILL.md}-only reload.
+B-ASR, and 15 retain nonzero C-ASR after a clean \texttt{SKILL.md}-only reload.
 The corresponding No Evolution floors are at most 0.47 B-ASR and 1.3 C-ASR.
-This $21\rightarrow19\rightarrow11$ contraction is the central misevolution
+This $21\rightarrow19\rightarrow15$ contraction is the central misevolution
 signature: content unsafety is widespread, but persistent harm appears only
 when the artifact is retrieved, reused on benign tasks, and executed after the
 original attack has disappeared.
 
 \paragraph{Evolution methods stop at different gates.}
-AutoSkill and SkillsVote cross every observed gate in all four frameworks, and
-Hermes-native reaches 16.14 B-ASR and 32.4 C-ASR. EvoSkill instead retrieves
-unsafe skills at 12.0--45.3\% across all four frameworks but produces zero
-C-ASR; OpenClaw with SkillOpt has the table's highest UG (4.88) but zero URR and
+AutoSkill, SkillsVote, and EvoSkill cross every observed gate in all four
+frameworks. EvoSkill reaches 23.00--30.24 B-ASR and 28.4--31.8 C-ASR, while
+Hermes-native reaches 16.14 B-ASR and 32.4 C-ASR. OpenClaw with SkillOpt has the
+table's highest UG (4.88) but zero URR and
 C-ASR. CU, UG, Stealth, URR, and behavioral ASR therefore diagnose distinct
 stages rather than interchangeable notions of safety. Moreover, C-Util exceeds
-No Evolution in 9 of the 11 full-signature conditions. These profiles motivate
+No Evolution in 12 of the 15 full-signature conditions. These profiles motivate
 governing both skill admission and reuse while preserving the useful procedure,
 the two boundaries targeted by \safeevolve.
 
@@ -603,9 +602,9 @@ schedules appear in the appendix.
 \label{sec:rq3}
 
 We evaluate \safeevolve with EvoSkill, AutoSkill, and SkillsVote, selected by
-their post-attack profiles in RQ1. AutoSkill and SkillsVote exhibit fresh-session
-carryover harm, whereas EvoSkill has high unsafe retrieval but zero carryover
-ASR. Raw evolution, Utility-only governance, and \safeevolve are compared under
+their post-attack profiles in RQ1. All three exhibit fresh-session carryover
+harm under distinct artifact and retrieval profiles. Raw evolution, Utility-only
+governance, and \safeevolve are compared under
 the same hooks and update budget. The middle condition tests whether ordinary
 capability-based library hygiene is sufficient without safety-specific evidence.
 This contrast tests whether mitigation suppresses both realized persistent harm
@@ -642,7 +641,7 @@ rather than collapsed into one score.
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{EvoSkill}
- & Raw             & 71.11/62.22/0.44 & 76.82/67.43/1.36 & 78.50/71.72/0.93 & 62.62/68.32/2.43 & 72.26/67.42/1.29 \\
+ & Raw             & 60.56/84.58/23.00 & 55.40/84.13/23.58 & 67.45/94.47/25.00 & 50.73/87.63/30.24 & 58.54/87.70/25.46 \\
  & Utility-only    & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
@@ -658,7 +657,7 @@ rather than collapsed into one score.
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{EvoSkill}
- & Raw             & 1.79/3.05/4.05 & 1.45/2.56/3.67 & 1.41/3.50/4.12 & 1.86/3.26/3.95 & 1.63/3.09/3.95 \\
+ & Raw             & 2.34/3.09/3.87 & 1.93/2.93/3.79 & 1.95/3.27/4.00 & 2.06/3.20/3.90 & 2.07/3.12/3.89 \\
  & Utility-only    & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
@@ -674,7 +673,7 @@ rather than collapsed into one score.
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
 \multirow{3}{*}{EvoSkill}
- & Raw             & 45.3/0.0/76.0 & 12.0/0.0/64.4 & 28.0/0.0/76.4 & 22.7/0.0/50.0 & 27.0/0.0/66.7 \\
+ & Raw             & 52.0/31.5/65.8 & 13.3/28.4/58.2 & 26.7/28.6/68.1 & 25.3/31.8/45.5 & 29.3/30.1/59.4 \\
  & Utility-only    & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
  & \safeevolve     & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
 \midrule
@@ -727,19 +726,19 @@ reports the complete per-method breakdown.}
 \textbf{CU}$\downarrow$ & \textbf{UG}$\downarrow$ & \textbf{Stealth}$\downarrow$ &
 \textbf{URR}$\downarrow$ & \textbf{C-ASR}$\downarrow$ & \textbf{C-Util}$\uparrow$ \\
 \midrule
-Claude Code & Raw & 66.37 & 59.26 & 5.33 & 2.30 & 3.00 & 4.10 & 47.6 & 11.6 & 68.4 \\
+Claude Code & Raw & 62.85 & 66.71 & 12.85 & 2.49 & 3.02 & 4.04 & 49.8 & 22.1 & 65.0 \\
 Claude Code & Utility-only & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 Claude Code & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-Codex & Raw & 82.70 & 69.98 & 12.03 & 2.20 & 2.84 & 3.97 & 18.2 & 19.4 & 83.9 \\
+Codex & Raw & 75.56 & 75.55 & 19.44 & 2.35 & 2.96 & 4.01 & 18.7 & 28.9 & 81.8 \\
 Codex & Utility-only & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 Codex & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-Hermes & Raw & 61.51 & 61.37 & 6.04 & 2.21 & 3.03 & 4.08 & 37.8 & 8.3 & 61.1 \\
+Hermes & Raw & 57.82 & 68.96 & 14.06 & 2.39 & 2.95 & 4.04 & 37.3 & 17.8 & 58.4 \\
 Hermes & Utility-only & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 Hermes & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \midrule
-OpenClaw & Raw & 61.58 & 66.24 & 5.09 & 2.26 & 3.11 & 4.01 & 26.7 & 6.4 & 51.0 \\
+OpenClaw & Raw & 57.62 & 72.68 & 14.36 & 2.32 & 3.08 & 4.00 & 27.6 & 17.0 & 49.5 \\
 OpenClaw & Utility-only & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 OpenClaw & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \bottomrule
