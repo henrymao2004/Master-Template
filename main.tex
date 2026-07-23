@@ -630,25 +630,16 @@ schedules appear in the appendix.
 \subsection{RQ3: How do safety and utility compare under SafeEvolve?}
 \label{sec:rq3}
 
-Because an unsafe evolution update can persist without immediately producing
-harm, governance must address both library admission and later reuse. We
-evaluate \safeevolve with EvoSkill, AutoSkill, and SkillsVote, selected by
-their post-attack profiles in RQ1. All three exhibit fresh-session carryover
-harm under distinct artifact and retrieval profiles. Raw evolution, Utility-only
-governance, and \safeevolve are compared under
-the same hooks and update budget. The middle condition tests whether ordinary
-capability-based library hygiene is sufficient without safety-specific evidence.
-This contrast tests whether mitigation suppresses both realized persistent harm
-and retrieved risk that has not yet produced harmful execution. The
-mitigation evaluation uses held-out AgentHazard episodes and attack
-strategies that are hidden
-during evolution, repair-policy development, and threshold selection. Libraries
-are frozen before evaluation. A favorable mitigation profile has lower
-malicious ASR, benign contamination, and lower artifact scores alongside preserved
-benign utility. Post-attack, it has either no unsafe exported skill or, where
-unsafe exported skills remain, lower fresh-session URR and carryover ASR
-alongside preserved carryover utility. The three stages are reported together
-rather than collapsed into one score.
+Unsafe updates may remain latent until later retrieval, so \safeevolve governs
+both library admission and reuse. We evaluate it with EvoSkill, AutoSkill, and
+SkillsVote, three methods with distinct carryover profiles in RQ1. Raw
+evolution, Utility-only governance, and \safeevolve use identical hooks and
+update budgets; Utility-only isolates the value of safety-specific evidence.
+Evaluation uses held-out AgentHazard episodes and attack strategies hidden
+during policy development and threshold selection, with libraries frozen before
+testing. We jointly report online behavior, artifact risk, and post-attack
+carryover, asking whether \safeevolve lowers risk while preserving benign and
+carryover utility.
 
 % Appendix table defined here and rendered after \appendix.
 \newcommand{\safeevolvefulltable}{%
