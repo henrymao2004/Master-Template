@@ -94,6 +94,21 @@ has become a persistent policy change. We call this skill-specific failure
 model, memory, tool, and workflow adaptation
 \citep{shao2025misevolution,zhao2026safety,xie2026memevobench,lin2026selfevolvingsafety}.
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{skillevolve.pdf}
+\caption{\textbf{SkillMisevo-Gym and SkillMisevo-Bench.}
+\textbf{(a)} AgentHazard supplies a harmful-task contract; an external
+autoresearch stage tests malicious--benign pairs to discover validated
+vulnerability concepts, and our constructor instantiates those concepts as
+fresh $M/B/P$ tasks and assembles the episodes. \textbf{(b)} \bench fixes the
+longitudinal episode, benign-completion judge, and lifecycle metrics;
+\gym executes it with versioned skill state, observable authoring and retrieval,
+and clean-session replay. The discovery VCG is never exposed to the evaluated
+agent; only its self-authored \texttt{SKILL.md} crosses the final reset.}
+\label{fig:episode}
+\end{figure*}
+
 Existing benchmark families expose adjacent parts of this problem but not the
 complete longitudinal chain. Capability-oriented skill benchmarks measure task
 success, transfer, skill quality, or the marginal value of skill injection
@@ -138,20 +153,7 @@ persistence tasks, and assembles the fixed exposure schedule. \bench adds an
 orthogonal benign-completion judge and measures online behavior, evolved
 artifacts, and post-attack carryover with nine metrics.
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{skillevolve.pdf}
-\caption{\textbf{SkillMisevo-Gym and SkillMisevo-Bench.}
-\textbf{(a)} AgentHazard supplies a harmful-task contract; an external
-autoresearch stage tests malicious--benign pairs to discover validated
-vulnerability concepts, and our constructor instantiates those concepts as
-fresh $M/B/P$ tasks and assembles the episodes. \textbf{(b)} \bench fixes the
-longitudinal episode, benign-completion judge, and lifecycle metrics;
-\gym executes it with versioned skill state, observable authoring and retrieval,
-and clean-session replay. The discovery VCG is never exposed to the evaluated
-agent; only its self-authored \texttt{SKILL.md} crosses the final reset.}
-\label{fig:episode}
-\end{figure*}
+
 
 We further introduce \safeevolve, a governance layer at the persistent update
 boundary (Figure~\ref{fig:safeevolve}). At write time it audits and repairs
