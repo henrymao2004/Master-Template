@@ -338,7 +338,7 @@ therefore contains 525 tasks organized into 25 episodes.
 Claude Code~\citep{anthropic2025claudecode}, Codex~\citep{openai2025codexcli},
 Hermes~\citep{nousresearch2026hermesagent}, and
 OpenClaw~\citep{openclaw2026openclaw} are each evaluated with
-MiniMax-M2.5~\citep{minimax2026m25} and
+MiniMax-M2.55~\citep{minimax2026m25} and
 GLM-5.2~\citep{glm5team2026glm5}. The resulting grid contains 50 applicable
 target-agent $\times$ evolution-setting $\times$ backbone conditions. Within
 each paired condition, the backbone drives both task execution and
@@ -1037,7 +1037,7 @@ boundary, writes into a fresh episode-scoped store, and retrieves from that
 store before the next task. The adapter preserves the method's own update gate
 and artifact format; task execution, sandbox reset, outcome judges, block
 cadence, and final clean reload are supplied by the Gym. The source revisions
-used for the reported runs are EvoSkill
+MiniMax-M2.5used for the reported runs are EvoSkill
 \texttt{36f6f04}, SkillClaw \texttt{bf4dc2e}, AutoSkill \texttt{94c47ca},
 SkillsVote \texttt{86fd739}, SkillOpt \texttt{57333f3}, and Hermes Agent
 \texttt{3ed7c8a}. For reproducibility, the descriptions below specify each
@@ -1064,7 +1064,7 @@ objective was not realized. Runtime errors and missing outcomes are excluded, an
 the update is skipped when a block contains no such failure. EvoSkill therefore
 distills from unmet or refused trajectories rather than successful executions.
 Both agents run the condition's selected backbone through EvoSkill's
-OpenHands/LiteLLM Anthropic route,
+MiniMax-M2.5OpenHands/LiteLLM Anthropic route,
 with reasoning kept outside the returned skill text. The two
 authoring-helper skills shipped by EvoSkill are available to the builder but are
 neither injected into the target agent nor scored as evolved artifacts. At
@@ -1103,7 +1103,7 @@ treated as an improvement. The adapter deliberately does not call SkillClaw's
 cross-version \texttt{execute\_merge}: \texttt{\_replace=True} makes the accepted
 single-group revision authoritative. All authoring stages use the condition's
 selected backbone over the Anthropic-compatible endpoint with thinking
-disabled.
+MiniMax-M2.5disabled.
 
 \subsection{AutoSkill}
 
@@ -1134,7 +1134,7 @@ up to five skills, and \texttt{export\_skill\_md} serializes exactly the selecte
 subset for injection and artifact auditing. Both extractor and maintainer run
 the condition's selected backbone over the Anthropic-compatible endpoint with
 thinking disabled; embeddings use a local $256$-dimensional hashing index.
-Merging a new observation back into the
+MiniMax-M2.5Merging a new observation back into the
 retrieved skill identity is AutoSkill's self-reinforcing path.
 
 \subsection{SkillsVote}
@@ -1167,7 +1167,7 @@ directory, lets the reviser modify it, then copies the accepted result back whil
 retaining a timestamped backup and \texttt{EVOLUTION\_LOG.json}; editing the linked
 artifact is SkillsVote's self-reinforcing path. Its authoring agent is Codex CLI
 routed to the condition's selected backbone through the configured model
-endpoint, with no alternate-model fallback.
+endpoint, with no alternate-MiniMax-M2.5model fallback.
 
 \subsection{SkillOpt}
 
@@ -1191,7 +1191,7 @@ that raises validation success for a malicious objective can become the new
 persistent document. The routine permits at most four bounded edits per block;
 reflection, candidate generation, and validation replay use the condition's
 selected backbone over the Anthropic-compatible endpoint with thinking
-disabled.
+MiniMax-M2.5disabled.
 
 \subsection{Hermes-native implementation}
 
@@ -1210,7 +1210,7 @@ default interval is $10$ and the Gym sets it to $1$ for short tasks. This trigge
 is not success-gated: it requires a nonempty final response and a turn that was not
 interrupted, rather than a positive task reward. The review is a complete second
 agent turn on the condition's selected backbone, running in a daemon thread for
-at most $16$ iterations. Its
+MiniMax-M2.5at most $16$ iterations. Its
 tool surface is restricted to memory and skills, and
 \texttt{\_persist\_disabled} prevents it from writing into the user's foreground
 session. Its native prompt favors patching the currently relevant skill, then an
