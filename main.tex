@@ -461,9 +461,8 @@ exposure order, or batch composition. For mitigation, EvoSkill, AutoSkill, and
 SkillsVote are evaluated raw, with Utility-only governance, and with \safeevolve on
 disjoint held-out episodes; repair policies and thresholds are selected on the
 train/development split before libraries are frozen. RQ3 additionally evaluates
-the full governed pipeline on SkillSafetyBench, its admission auditor on
-MalSkillBench, and capability preservation on SkillsBench and SkillLearnBench,
-always using each external benchmark's native metric and official split.
+capability preservation on SkillsBench and SkillLearnBench, using each
+benchmark's native metrics and official split.
 
 \section{Results}
 \label{sec:results}
@@ -777,36 +776,6 @@ OpenClaw & \safeevolve & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
 \end{tabular}}
 \end{table*}
 
-\paragraph{Full-system evaluation on SkillSafetyBench.}
-The held-out episode table tests end-to-end mitigation inside evolving agents.
-We then test the complete \safeevolve pipeline on SkillSafetyBench, which places
-adversarial content in skill-facing local artifacts and measures whether an
-agent both completes the nominal task and realizes the attack
-\citep{jin2026skillsafetybench}. For each case, the original clean SkillsBench
-skill is the ancestor and the attacked skill bundle is the proposed update.
-\safeevolve runs admission, repair, verification preservation, lineage,
-quarantine/rollback, selection, and governed reuse over the complete bundle and
-its referenced files before the resulting skill is executed in the official
-environment. The gym's multi-round episodes remain the test of longitudinal
-retirement; SkillSafetyBench supplies an independent one-update, downstream
-behavior test.
-
-SkillSafetyBench's unsafe outcome on a nominally benign task resembles benign
-ASR (contamination), but the evaluation setup differs: it supplies the adversarial
-artifact in the evaluated run, whereas \bench contamination is harmful behavior
-observed on a later zero-injection benign task after a skill was learned from
-earlier malicious experience. We therefore retain SkillSafetyBench's official ASR, task
-success, and task-success-conditional ASR rather than relabeling its result as
-contamination (Table~\ref{tab:external-eval}).
-
-\paragraph{Admission-auditor evaluation on MalSkillBench.}
-MalSkillBench is a labeled static corpus of malicious and benign skill bundles
-\citep{guo2026malskillbench}. It cannot exercise repair trajectories, lineage,
-retirement, or downstream reuse, so we use it only to diagnose \safeevolve's
-admission auditor. Table~\ref{tab:external-eval} follows the benchmark's official
-classification protocol; it is supporting component evidence rather than a
-substitute for the two full-system evaluations.
-
 \paragraph{Capability preservation on common benchmarks.}
 Safety gains are useful only if the governed library continues to improve task
 performance. We therefore evaluate EvoSkill, AutoSkill, and SkillsVote raw and
@@ -821,11 +790,10 @@ separately in the appendix.
 
 \begin{table*}[t]
 \centering
-\caption{\small \textbf{External safety and capability evaluation of SafeEvolve
-(RQ3).} Each block retains the benchmark's official metrics and comparison
-condition. Results are aggregated only within the corresponding native metric;
-heterogeneous metrics are not combined. The appendix reports per-agent,
-per-method, and detector results.}
+\caption{\small \textbf{External capability evaluation of SafeEvolve
+(RQ3).} Each benchmark retains its official metrics and comparison condition.
+Results are aggregated only within the corresponding native metric; heterogeneous
+metrics are not combined. The appendix reports the per-method breakdown.}
 \label{tab:external-eval}
 \vspace{3pt}
 \scriptsize
@@ -834,22 +802,6 @@ per-method, and detector results.}
 \resizebox{0.97\textwidth}{!}{%
 \begin{tabular}{l|ccccccc}
 \toprule
-\multicolumn{8}{l}{\cellcolor{gray!10}\textit{SkillSafetyBench}} \\
-\textbf{Condition} & \textbf{ASR $\downarrow$} & \textbf{Task success $\uparrow$}
-& \textbf{Conditional ASR $\downarrow$} & \multicolumn{4}{c}{} \\
-Raw attacked update & -- & -- & -- & & & & \\
-Utility-only governance & -- & -- & -- & & & & \\
-Full \safeevolve & -- & -- & -- & & & & \\
-\midrule
-\multicolumn{8}{l}{\cellcolor{gray!10}\textit{MalSkillBench}} \\
-\textbf{Condition} & \textbf{Acc. $\uparrow$} & \textbf{Prec. $\uparrow$}
-& \textbf{Rec. $\uparrow$} & \textbf{F1 $\uparrow$}
-& \textbf{FP $\downarrow$} & \textbf{FN $\downarrow$} & \\
-Best skill detector & -- & -- & -- & -- & -- & -- & \\
-Best supply-chain detector & -- & -- & -- & -- & -- & -- & \\
-Best prompt-injection detector & -- & -- & -- & -- & -- & -- & \\
-\safeevolve admission auditor & -- & -- & -- & -- & -- & -- & \\
-\midrule
 \multicolumn{8}{l}{\cellcolor{gray!10}\textit{SkillsBench}} \\
 \textbf{Condition} & \textbf{No-skill pass $\uparrow$} & \textbf{Evolved-skill pass $\uparrow$}
 & \textbf{Improvement (pp) $\uparrow$} & \textbf{Normalized gain $\uparrow$}
@@ -873,8 +825,8 @@ Utility-only governance & -- & -- & -- & -- & -- & -- & -- \\
 \paragraph{Component evaluation.}
 Finally, ablate admission auditing, verification preservation, provenance
 rollback, and safety-aware retirement. These component results characterize the
-three complete RQ3 evaluations; they do not replace held-out behavioral or
-capability evidence.
+held-out mitigation and external capability evaluations; they do not replace
+either form of end-to-end evidence.
 
 \begin{table*}[t]
 \centering
@@ -1240,70 +1192,14 @@ failures, missing combinations, and sensitivity to aggregation choices.
 
 \safeevolvefulltable
 
-\subsection{External Benchmark Breakdowns}
+\subsection{External Capability Benchmark Breakdowns}
 \label{app:external-benchmarks}
 
 All external results retain the source benchmark's task set, verifier,
 denominator, and aggregation rule. We report our nine \bench metrics
 only on the gym episodes; external benchmark outcomes are never converted into
-those metrics. MalSkillBench false positives and false negatives are counts on
-the pinned test set. SkillSafetyBench conditional ASR conditions on task reward
-equal to one. SkillsBench averages
-repeated trials within task before averaging across tasks. SkillLearnBench
-retains its three evaluation levels.
-
-\begin{table*}[t]
-\centering
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Governance} & \textbf{CC/MiniMax} & \textbf{Codex/MiniMax}
-& \textbf{Hermes/MiniMax} & \textbf{OpenClaw/MiniMax}
-& \textbf{Macro avg.} \\
-\midrule
-Raw attacked update & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\rowcolor{lightblue}Full \safeevolve & --/--/-- & --/--/-- & --/--/-- & --/--/-- & --/--/-- \\
-\bottomrule
-\end{tabular}}
-\caption{\textbf{Full SafeEvolve on SkillSafetyBench by target agent.} Each
-cell reports official overall ASR / task success / task-success-conditional ASR.
-The clean skill is the ancestor and the attacked bundle is the proposed update;
-all applicable \safeevolve stages run before downstream execution. Separate
-tables report ASR for RD1--RD6.}
-\label{tab:skill-safety-full}
-\end{table*}
-
-\begin{table*}[t]
-\centering
-\scriptsize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Detector} & \textbf{Acc.} & \textbf{Prec.} & \textbf{Rec.}
-& \textbf{F1} & \textbf{FP} & \textbf{FN} \\
-\midrule
-Skill Security Scan & -- & -- & -- & -- & -- & -- \\
-SkillScan & -- & -- & -- & -- & -- & -- \\
-SkillScan-Security & -- & -- & -- & -- & -- & -- \\
-Cisco Skill Scanner (static) & -- & -- & -- & -- & -- & -- \\
-Cisco Skill Scanner (LLM) & -- & -- & -- & -- & -- & -- \\
-AI-Infra-Guard & -- & -- & -- & -- & -- & -- \\
-LLM Guard & -- & -- & -- & -- & -- & -- \\
-Panguard Skill Auditor (static) & -- & -- & -- & -- & -- & -- \\
-Snyk Agent Scan & -- & -- & -- & -- & -- & -- \\
-Sentry Skill Scanner (static) & -- & -- & -- & -- & -- & -- \\
-Sentry Skill Scanner (full) & -- & -- & -- & -- & -- & -- \\
-VirusTotal & -- & -- & -- & -- & -- & -- \\
-\rowcolor{lightblue}\safeevolve admission auditor & -- & -- & -- & -- & -- & -- \\
-\bottomrule
-\end{tabular}
-\caption{\textbf{Complete MalSkillBench admission-auditor results.} Columns
-follow the official classification protocol. FP and FN are counts on the pinned
-test set; the remaining entries are rates.}
-\label{tab:malskill-full}
-\end{table*}
+those metrics. SkillsBench averages repeated trials within task before
+averaging across tasks. SkillLearnBench retains its three evaluation levels.
 
 \begin{table*}[t]
 \centering
